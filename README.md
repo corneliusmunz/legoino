@@ -24,6 +24,9 @@ https://github.com/nathankellenicki/node-poweredup
 
 https://github.com/JorgePe/BOOSTreveng
 
+# Remarks
+Prerequisite of that library is the BLE ESP32 Library with at least version 1.0.1 Otherwise the notifcations of changed charachteristic values will not work
+https://github.com/nkolban/ESP32_BLE_Arduino
 
 # ToDo
 * Test on other controllers

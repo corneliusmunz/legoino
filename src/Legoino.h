@@ -1,13 +1,20 @@
 /*
-  Legoino.h - Arduino Library for controlling Powered UP and Boost controllers
-  (c) Copyright 2019 - Cornelius Munz
-  Released under MIT License
+ * Legoino.h - Arduino Library for controlling Powered UP and Boost controllers
+ * 
+ * (c) Copyright 2019 - Cornelius Munz
+ * Released under MIT License
+ * 
 */
+
 #ifndef Legoino_h
 #define Legoino_h
 
 #include "Arduino.h"
 #include "BLEDevice.h"
+
+#define WEDO_UUID "0001523-1212-efde-1523-785feabcd123"
+#define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
+#define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
 
 typedef enum HubType{  
   WEDO,
@@ -36,11 +43,6 @@ typedef enum Port {
   AB = 0x39
 };
 
-#define WEDO_UUID "0001523-1212-efde-1523-785feabcd123"
-#define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
-
-#define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
-
 class Legoino
 {
   public:
@@ -50,8 +52,13 @@ class Legoino
     bool isConnected();
     bool isConnecting();
     
+    void setHubName(char name[]);
+    void shutDownHub();
+
     void setLedColor(Color color);
-    void setMotorSpeed(Port port, byte speed);
+    void setLedRGBColor(char red, char green, char blue);
+
+    void setMotorSpeed(Port port, int speed);
     void stopMotor(Port port);
 
 };
