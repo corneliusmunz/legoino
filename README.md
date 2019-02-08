@@ -31,8 +31,6 @@ In the main ```loop``` just add the following connection flow
     myTrainHub.connectHub();
     if (myTrainHub.isConnected()) {
       Serial.println("We are now connected to Train HUB");
-      char hubName[] = "myTrainHub";
-      myTrainHub.setHubName(hubName);
     } else {
       Serial.println("We have failed to connect to the Train HUB");
     }
@@ -67,6 +65,14 @@ If you want to stop the motor, you can use the follwing command. If you do not s
 myTrainHub.stopMotor(A); // Stop motor on Port A
 myTrainHub.stopMotor(); // Stop all motors (Port A and Port B)
 ```
+
+## Set Hub Name
+You can define the display name of the Hub (e.g. displayed in the PoweredUp Apps) with the following command. 
+```c
+char hubName[] = "myTrainHub";
+myTrainHub.setHubName(hubName);
+```
+The maximum supported length of the character array is 14
 
 ## Shut Down Hub
 
