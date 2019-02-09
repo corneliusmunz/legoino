@@ -16,6 +16,15 @@
 #define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
 
+typedef enum Port {
+  A = 0x00,
+  B = 0x01,
+  AB = 0x39
+};
+
+typedef void (*ButtonCallback)(bool isPressed);
+typedef void (*PortCallback)(Port port, bool isConnected);
+
 typedef enum HubType{  
   WEDO,
   BOOST,
@@ -37,11 +46,7 @@ typedef enum Color {
     NONE = 255
 };
 
-typedef enum Port {
-  A = 0x00,
-  B = 0x01,
-  AB = 0x39
-};
+
 
 class Legoino
 {
@@ -60,6 +65,10 @@ class Legoino
 
     void setMotorSpeed(Port port, int speed);
     void stopMotor(Port port);
+
+    void registerButtonCallback(ButtonCallback buttonCallback);
+    void registerPortCallback(PortCallback portCallback);
+
 
 };
 
