@@ -21,8 +21,6 @@ boolean _isConnected = false;
 int _rssi = -100;
 
 // device properties
-string _name: string = "";
-string _firmwareInfo = "";
 int _batteryLevel = 100;
 int _voltage = 0;
 int _current = 0;
@@ -51,6 +49,35 @@ class AdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
   } 
 }; 
 
+static uint8_t ReadUInt8(uint8_t* data, int offset = 0) 
+{
+    uint8_t value = data[0+offset];  
+    return value;   
+}
+
+static int8_t ReadInt8(uint8_t* data, int offset = 0) 
+{
+    int8_t value = (int8_t)data[0+offset];  
+    return value;   
+}
+
+static uint16_t ReadUInt16LE(uint8_t* data, int offset = 0) 
+{
+    uint16_t value = data[0+offset] | (uint16_t)(data[1+offset] << 8);  
+    return value;   
+}
+
+static int16_t ReadInt16LE(uint8_t* data, int offset = 0) 
+{
+    int16_t value = data[0+offset] | (int16_t)(data[1+offset] << 8);  
+    return value;   
+}
+
+static uint32_t ReadUInt32LE(uint8_t* data, int offset = 0) 
+{
+    uint32_t value = data[0+offset] | (uint32_t)(data[1+offset] << 8) | (uint32_t)(data[2+offset] << 16) | (uint32_t)(data[3+offset] << 24);
+    return value;     
+}
 
 /**
  * @brief Convert a raw port value to the corresponding Port datatype
@@ -98,10 +125,16 @@ void parseDeviceInfo(uint8_t* pData) {
         // Firmware version
         } else if (pData[3] == 0x03) {
             Serial.println("Firmware version");
-
+        // RSSI 
+        } else if (pData[3] == 0x05) {
+            Serial.print("RSSI update: ");
+            Serial.print(ReadInt8(pData, 5));
+            Serial.println();
         // Battery level reports
         } else if (pData[3] == 0x06) {
-            Serial.println("Battery level");
+            Serial.print("Battery level: ");
+            Serial.print(ReadUInt8(pData, 5));
+            Serial.println();
         }
 
 }
@@ -135,10 +168,15 @@ void parsePortMessage(uint8_t* pData) {
 void parseSensorMessage(uint8_t* pData) {
     Serial.println("parseSensorMessage");
         if (pData[3] == 0x3b) { 
-            Serial.println("Voltage or Current sensor value: ");
-            return;
+            int current = ReadUInt16LE(pData, 4);
+            Serial.print("Current of Sensor value: ");
+            Serial.print(current);
+            Serial.println();            return;
         } else if (pData[3] == 0x3c) {
-            Serial.println("Voltage or Current sensor value: ");
+            int voltage = ReadUInt16LE(pData, 4);
+            Serial.print("Voltage of Sensor value: ");
+            Serial.print(voltage);
+            Serial.println();
             return;
         }
 
@@ -345,6 +383,18 @@ void Legoino::stopMotor(Port port=AB) {
 }
 
 
+void activateHubUpdates() {
+    // Activate reports
+    byte setButtonCommand[5] = {0x05, 0x00, 0x01, 0x02, 0x02};
+    _pRemoteCharacteristic->writeValue(setButtonCommand, sizeof(setButtonCommand), true);
+    byte setBatteryLevelCommand[5] = {0x05, 0x00, 0x01, 0x06, 0x02};
+    _pRemoteCharacteristic->writeValue(setBatteryLevelCommand, sizeof(setBatteryLevelCommand), true);
+    byte setRSSICommand[5] = {0x05, 0x00, 0x01, 0x05, 0x02};
+    _pRemoteCharacteristic->writeValue(setRSSICommand, sizeof(setRSSICommand), true);
+    byte setCurrentReport[10] = {0xA, 0x00, 0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
+    _pRemoteCharacteristic->writeValue(setCurrentReport, sizeof(setCurrentReport), true);
+}
+
 /**
  * @brief Connect to the HUB, get a reference to the characteristic and register for notifications
  */
@@ -369,13 +419,7 @@ bool Legoino::connectHub() {
             _pRemoteCharacteristic->registerForNotify(notifyCallback);
     }
 
-    // Activate reports
-    byte setButtonCommand[5] = {0x05, 0x00, 0x01, 0x02, 0x02};
-    _pRemoteCharacteristic->writeValue(setButtonCommand, sizeof(setButtonCommand), true);
-    //byte setBatteryLevelCommand[5] = {0x05, 0x00, 0x01, 0x06, 0x02};
-    //_pRemoteCharacteristic->writeValue(setBatteryLevelCommand, sizeof(setBatteryLevelCommand), true);
-    //byte setCurrentReport[10] = {0xA, 0x00, 0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
-    //_pRemoteCharacteristic->writeValue(setCurrentReport, sizeof(setCurrentReport), true);
+    activateHubUpdates();
 
     // Set states
     _isConnected = true;
