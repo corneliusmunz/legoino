@@ -42,10 +42,9 @@ void setup() {
     pinMode(GREEN_LED_PIN, OUTPUT);
     pinMode(RED_LED_PIN, OUTPUT);
     Serial.begin(115200);
-    myTrainHub.init(POWEREDUP); // initalize the legoino instance with the specific hubtype
-    myTrainHub.registerForButtonNotification(buttonNotification);
-    myTrainHub.registerForPortConnectionNotification(portNotification);
-
+    myTrainHub.init(POWERED_UP_HUB); // initalize the legoino instance with the specific hubtype
+    myTrainHub.registerButtonCallback(buttonNotification);
+    myTrainHub.registerPortCallback(portNotification);
 } 
 
 
@@ -60,7 +59,7 @@ void loop() {
       char hubName[] = "myTrainHub";
       myTrainHub.setHubName(hubName);
     } else {
-      Serial.println("We have failed to connect to the Train HUB");
+      Serial.println("We failed to connect to the Train HUB");
     }
   }
 

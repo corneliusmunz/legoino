@@ -8,13 +8,26 @@
 
 #include "Legoino.h"
 
+// BLE properties
 HubType _hubType;
 BLEUUID _bleUuid;
 BLEUUID _charachteristicUuid;
 BLEAddress *_pServerAddress;
 BLERemoteCharacteristic *_pRemoteCharacteristic;
+
+// status properties
 boolean _isConnecting = false;
 boolean _isConnected = false;
+int _rssi = -100;
+
+// device properties
+string _name: string = "";
+string _firmwareInfo = "";
+int _batteryLevel = 100;
+int _voltage = 0;
+int _current = 0;
+
+// Notification callbacks
 ButtonCallback _buttonCallback = nullptr;
 PortCallback _portCallback = nullptr;
 
@@ -209,7 +222,7 @@ Legoino::Legoino(){};
  */
 void Legoino::init(HubType hubType) {
     _hubType = hubType;
-    if (hubType == WEDO) {
+    if (hubType == WEDO2_SMART_HUB) {
         _bleUuid = BLEUUID(WEDO_UUID);
         _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
     } else {
@@ -310,18 +323,15 @@ void Legoino::setHubName(char name[]) {
  */
 void Legoino::setMotorSpeed(Port port, int speed) {
     
+    byte rawSpeed; 
     if (speed == 0) {
-       stopMotor(port);
-       return;
-    }
-
-    byte rawSpeed = 127; // stop motor
-    if (speed > 0) {
+       rawSpeed=127; // stop motor
+    } else if (speed > 0) {
         rawSpeed = map(speed, 0, 100, 0, 126);
     } else {
         rawSpeed = map(-speed, 0, 100, 255, 128);
     }
-    byte setMotorCommand[8] = {0x08, port, 0x81, 0x00, 0x11, 0x51, 0x00, rawSpeed};
+    byte setMotorCommand[10] = {0xA, 0x00, 0x81, port, 0x11, 0x60, 0x00, rawSpeed, 0x00, 0x00};
     _pRemoteCharacteristic->writeValue(setMotorCommand, sizeof(setMotorCommand), false);
     
 }
@@ -331,8 +341,7 @@ void Legoino::setMotorSpeed(Port port, int speed) {
  * @param [in] port Port of the Hub on which the motor will be stopped (A, B, AB)
  */
 void Legoino::stopMotor(Port port=AB) {
-    byte setMotorCommand[8] = {0x08, port, 0x81, 0x00, 0x11, 0x51, 0x00, 0x7F};
-    _pRemoteCharacteristic->writeValue(setMotorCommand, sizeof(setMotorCommand), false);  
+    setMotorSpeed(port, 0);
 }
 
 
