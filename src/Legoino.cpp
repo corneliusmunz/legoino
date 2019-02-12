@@ -116,6 +116,7 @@ void parseDeviceInfo(uint8_t* pData) {
             name[charArrayLength+1]=0;
             Serial.print("device name: ");
             Serial.print(name);
+            Serial.println();
         }
         // Button press reports
         else if (pData[3] == 0x02) 
@@ -133,15 +134,8 @@ void parseDeviceInfo(uint8_t* pData) {
                 Serial.println("button RELEASED");
                 return;
             }
-
         // Firmware version
         } else if (pData[3] == 0x03) {
-            /*
-            const build = data.readUInt16LE(5);
-            const bugFix = data.readUInt8(7);
-            const major = data.readUInt8(8) >>> 4;
-            const minor = data.readUInt8(8) & 0xf;
-            */
             int build = ReadUInt16LE(pData, 5);
             int bugfix = ReadUInt8(pData, 7);
             int major = ReadUInt8(pData, 8) >> 4;
@@ -155,9 +149,23 @@ void parseDeviceInfo(uint8_t* pData) {
             Serial.print(bugfix); 
             Serial.print(" build:");   
             Serial.print(build);        
+            Serial.println();
         // Hardware version
         } else if (pData[3] == 0x04) {
-            Serial.println("Hardware version");
+            int build = ReadUInt16LE(pData, 5);
+            int bugfix = ReadUInt8(pData, 7);
+            int major = ReadUInt8(pData, 8) >> 4;
+            int minor = ReadUInt8(pData, 8) & 0xf;
+
+            Serial.print("Hardware version major:");
+            Serial.print(major);
+            Serial.print(" minor:");
+            Serial.print(minor);
+            Serial.print(" bugfix:");   
+            Serial.print(bugfix); 
+            Serial.print(" build:");   
+            Serial.print(build);        
+            Serial.println();        
         // RSSI 
         } else if (pData[3] == 0x05) {
             Serial.print("RSSI update: ");
