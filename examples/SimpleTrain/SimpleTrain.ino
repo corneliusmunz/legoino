@@ -9,12 +9,42 @@
 
 #include "Legoino.h"
 
+#define GREEN_LED_PIN 13
+#define RED_LED_PIN 12
+
 // create a legoino instance
 Legoino myTrainHub;
+bool isLedOn=false;
+Port _port=A;
+
+void buttonNotification(bool isPressed) {
+   if (isPressed) {
+     if (isLedOn) {
+       digitalWrite(GREEN_LED_PIN, LOW);
+       isLedOn=false;
+     } else {
+       digitalWrite(GREEN_LED_PIN, HIGH);
+       isLedOn=true;
+     }
+   }
+}
+
+void portNotification(Port port, bool isConnected) {
+  if (isConnected) {
+    digitalWrite(RED_LED_PIN, HIGH);
+    _port = port;
+  } else {
+    digitalWrite(RED_LED_PIN, LOW);
+  }
+}
 
 void setup() {
+    pinMode(GREEN_LED_PIN, OUTPUT);
+    pinMode(RED_LED_PIN, OUTPUT);
     Serial.begin(115200);
-    myTrainHub.init(POWEREDUP); // initalize the legoino instance with the specific hubtype
+    myTrainHub.init(POWERED_UP_HUB); // initalize the legoino instance with the specific hubtype
+    myTrainHub.registerButtonCallback(buttonNotification);
+    myTrainHub.registerPortCallback(portNotification);
 } 
 
 
@@ -29,7 +59,7 @@ void loop() {
       char hubName[] = "myTrainHub";
       myTrainHub.setHubName(hubName);
     } else {
-      Serial.println("We have failed to connect to the Train HUB");
+      Serial.println("We failed to connect to the Train HUB");
     }
   }
 
@@ -37,26 +67,26 @@ void loop() {
   if (myTrainHub.isConnected()) {
   
     myTrainHub.setLedColor(GREEN);
-    myTrainHub.setMotorSpeed(A, 25);
+    myTrainHub.setMotorSpeed(_port, 25);
     delay(1000);
 
     myTrainHub.setLedColor(RED);
-    myTrainHub.stopMotor(A);
+    myTrainHub.stopMotor(_port);
     delay(1000);
 
     myTrainHub.setLedColor(BLUE);
-    myTrainHub.setMotorSpeed(A, -25);
+    myTrainHub.setMotorSpeed(_port, -25);
     delay(1000);
 
-    myTrainHub.stopMotor(A);
+    myTrainHub.stopMotor(_port);
     
     for (int idx=0; idx < 20; idx++) {
       myTrainHub.setLedRGBColor(random(255), random(255), random(255));
       delay(200);
     }
 
-    myTrainHub.shutDownHub();
-    delay(2000);
+    //myTrainHub.shutDownHub();
+    //delay(2000);
 
   }
   

@@ -16,10 +16,39 @@
 #define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
 
+typedef enum Port {
+  A = 0x00,
+  B = 0x01,
+  AB = 0x39
+};
+
+typedef void (*ButtonCallback)(bool isPressed);
+typedef void (*PortCallback)(Port port, bool isConnected);
+
 typedef enum HubType{  
-  WEDO,
-  BOOST,
-  POWEREDUP
+    WEDO2_SMART_HUB = 1,
+    BOOST_MOVE_HUB = 2,
+    POWERED_UP_HUB = 3,
+    POWERED_UP_REMOTE = 4,
+    DUPLO_TRAIN_HUB = 5
+};
+
+typedef enum DeviceType {
+    BASIC_MOTOR = 1,
+    TRAIN_MOTOR = 2,
+    LED_LIGHTS = 8,
+    BOOST_LED = 22,
+    WEDO2_TILT = 34,
+    WEDO2_DISTANCE = 35,
+    BOOST_DISTANCE = 37,
+    BOOST_TACHO_MOTOR = 38,
+    BOOST_MOVE_HUB_MOTOR = 39,
+    BOOST_TILT = 40,
+    DUPLO_TRAIN_BASE_MOTOR = 41,
+    DUPLO_TRAIN_BASE_SPEAKER = 42,
+    DUPLO_TRAIN_BASE_COLOR = 43,
+    DUPLO_TRAIN_BASE_SPEEDOMETER = 44,
+    POWERED_UP_REMOTE_BUTTON = 55
 };
 
 typedef enum Color {
@@ -27,7 +56,7 @@ typedef enum Color {
     PINK = 1,
     PURPLE = 2,
     BLUE = 3,
-    LIGHT_BLUE = 4,
+    LIGHTBLUE = 4,
     CYAN = 5,
     GREEN = 6,
     YELLOW = 7,
@@ -37,11 +66,7 @@ typedef enum Color {
     NONE = 255
 };
 
-typedef enum Port {
-  A = 0x00,
-  B = 0x01,
-  AB = 0x39
-};
+
 
 class Legoino
 {
@@ -60,6 +85,10 @@ class Legoino
 
     void setMotorSpeed(Port port, int speed);
     void stopMotor(Port port);
+
+    void registerButtonCallback(ButtonCallback buttonCallback);
+    void registerPortCallback(PortCallback portCallback);
+
 
 };
 
