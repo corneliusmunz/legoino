@@ -83,8 +83,11 @@ class Legoino
     void setLedColor(Color color);
     void setLedRGBColor(char red, char green, char blue);
 
-    void setMotorSpeed(Port port, int speed);
     void stopMotor(Port port);
+    void setMotorSpeed(Port port, int speed);
+    void setMotorSpeeds(int speedA, int speedB);
+    void setAccelerationProfile(Port port, int16_t time, int8_t profileNumber);
+    void setDecelerationProfile(Port port, int16_t time, int8_t profileNumber);
 
     void registerButtonCallback(ButtonCallback buttonCallback);
     void registerPortCallback(PortCallback portCallback);
