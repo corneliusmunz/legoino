@@ -106,8 +106,20 @@ Port getPortForRawValue(byte rawPortValue) {
  */
 void parseDeviceInfo(uint8_t* pData) {
     Serial.println("parseDeviceInfo");
-            // Button press reports
-        if (pData[3] == 0x02) {
+        // Advertising name
+        if (pData[3] == 0x01) {
+            int charArrayLength = min(pData[0]-5, 14);
+            char name[charArrayLength+1];
+            for (int i; i<charArrayLength; i++) {
+                name[i] = pData[5+i];
+            }
+            name[charArrayLength+1]=0;
+            Serial.print("device name: ");
+            Serial.print(name);
+        }
+        // Button press reports
+        else if (pData[3] == 0x02) 
+        {
             if (pData[5] == 1) {
                 Serial.println("button PRESSED");
                 if (_buttonCallback != nullptr) {
@@ -124,7 +136,28 @@ void parseDeviceInfo(uint8_t* pData) {
 
         // Firmware version
         } else if (pData[3] == 0x03) {
-            Serial.println("Firmware version");
+            /*
+            const build = data.readUInt16LE(5);
+            const bugFix = data.readUInt8(7);
+            const major = data.readUInt8(8) >>> 4;
+            const minor = data.readUInt8(8) & 0xf;
+            */
+            int build = ReadUInt16LE(pData, 5);
+            int bugfix = ReadUInt8(pData, 7);
+            int major = ReadUInt8(pData, 8) >> 4;
+            int minor = ReadUInt8(pData, 8) & 0xf;
+
+            Serial.print("Firmware version major:");
+            Serial.print(major);
+            Serial.print(" minor:");
+            Serial.print(minor);
+            Serial.print(" bugfix:");   
+            Serial.print(bugfix); 
+            Serial.print(" build:");   
+            Serial.print(build);        
+        // Hardware version
+        } else if (pData[3] == 0x04) {
+            Serial.println("Hardware version");
         // RSSI 
         } else if (pData[3] == 0x05) {
             Serial.print("RSSI update: ");
@@ -134,8 +167,19 @@ void parseDeviceInfo(uint8_t* pData) {
         } else if (pData[3] == 0x06) {
             Serial.print("Battery level: ");
             Serial.print(ReadUInt8(pData, 5));
+            Serial.print("%");
+            Serial.println();
+        // Battery type
+        } else if (pData[3] == 0x07) {
+            Serial.print("Battery type: ");
+            if (pData[5] == 0x00) {
+                Serial.print("Normal");
+            } else if (pData[5] == 0x01) {
+                Serial.print("Recharchable");
+            }
             Serial.println();
         }
+        
 
 }
 
@@ -330,28 +374,20 @@ void Legoino::shutDownHub() {
  */
 void Legoino::setHubName(char name[]) {
 
-
     int nameLength = strlen(name);
     if (nameLength>14) {
         return;
     }
 
-    char offset = 4;
+    char offset = 5;
     int arraySize = offset + nameLength;
-    byte setName[arraySize];
-    setName[0] = arraySize;
-    setName[1] = 0x01;
-    setName[2] = 0x01;
-    setName[3] = 0x01;
+    byte setName[arraySize] = {arraySize, 0x00, 0x01, 0x01, 0x01};
 
     for (int idx=0; idx < nameLength; idx++) {
         setName[idx+offset]=name[idx];
     }
 
-    // set it twice because sometimes the name was not set
     _pRemoteCharacteristic->writeValue(setName, sizeof(setName), true);
-    _pRemoteCharacteristic->writeValue(setName, sizeof(setName), true);
-
 }
 
 /**
@@ -386,13 +422,21 @@ void Legoino::stopMotor(Port port=AB) {
 void activateHubUpdates() {
     // Activate reports
     byte setButtonCommand[5] = {0x05, 0x00, 0x01, 0x02, 0x02};
-    _pRemoteCharacteristic->writeValue(setButtonCommand, sizeof(setButtonCommand), true);
+    _pRemoteCharacteristic->writeValue(setButtonCommand, sizeof(setButtonCommand));
     byte setBatteryLevelCommand[5] = {0x05, 0x00, 0x01, 0x06, 0x02};
-    _pRemoteCharacteristic->writeValue(setBatteryLevelCommand, sizeof(setBatteryLevelCommand), true);
+    _pRemoteCharacteristic->writeValue(setBatteryLevelCommand, sizeof(setBatteryLevelCommand));
     byte setRSSICommand[5] = {0x05, 0x00, 0x01, 0x05, 0x02};
-    _pRemoteCharacteristic->writeValue(setRSSICommand, sizeof(setRSSICommand), true);
-    byte setCurrentReport[10] = {0xA, 0x00, 0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
-    _pRemoteCharacteristic->writeValue(setCurrentReport, sizeof(setCurrentReport), true);
+    _pRemoteCharacteristic->writeValue(setRSSICommand, sizeof(setRSSICommand));
+    //byte setCurrentReport[10] = {0xA, 0x00, 0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
+    //_pRemoteCharacteristic->writeValue(setCurrentReport, sizeof(setCurrentReport), true);
+    byte setNameCommand[5] = {0x05, 0x00, 0x01, 0x01, 0x02};
+    _pRemoteCharacteristic->writeValue(setNameCommand, sizeof(setNameCommand));
+    byte setFWCommand[5] = {0x05, 0x00, 0x01, 0x03, 0x02};
+    _pRemoteCharacteristic->writeValue(setFWCommand, sizeof(setFWCommand));
+    byte setHWCommand[5] = {0x05, 0x00, 0x01, 0x04, 0x02};
+    _pRemoteCharacteristic->writeValue(setHWCommand, sizeof(setHWCommand));    
+    byte setBatteryType[5] = {0x05, 0x00, 0x01, 0x07, 0x02};
+    _pRemoteCharacteristic->writeValue(setBatteryType, sizeof(setBatteryType)); 
 }
 
 /**
