@@ -12,7 +12,6 @@
 #include "Arduino.h"
 #include "BLEDevice.h"
 
-#define WEDO_UUID "0001523-1212-efde-1523-785feabcd123"
 #define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
 
@@ -26,11 +25,9 @@ typedef void (*ButtonCallback)(bool isPressed);
 typedef void (*PortCallback)(Port port, bool isConnected);
 
 typedef enum HubType{  
-    WEDO2_SMART_HUB = 1,
     BOOST_MOVE_HUB = 2,
     POWERED_UP_HUB = 3,
     POWERED_UP_REMOTE = 4,
-    DUPLO_TRAIN_HUB = 5
 };
 
 typedef enum DeviceType {
@@ -38,16 +35,10 @@ typedef enum DeviceType {
     TRAIN_MOTOR = 2,
     LED_LIGHTS = 8,
     BOOST_LED = 22,
-    WEDO2_TILT = 34,
-    WEDO2_DISTANCE = 35,
     BOOST_DISTANCE = 37,
     BOOST_TACHO_MOTOR = 38,
     BOOST_MOVE_HUB_MOTOR = 39,
     BOOST_TILT = 40,
-    DUPLO_TRAIN_BASE_MOTOR = 41,
-    DUPLO_TRAIN_BASE_SPEAKER = 42,
-    DUPLO_TRAIN_BASE_COLOR = 43,
-    DUPLO_TRAIN_BASE_SPEEDOMETER = 44,
     POWERED_UP_REMOTE_BUTTON = 55
 };
 
@@ -72,7 +63,7 @@ class Legoino
 {
   public:
     Legoino();
-    void init(HubType hubType);
+    void init();
     bool connectHub();
     bool isConnected();
     bool isConnecting();
@@ -83,8 +74,9 @@ class Legoino
     void setLedColor(Color color);
     void setLedRGBColor(char red, char green, char blue);
 
-    void setMotorSpeed(Port port, int speed);
     void stopMotor(Port port);
+    void setMotorSpeed(Port port, int speed);
+    void setMotorSpeeds(int speedA, int speedB);
 
     void registerButtonCallback(ButtonCallback buttonCallback);
     void registerPortCallback(PortCallback portCallback);

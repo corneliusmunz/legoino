@@ -50,6 +50,46 @@ class AdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
     }
 };
 
+/**
+ * @brief Write value to the remote characteristic
+ * @param [in] command byte array which contains the ble command
+ * @param [in] size length of the command byte array
+ */
+void WriteValue(byte command[], int size) { 
+    byte commandWithCommonHeader[size+2] = {size+2, 0x00};
+    memcpy(commandWithCommonHeader+2, command, size);
+    _pRemoteCharacteristic->writeValue(commandWithCommonHeader, sizeof(commandWithCommonHeader), false);
+}
+
+
+/**
+ * @brief Map speed from -100..100 to the 8bit internal value
+ * @param [in] speed -100..100
+ */
+byte MapSpeed(int speed) {
+    byte rawSpeed;
+    if (speed == 0)
+    {
+        rawSpeed = 127; // stop motor
+    }
+    else if (speed > 0)
+    {
+        rawSpeed = map(speed, 0, 100, 0, 126);
+    }
+    else
+    {
+        rawSpeed = map(-speed, 0, 100, 255, 128);
+    }
+    return rawSpeed;
+}
+
+byte* Int16ToByteArray(int16_t x) {
+    byte y[2];
+    y[0] = (byte) (x & 0xff);
+    y[1] = (byte) ((x >> 8) & 0xff);
+    return y;
+}
+
 static uint8_t ReadUInt8(uint8_t *data, int offset = 0)
 {
     uint8_t value = data[0 + offset];
@@ -352,28 +392,20 @@ void notifyCallback(
 Legoino::Legoino(){};
 
 /**
- * @brief Init function to define the Hub type and set the UUIDs 
- * @param [in] hubType (WEDO, BOOST, POWEREDUP)
+ * @brief Init function set the UUIDs and scan for the Hub
  */
-void Legoino::init(HubType hubType)
+void Legoino::init()
 {
-    _hubType = hubType;
-    if (hubType == WEDO2_SMART_HUB)
-    {
-        _bleUuid = BLEUUID(WEDO_UUID);
-        _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
-    }
-    else
-    {
-        _bleUuid = BLEUUID(LPF2_UUID);
-        _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
-    };
+
+    _bleUuid = BLEUUID(LPF2_UUID);
+    _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
 
     BLEDevice::init("");
     BLEScan *pBLEScan = BLEDevice::getScan();
     pBLEScan->setAdvertisedDeviceCallbacks(new AdvertisedDeviceCallbacks());
     pBLEScan->setActiveScan(true);
     pBLEScan->start(30);
+
 }
 
 /**
@@ -400,10 +432,10 @@ void Legoino::registerPortCallback(PortCallback portCallback)
  */
 void Legoino::setLedColor(Color color)
 {
-    byte setColorMode[10] = {0xA, 0x00, 0x41, 0x32, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00};
-    _pRemoteCharacteristic->writeValue(setColorMode, sizeof(setColorMode));
-    byte setColor[8] = {0x08, 0x00, 0x81, 0x32, 0x11, 0x51, 0x00, color};
-    _pRemoteCharacteristic->writeValue(setColor, sizeof(setColor));
+    byte setColorMode[8] = {0x41, 0x32, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00};
+    WriteValue(setColorMode, 8);
+    byte setColor[6] = {0x81, 0x32, 0x11, 0x51, 0x00, color};
+    WriteValue(setColor, 6);
 }
 
 /**
@@ -414,10 +446,10 @@ void Legoino::setLedColor(Color color)
  */
 void Legoino::setLedRGBColor(char red, char green, char blue)
 {
-    byte setRGBMode[10] = {0xA, 0x00, 0x41, 0x32, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
-    _pRemoteCharacteristic->writeValue(setRGBMode, sizeof(setRGBMode));
-    byte setRGBColor[10] = {0xA, 0x00, 0x81, 0x32, 0x11, 0x51, 0x01, red, green, blue};
-    _pRemoteCharacteristic->writeValue(setRGBColor, sizeof(setRGBColor));
+    byte setRGBMode[8] = {0x41, 0x32, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
+    WriteValue(setRGBMode, 8);
+    byte setRGBColor[8] = {0x81, 0x32, 0x11, 0x51, 0x01, red, green, blue};
+    WriteValue(setRGBColor, 8);
 }
 
 /**
@@ -425,8 +457,8 @@ void Legoino::setLedRGBColor(char red, char green, char blue)
  */
 void Legoino::shutDownHub()
 {
-    byte shutdownCommand[4] = {0x04, 0x00, 0x02, 0X01};
-    _pRemoteCharacteristic->writeValue(shutdownCommand, sizeof(shutdownCommand), true);
+    byte shutdownCommand[2] = {0x02, 0X01};
+    WriteValue(shutdownCommand, 2);
 }
 
 /**
@@ -435,23 +467,18 @@ void Legoino::shutDownHub()
  */
 void Legoino::setHubName(char name[])
 {
-
     int nameLength = strlen(name);
     if (nameLength > 14)
     {
         return;
     }
 
-    char offset = 5;
+    char offset = 3;
     int arraySize = offset + nameLength;
-    byte setName[arraySize] = {arraySize, 0x00, 0x01, 0x01, 0x01};
+    byte setNameCommand[arraySize] = {0x01, 0x01, 0x01};
 
-    for (int idx = 0; idx < nameLength; idx++)
-    {
-        setName[idx + offset] = name[idx];
-    }
-
-    _pRemoteCharacteristic->writeValue(setName, sizeof(setName), true);
+    memcpy(setNameCommand+offset, name, nameLength);
+    WriteValue(setNameCommand, arraySize);
 }
 
 
@@ -462,22 +489,10 @@ void Legoino::setHubName(char name[])
  */
 void Legoino::setMotorSpeed(Port port, int speed)
 {
-
-    byte rawSpeed;
-    if (speed == 0)
-    {
-        rawSpeed = 127; // stop motor
-    }
-    else if (speed > 0)
-    {
-        rawSpeed = map(speed, 0, 100, 0, 126);
-    }
-    else
-    {
-        rawSpeed = map(-speed, 0, 100, 255, 128);
-    }
-    byte setMotorCommand[10] = {0xA, 0x00, 0x81, port, 0x11, 0x60, 0x00, rawSpeed, 0x00, 0x00};
-    _pRemoteCharacteristic->writeValue(setMotorCommand, sizeof(setMotorCommand), false);
+    //byte setMotorCommand[10] = {0xA, 0x00, 0x81, port, 0x11, 0x60, 0x00, MapSpeed(speed), 0x00, 0x00};
+    //_pRemoteCharacteristic->writeValue(setMotorCommand, sizeof(setMotorCommand), false);
+    byte setMotorCommand[8] = {0x81, port, 0x11, 0x60, 0x00, MapSpeed(speed), 0x00, 0x00};
+    WriteValue(setMotorCommand, 8);
 }
 
 /**
@@ -492,22 +507,29 @@ void Legoino::stopMotor(Port port = AB)
 void activateHubUpdates()
 {
     // Activate reports
-    byte setButtonCommand[5] = {0x05, 0x00, 0x01, 0x02, 0x02};
-    _pRemoteCharacteristic->writeValue(setButtonCommand, sizeof(setButtonCommand));
-    byte setBatteryLevelCommand[5] = {0x05, 0x00, 0x01, 0x06, 0x02};
-    _pRemoteCharacteristic->writeValue(setBatteryLevelCommand, sizeof(setBatteryLevelCommand));
-    byte setRSSICommand[5] = {0x05, 0x00, 0x01, 0x05, 0x02};
-    _pRemoteCharacteristic->writeValue(setRSSICommand, sizeof(setRSSICommand));
-    //byte setCurrentReport[10] = {0xA, 0x00, 0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
-    //_pRemoteCharacteristic->writeValue(setCurrentReport, sizeof(setCurrentReport), true);
-    byte setNameCommand[5] = {0x05, 0x00, 0x01, 0x01, 0x02};
-    _pRemoteCharacteristic->writeValue(setNameCommand, sizeof(setNameCommand));
-    byte setFWCommand[5] = {0x05, 0x00, 0x01, 0x03, 0x02};
-    _pRemoteCharacteristic->writeValue(setFWCommand, sizeof(setFWCommand));
-    byte setHWCommand[5] = {0x05, 0x00, 0x01, 0x04, 0x02};
-    _pRemoteCharacteristic->writeValue(setHWCommand, sizeof(setHWCommand));
-    byte setBatteryType[5] = {0x05, 0x00, 0x01, 0x07, 0x02};
-    _pRemoteCharacteristic->writeValue(setBatteryType, sizeof(setBatteryType));
+    byte setButtonCommand[3] = {0x01, 0x02, 0x02};
+    WriteValue(setButtonCommand, 3);
+
+    byte setBatteryLevelCommand[3] = {0x01, 0x06, 0x02};
+    WriteValue(setBatteryLevelCommand, 3);
+
+    byte setRSSICommand[3] = {0x01, 0x05, 0x02};
+    WriteValue(setRSSICommand, 3);
+
+    //byte setCurrentReport[8] = {0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
+    //WriteValue(setCurrentReport, 8);
+
+    byte setNameCommand[3] = {0x01, 0x01, 0x02};
+    WriteValue(setNameCommand, 3);
+
+    byte setFWCommand[3] = {0x01, 0x03, 0x02};
+    WriteValue(setFWCommand, 3);
+    
+    byte setHWCommand[3] = {0x01, 0x04, 0x02};
+    WriteValue(setHWCommand, 3);
+    
+    byte setBatteryType[3] = {0x01, 0x07, 0x02};
+    WriteValue(setBatteryType, 3);
 }
 
 /**
