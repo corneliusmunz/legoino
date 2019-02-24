@@ -1,0 +1,48 @@
+#######################################
+# Syntax Coloring Map Servo
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+HubType	KEYWORD1	HubType
+Legoino KEYWORD1    Legoino
+Color   KEYWORD1    Color
+Port    KEYWORD1    Port
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+setLedColor	    KEYWORD2
+setLedRGBColor  KEYWORD2
+setMotorSpeed	KEYWORD2
+stopMotor   	KEYWORD2
+connectHub  	KEYWORD2
+shutDownHub     KEYWORD2
+setHubName      KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+A               LITERAL1
+B               LITERAL1
+AB              LITERAL1
+
+WEDO            LITERAL1    
+BOOST           LITERAL1
+POWEREDUP       LITERAL1
+
+BLACK           LITERAL1
+PINK            LITERAL1
+PURPLE          LITERAL1
+BLUE            LITERAL1
+LIGHTBLUE       LITERAL1
+CYAN            LITERAL1
+GREEN           LITERAL1
+YELLOW          LITERAL1
+ORANGE          LITERAL1
+RED             LITERAL1
+WHITE           LITERAL1
+NONE            LITERAL1
