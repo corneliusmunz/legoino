@@ -1,5 +1,5 @@
 # Legoino
-Arduino Library for controlling Powered UP, WeDo and Boost controllers
+Arduino Library for controlling Powered UP and Boost controllers
 
 *Disclaimer*: LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this project.
 
@@ -19,11 +19,10 @@ Open your sketch (*.ino) and make a new instance of the Legoino object
 Legoino myTrainHub;
 ```
 
-In the ```setup``` part of your Arduino sketch, just initialize your Legoino with the desired HUB Type
+In the ```setup``` part of your Arduino sketch, just initialize your Legoino
 ```c
-myTrainHub.init(POWEREDUP);
+myTrainHub.init();
 ```
-Available Hub Types are: ```BOOST```, ```POWEREDUP``` and ```WEDO```
 
 In the main ```loop``` just add the following connection flow
 ```c
@@ -81,6 +80,49 @@ If you want to shut down the LEGO Hub, you can use the following command:
 myTrainHub.shutDownHub();
 ```
 The Hub will disconnect and then shut down. 
+
+## Register Notifications
+
+If a event happens on the hub a notification callback function could be registered. Up to now only two types of notifications are supported
+
+### Button Notification
+This notification will be triggered if the button on the hub will be pressed or released. So on every state change, the notification will be triggerd. To register for such a notification, you can register a callback function in your sketch
+```c
+myTrainHub.registerButtonCallback(buttonNotification);
+```
+
+The callback has the following signature:
+```c
+void (*ButtonCallback)(bool isPressed);
+```
+
+So you can implement a function in you sketch which will be called when the Notification will be triggered and you receive the Button state as an input Parameter ```isPressed```
+```c
+void buttonNotification(bool isPressed) {
+   if (isPressed) {
+     // do some stuff here e.g. digital write to a LED port or something else
+   }
+}
+```
+
+### Port Notification
+This notification will be triggered if a motor is connected or disconnected to a port. So on every state change, the notification will be triggerd. To register for such a notification, you can register a callback function in your sketch
+```c
+myTrainHub.registerPortCallback(portNotification);
+```
+
+The callback has the following signature:
+```c
+void (*PortCallback)(Port port, bool isConnected);
+```
+
+So you can implement a function in you sketch which will be called when the Notification will be triggered and you receive the  state with the two input parameters ```port``` and ```isConnected```
+```c
+void portNotification(Port port, bool isConnected) {
+  if (isConnected) {
+    // do some stuff if a port is connected
+}
+```
 
 # Examples
 You can find an Example called "SimpleTrain" in the "examples" folder. 

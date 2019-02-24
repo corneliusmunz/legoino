@@ -392,28 +392,20 @@ void notifyCallback(
 Legoino::Legoino(){};
 
 /**
- * @brief Init function to define the Hub type and set the UUIDs 
- * @param [in] hubType (WEDO, BOOST, POWEREDUP)
+ * @brief Init function set the UUIDs and scan for the Hub
  */
-void Legoino::init(HubType hubType)
+void Legoino::init()
 {
-    _hubType = hubType;
-    if (hubType == WEDO2_SMART_HUB)
-    {
-        _bleUuid = BLEUUID(WEDO_UUID);
-        _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
-    }
-    else
-    {
-        _bleUuid = BLEUUID(LPF2_UUID);
-        _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
-    };
+
+    _bleUuid = BLEUUID(LPF2_UUID);
+    _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
 
     BLEDevice::init("");
     BLEScan *pBLEScan = BLEDevice::getScan();
     pBLEScan->setAdvertisedDeviceCallbacks(new AdvertisedDeviceCallbacks());
     pBLEScan->setActiveScan(true);
     pBLEScan->start(30);
+
 }
 
 /**
@@ -511,58 +503,6 @@ void Legoino::stopMotor(Port port = AB)
 {
     setMotorSpeed(port, 0);
 }
-
-/**
- * @brief Set the motor speeds on ports A and B. 
- * @param [in] speedA Speed of the Motor on port A -100..0..100 negative values will reverse the rotation
- * @param [in] speedB Speed of the Motor on port B -100..0..100 negative values will reverse the rotation
- */
-void Legoino::setMotorSpeeds(int speedA, int speedB)
-{
-    //{length, 0x00, message_type, port_id, startup and completion = 0x10, sub_command, payload};
-    //{0x81, port, 0x10, 0x02, MapSpeed(speedA),MapSpeed(speedB)};
-    byte setMotorCommand[6] = {0x81, 0x39, 0x10, 0x02, MapSpeed(speedA),MapSpeed(speedB)};
-    WriteValue(setMotorCommand, 6);
-}
-
-/**
- * @brief Set the acceleration profile 
- * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
- * @param [in] time Time value in ms of the acceleration from 0-100% speed/Power
- * @param [in] profileNumber Number for which the acceleration profile is stored
- */
-void Legoino::setAccelerationProfile(Port port, int16_t time, int8_t profileNumber) 
-{
-    byte *timeBytes = Int16ToByteArray(time);
-    byte setMotorCommand[7] = {0x81, port, 0x10, 0x05, timeBytes[0], timeBytes[1], profileNumber};
-    WriteValue(setMotorCommand, 7);
-}
-
-/**
- * @brief Set the deceleration profile 
- * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
- * @param [in] time Time value in ms of the deceleration from 100-0% speed/Power
- * @param [in] profileNumber Number for which the deceleration profile is stored
- */
-void Legoino::setDecelerationProfile(Port port, int16_t time, int8_t profileNumber) 
-{
-    byte *timeBytes = Int16ToByteArray(time);
-    byte setMotorCommand[7] = {0x81, port, 0x10, 0x06, timeBytes[0], timeBytes[1], profileNumber};
-    WriteValue(setMotorCommand, 7);
-}
-
-/**
- * @brief Set the deceleration profile 
- * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
- * @param [in] time Time value in ms of the deceleration from 100-0% speed/Power
- * @param [in] profileNumber Number for which the deceleration profile is stored
- 
-void Legoino::startMotorSpeedWithProfile(Port port, int speed, int maxPower, int accelerationProfile, int decelerationProfile) 
-{
-    byte setMotorCommand[8] = {0x81, port, 0x10, 0x07, MapSpeed(speed), maxPower, profileNumber};
-    WriteValue(setMotorCommand);
-}
-*/
 
 void activateHubUpdates()
 {

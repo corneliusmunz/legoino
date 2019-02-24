@@ -42,7 +42,7 @@ void setup() {
     pinMode(GREEN_LED_PIN, OUTPUT);
     pinMode(RED_LED_PIN, OUTPUT);
     Serial.begin(115200);
-    myTrainHub.init(POWERED_UP_HUB); // initalize the legoino instance with the specific hubtype
+    myTrainHub.init(); // initalize the legoino instance
     myTrainHub.registerButtonCallback(buttonNotification);
     myTrainHub.registerPortCallback(portNotification);
 } 
@@ -79,14 +79,7 @@ void loop() {
     delay(1000);
 
     myTrainHub.stopMotor(_port);
-    
-    for (int idx=0; idx < 20; idx++) {
-      myTrainHub.setLedRGBColor(random(255), random(255), random(255));
-      delay(200);
-    }
-
-    //myTrainHub.shutDownHub();
-    //delay(2000);
+    delay(1000);
 
   }
   
