@@ -501,7 +501,7 @@ bool Lpf2Hub::connectHub()
     // register notifications (callback function) for the characteristic
     if (_pRemoteCharacteristic->canNotify())
     {
-        _pRemoteCharacteristic->registerForNotify(notifyCallback);
+        //_pRemoteCharacteristic->registerForNotify(notifyCallback);
     }
 
     activateHubUpdates();
