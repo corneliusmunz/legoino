@@ -1,5 +1,5 @@
 /**
- * A BoostHub basic example to connect a boos hub, set the led color and the name of the hub
+ * A BoostHub basic example to connect a boost hub, set the led color and the name of the hub
  * 
  * (c) Copyright 2019 - Cornelius Munz
  * Released under MIT License
@@ -31,8 +31,8 @@ void setup() {
     pinMode(GREEN_LED_PIN, OUTPUT);
     pinMode(RED_LED_PIN, OUTPUT);
     Serial.begin(115200);
-    myBoostHub.init(BOOST_MOVE_HUB); // initalize the lpf2hub instance
-    //myBoostHub.registerButtonCallback(buttonNotification);
+    myBoostHub.init(); // initalize the BoostHub instance
+    myBoostHub.registerButtonCallback(buttonNotification);
 } 
 
 

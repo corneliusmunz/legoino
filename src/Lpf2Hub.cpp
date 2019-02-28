@@ -359,25 +359,21 @@ Lpf2Hub::Lpf2Hub(){};
 /**
  * @brief Init function set the UUIDs and scan for the Hub
  */
-void Lpf2Hub::init(HubType hubType)
+void Lpf2Hub::init()
 {
     _isConnected=false;
     _isConnecting=false;
     _bleUuid = BLEUUID(LPF2_UUID);
     _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
-    _hubType = hubType;
+    _hubType = BOOST_MOVE_HUB;
 
     BLEDevice::init("");
     BLEScan *pBLEScan = BLEDevice::getScan();
-        Serial.println("setAvertisedDeviceCallbacks");
 
     pBLEScan->setAdvertisedDeviceCallbacks(new Lpf2HubAdvertisedDeviceCallbacks(this));
-        Serial.println("activate scanning");
 
     pBLEScan->setActiveScan(true);
     pBLEScan->start(30);
-            Serial.println("start");
-
 
 }
 
@@ -505,7 +501,7 @@ bool Lpf2Hub::connectHub()
     // register notifications (callback function) for the characteristic
     if (_pRemoteCharacteristic->canNotify())
     {
-        //_pRemoteCharacteristic->registerForNotify(notifyCallback);
+        _pRemoteCharacteristic->registerForNotify(notifyCallback);
     }
 
     activateHubUpdates();

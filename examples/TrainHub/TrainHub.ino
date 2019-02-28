@@ -7,15 +7,15 @@
  * 
  */
 
-#include "Legoino.h"
+#include "PoweredUpHub.h"
 
 #define GREEN_LED_PIN 13
 #define RED_LED_PIN 12
 
-// create a legoino instance
-Legoino myTrainHub;
+// create a lpf2hub instance
+PoweredUpHub myTrainHub;
 bool isLedOn=false;
-Port _port=AB;
+PoweredUpHub::Port _port = PoweredUpHub::Port::A;
 
 void buttonNotification(bool isPressed) {
    if (isPressed) {
@@ -33,7 +33,7 @@ void setup() {
     pinMode(GREEN_LED_PIN, OUTPUT);
     pinMode(RED_LED_PIN, OUTPUT);
     Serial.begin(115200);
-    myTrainHub.init(); // initalize the legoino instance
+    myTrainHub.init(); // initalize the PoweredUpHub instance
     myTrainHub.registerButtonCallback(buttonNotification);
 } 
 
@@ -45,31 +45,31 @@ void loop() {
   if (myTrainHub.isConnecting()) {
     myTrainHub.connectHub();
     if (myTrainHub.isConnected()) {
-      Serial.println("We are now connected to Train HUB");
-      char hubName[] = "myBoostHub";
-      myTrainHub.setHubName(hubName);
+      Serial.println("Connected to HUB");
     } else {
-      Serial.println("We failed to connect to the Train HUB");
+      Serial.println("Failed to connect to HUB");
     }
   }
 
-  // if connected, you can set the actuators of the hub and read in values
+  // if connected, you can set the name of the hub, the led color and shut it down
   if (myTrainHub.isConnected()) {
+
+    char hubName[] = "myTrainHub";
+    myTrainHub.setHubName(hubName);
   
     myTrainHub.setLedColor(GREEN);
     delay(1000);
     myTrainHub.setLedColor(RED);
     delay(1000);
-    
-    myTrainHub.setLedColor(BLUE);
-    myTrainHub.setMotorSpeed(_port, -25);
+    myTrainHub.setMotorSpeed(_port, 35);
     delay(1000);
     myTrainHub.stopMotor(_port);
     delay(1000);
-    myTrainHub.setMotorSpeed(_port, 25);
+    myTrainHub.setMotorSpeed(_port, -35);
     delay(1000);
     myTrainHub.stopMotor(_port);
-    delay(1000);
+    delay(1000);    
+    myTrainHub.shutDownHub();
 
   }
   

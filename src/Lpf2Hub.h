@@ -66,7 +66,7 @@ int _current = 0;
 ButtonCallback _buttonCallback = nullptr;
   public:
     Lpf2Hub();
-    void init(HubType hubType);
+    void init();
     bool connectHub();
     bool isConnected();
     bool isConnecting();

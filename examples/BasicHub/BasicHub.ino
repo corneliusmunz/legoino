@@ -15,6 +15,7 @@
 Lpf2Hub myHub;
 bool isLedOn=false;
 
+
 void buttonNotification(bool isPressed) {
    if (isPressed) {
      if (isLedOn) {
@@ -31,8 +32,8 @@ void setup() {
     pinMode(GREEN_LED_PIN, OUTPUT);
     pinMode(RED_LED_PIN, OUTPUT);
     Serial.begin(115200);
-    myHub.init(BOOST_MOVE_HUB); // initalize the lpf2hub instance
-    //myHub.registerButtonCallback(buttonNotification);
+    myHub.init(); // initalize the lpf2hub instance
+    myHub.registerButtonCallback(buttonNotification);
 } 
 
 
