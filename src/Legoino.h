@@ -16,10 +16,31 @@
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
 
 typedef enum Port {
-  A = 0x00,
-  B = 0x01,
-  AB = 0x39
+  A = 0x37,
+  B = 0x38,
+  AB = 0x39,
+  C = 0x01,
+  D = 0x02,
+  TILT = 0x3A
 };
+// Boost
+            // "A": new Port("A", 55),
+            // "B": new Port("B", 56),
+            // "AB": new Port("AB", 57),
+            // "TILT": new Port("TILT", 58),
+            // "C": new Port("C", 1),
+            // "D": new Port("D", 2)
+
+// Train
+            // "A": new Port("A", 0),
+            // "B": new Port("B", 1),
+            // "AB": new Port("AB", 57)
+// typedef enum Port {
+//   A = 0x00,
+//   B = 0x01,
+//   AB = 0x39
+// };
+
 
 typedef void (*ButtonCallback)(bool isPressed);
 typedef void (*PortCallback)(Port port, bool isConnected);
@@ -74,9 +95,14 @@ class Legoino
     void setLedColor(Color color);
     void setLedRGBColor(char red, char green, char blue);
 
+    void setAccelerationProfile(Port port, int16_t time, int8_t profileNumber);
+    void setDecelerationProfile(Port port, int16_t time, int8_t profileNumber);
+
     void stopMotor(Port port);
     void setMotorSpeed(Port port, int speed);
     void setMotorSpeeds(int speedA, int speedB);
+    void setMotorSpeedForTime(Port port, int speed, int16_t time);
+    void setMotorSpeedForDegrees(Port port, int speed, int32_t degrees);
 
     void registerButtonCallback(ButtonCallback buttonCallback);
     void registerPortCallback(PortCallback portCallback);

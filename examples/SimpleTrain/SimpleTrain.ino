@@ -15,7 +15,7 @@
 // create a legoino instance
 Legoino myTrainHub;
 bool isLedOn=false;
-Port _port=A;
+Port _port=AB;
 
 void buttonNotification(bool isPressed) {
    if (isPressed) {
@@ -29,22 +29,12 @@ void buttonNotification(bool isPressed) {
    }
 }
 
-void portNotification(Port port, bool isConnected) {
-  if (isConnected) {
-    digitalWrite(RED_LED_PIN, HIGH);
-    _port = port;
-  } else {
-    digitalWrite(RED_LED_PIN, LOW);
-  }
-}
-
 void setup() {
     pinMode(GREEN_LED_PIN, OUTPUT);
     pinMode(RED_LED_PIN, OUTPUT);
     Serial.begin(115200);
     myTrainHub.init(); // initalize the legoino instance
     myTrainHub.registerButtonCallback(buttonNotification);
-    myTrainHub.registerPortCallback(portNotification);
 } 
 
 
@@ -56,7 +46,7 @@ void loop() {
     myTrainHub.connectHub();
     if (myTrainHub.isConnected()) {
       Serial.println("We are now connected to Train HUB");
-      char hubName[] = "myTrainHub";
+      char hubName[] = "myBoostHub";
       myTrainHub.setHubName(hubName);
     } else {
       Serial.println("We failed to connect to the Train HUB");
@@ -67,17 +57,17 @@ void loop() {
   if (myTrainHub.isConnected()) {
   
     myTrainHub.setLedColor(GREEN);
-    myTrainHub.setMotorSpeed(_port, 25);
     delay(1000);
-
     myTrainHub.setLedColor(RED);
-    myTrainHub.stopMotor(_port);
     delay(1000);
-
+    
     myTrainHub.setLedColor(BLUE);
     myTrainHub.setMotorSpeed(_port, -25);
     delay(1000);
-
+    myTrainHub.stopMotor(_port);
+    delay(1000);
+    myTrainHub.setMotorSpeed(_port, 25);
+    delay(1000);
     myTrainHub.stopMotor(_port);
     delay(1000);
 
