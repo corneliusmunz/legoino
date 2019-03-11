@@ -38,6 +38,16 @@ public:
   void setMotorSpeed(Port port, int speed);
   void setMotorSpeedForTime(Port port, int speed, int16_t time);
   void setMotorSpeedForDegrees(Port port, int speed, int32_t degrees);
+  void setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees);
+
+  void moveForward(int steps);
+  void moveBack(int steps);
+  void rotate(int degrees);
+  void rotateLeft(int degrees);
+  void rotateRight(int degrees);
+  void moveArc(int degrees);
+  void moveArcLeft(int degrees);
+  void moveArcRight(int degrees);
 };
 
 #endif

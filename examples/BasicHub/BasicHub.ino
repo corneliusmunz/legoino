@@ -11,7 +11,7 @@
 #define GREEN_LED_PIN 13
 #define RED_LED_PIN 12
 
-// create a lpf2hub instance
+// create a hub instance
 Lpf2Hub myHub;
 bool isLedOn=false;
 

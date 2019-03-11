@@ -11,7 +11,7 @@
 #define GREEN_LED_PIN 13
 #define RED_LED_PIN 12
 
-// create a lpf2hub instance
+// create a hub instance
 BoostHub myBoostHub;
 bool isLedOn=false;
 
@@ -58,7 +58,17 @@ void loop() {
     myBoostHub.setLedColor(GREEN);
     delay(1000);
     myBoostHub.setLedColor(RED);
-    delay(5000);
+    delay(1000);
+    myBoostHub.moveForward(1);
+    delay(2000);
+    myBoostHub.rotateLeft(90);
+    delay(2000);
+    myBoostHub.moveForward(1);
+    delay(2000);
+    myBoostHub.rotateRight(90);
+    delay(2000);
+    myBoostHub.moveBack(1);
+    delay(2000);
     myBoostHub.shutDownHub();
 
   }
