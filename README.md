@@ -1,18 +1,15 @@
-![GitHub](https://img.shields.io/github/license/corneliusmunz/legoino.svg)
-![GitHub release](https://img.shields.io/github/release-pre/corneliusmunz/legoino.svg)
-![Gitter](https://img.shields.io/gitter/room/corneliusmunz/legoinochat.svg)
-![](https://img.shields.io/badge/arduino-esp32-green.svg)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/legoinochat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Legoino
 Arduino Library for controlling Powered UP and Boost controllers
 
 *Disclaimer*: LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this project.
 
-Simple Train example
+Simple Train example (just click the image to see the video)
 
 [![Legoino TrainHub example](http://img.youtube.com/vi/o1hgZQz3go4/0.jpg)](http://www.youtube.com/watch?v=o1hgZQz3go4 "Legoino TrainHub example")
 
-Simple Boost movement example
+Simple Boost movement example (just click the image to see the video)
 
 [![Legoino BoostHub simple movements example](http://img.youtube.com/vi/VgWObhyUmi0/0.jpg)](http://www.youtube.com/watch?v=VgWObhyUmi0 "Legoino BoostHub simple movements example")
 
