@@ -13,9 +13,11 @@
  */
 class Lpf2HubAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
 {
-    Lpf2Hub* _lpf2Hub;
-public:
-    Lpf2HubAdvertisedDeviceCallbacks(Lpf2Hub* lpf2Hub) : BLEAdvertisedDeviceCallbacks() {
+    Lpf2Hub *_lpf2Hub;
+
+  public:
+    Lpf2HubAdvertisedDeviceCallbacks(Lpf2Hub *lpf2Hub) : BLEAdvertisedDeviceCallbacks()
+    {
         _lpf2Hub = lpf2Hub;
     }
 
@@ -36,18 +38,19 @@ public:
  * @param [in] command byte array which contains the ble command
  * @param [in] size length of the command byte array
  */
-void Lpf2Hub::WriteValue(byte command[], int size) { 
-    byte commandWithCommonHeader[size+2] = {size+2, 0x00};
-    memcpy(commandWithCommonHeader+2, command, size);
+void Lpf2Hub::WriteValue(byte command[], int size)
+{
+    byte commandWithCommonHeader[size + 2] = {size + 2, 0x00};
+    memcpy(commandWithCommonHeader + 2, command, size);
     _pRemoteCharacteristic->writeValue(commandWithCommonHeader, sizeof(commandWithCommonHeader), false);
 }
-
 
 /**
  * @brief Map speed from -100..100 to the 8bit internal value
  * @param [in] speed -100..100
  */
-byte Lpf2Hub::MapSpeed(int speed) {
+byte Lpf2Hub::MapSpeed(int speed)
+{
     byte rawSpeed;
     if (speed == 0)
     {
@@ -64,19 +67,21 @@ byte Lpf2Hub::MapSpeed(int speed) {
     return rawSpeed;
 }
 
-byte* Lpf2Hub::Int16ToByteArray(int16_t x) {
+byte *Lpf2Hub::Int16ToByteArray(int16_t x)
+{
     static byte y[2];
-    y[0] = (byte) (x & 0xff);
-    y[1] = (byte) ((x >> 8) & 0xff);
+    y[0] = (byte)(x & 0xff);
+    y[1] = (byte)((x >> 8) & 0xff);
     return y;
 }
 
-byte* Lpf2Hub::Int32ToByteArray(int32_t x) {
+byte *Lpf2Hub::Int32ToByteArray(int32_t x)
+{
     static byte y[4];
-    y[0] = (byte) (x & 0xff);
-    y[1] = (byte) ((x >> 8) & 0xff);
-    y[2] = (byte) ((x >> 16) & 0xff);
-    y[3] = (byte) ((x >> 24) & 0xff);
+    y[0] = (byte)(x & 0xff);
+    y[1] = (byte)((x >> 8) & 0xff);
+    y[2] = (byte)((x >> 16) & 0xff);
+    y[3] = (byte)((x >> 24) & 0xff);
     return y;
 }
 
@@ -241,7 +246,6 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
     {
         Serial.print(" is not connected");
     }
-
 }
 
 /**
@@ -352,8 +356,6 @@ void Lpf2Hub::notifyCallback(
     }
 }
 
-
-
 Lpf2Hub::Lpf2Hub(){};
 
 /**
@@ -361,8 +363,8 @@ Lpf2Hub::Lpf2Hub(){};
  */
 void Lpf2Hub::init()
 {
-    _isConnected=false;
-    _isConnecting=false;
+    _isConnected = false;
+    _isConnecting = false;
     _bleUuid = BLEUUID(LPF2_UUID);
     _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
     _hubType = BOOST_MOVE_HUB;
@@ -374,7 +376,6 @@ void Lpf2Hub::init()
 
     pBLEScan->setActiveScan(true);
     pBLEScan->start(30);
-
 }
 
 /**
@@ -437,10 +438,9 @@ void Lpf2Hub::setHubName(char name[])
     int arraySize = offset + nameLength;
     byte setNameCommand[arraySize] = {0x01, 0x01, 0x01};
 
-    memcpy(setNameCommand+offset, name, nameLength);
+    memcpy(setNameCommand + offset, name, nameLength);
     WriteValue(setNameCommand, arraySize);
 }
-
 
 void Lpf2Hub::activateHubUpdates()
 {
@@ -462,10 +462,10 @@ void Lpf2Hub::activateHubUpdates()
 
     byte setFWCommand[3] = {0x01, 0x03, 0x02};
     WriteValue(setFWCommand, 3);
-    
+
     byte setHWCommand[3] = {0x01, 0x04, 0x02};
     WriteValue(setHWCommand, 3);
-    
+
     byte setBatteryType[3] = {0x01, 0x07, 0x02};
     WriteValue(setBatteryType, 3);
 }
@@ -485,15 +485,15 @@ bool Lpf2Hub::connectHub()
     BLERemoteService *pRemoteService = pClient->getService(_bleUuid);
     if (pRemoteService == nullptr)
     {
-            Serial.println("get pClient failed");
+        Serial.println("get pClient failed");
         return false;
     }
-        Serial.println("get pRemoteService");
+    Serial.println("get pRemoteService");
 
     _pRemoteCharacteristic = pRemoteService->getCharacteristic(_charachteristicUuid);
     if (_pRemoteCharacteristic == nullptr)
     {
-            Serial.println("get pRemoteService failed");
+        Serial.println("get pRemoteService failed");
 
         return false;
     }
