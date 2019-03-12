@@ -220,13 +220,13 @@ The library is implemented for the ESP32 Boards and does use the ESP32_BLE_Ardui
 Hands up to Lego, that they have recently open-sourced the Specification
 https://github.com/LEGO/lego-ble-wireless-protocol-docs
 
-Thanks to @JorgePe and all contributors for the reverse engenieering part
+Thanks to [@JorgePe](https://github.com/JorgePe) and all contributors for the reverse engenieering part
 https://github.com/JorgePe/BOOSTreveng
 
-Thanks to @jakorten for his SWIFT iOS App
+Thanks to [@jakorten](https://github.com/jakorten) for his SWIFT iOS App
 https://github.com/jakorten/UpControl
 
-Thanks @nathankellenicki for his brilliant structured node module
+Thanks [@nathankellenicki](https://github.com/nathankellenicki) for his brilliant structured node module
 https://github.com/nathankellenicki/node-poweredup
 
 # Remarks
