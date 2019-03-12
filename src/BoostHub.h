@@ -31,7 +31,7 @@ public:
   //Constructor
   BoostHub();
 
-  //Methods
+  //Basic Motor methods
   void setAccelerationProfile(Port port, int16_t time, int8_t profileNumber);
   void setDecelerationProfile(Port port, int16_t time, int8_t profileNumber);
   void stopMotor(Port port);
@@ -40,6 +40,7 @@ public:
   void setMotorSpeedForDegrees(Port port, int speed, int32_t degrees);
   void setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees);
 
+  //Basic Move/Rotate methods
   void moveForward(int steps);
   void moveBack(int steps);
   void rotate(int degrees);

@@ -1,13 +1,15 @@
 #######################################
-# Syntax Coloring Map Servo
+# Syntax Legoino Hubs
 #######################################
 
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
 
-HubType	KEYWORD1	HubType
-Legoino KEYWORD1    Legoino
+BoostHub KEYWORD1    BoostHub
+Lpf2Hub KEYWORD1    Lpf2Hub
+PoweredUpHub KEYWORD1    PoweredUpHub
+
 Color   KEYWORD1    Color
 Port    KEYWORD1    Port
 
@@ -22,6 +24,24 @@ connectHub  	KEYWORD2
 shutDownHub     KEYWORD2
 setHubName      KEYWORD2
 
+setAccelerationProfile KEYWORD2
+setDecelerationProfile KEYWORD2
+stopMotor KEYWORD2
+setMotorSpeed KEYWORD2
+setMotorSpeedForTime KEYWORD2
+setMotorSpeedForDegrees KEYWORD2
+setMotorSpeedsForDegrees KEYWORD2
+
+moveForward KEYWORD2
+moveBack KEYWORD2
+rotate KEYWORD2
+rotateLeft KEYWORD2
+rotateRight KEYWORD2
+moveArc KEYWORD2
+moveArcLeft KEYWORD2
+moveArcRight KEYWORD2
+
+
 #######################################
 # Constants (LITERAL1)
 #######################################
@@ -30,7 +50,6 @@ A               LITERAL1
 B               LITERAL1
 AB              LITERAL1
 
-WEDO            LITERAL1    
 BOOST           LITERAL1
 POWEREDUP       LITERAL1
 

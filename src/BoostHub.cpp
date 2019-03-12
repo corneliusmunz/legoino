@@ -105,7 +105,11 @@ void BoostHub::stopMotor(Port port = AB)
  */
 void BoostHub::moveForward(int steps) {
     Port port = AB;
-    setMotorSpeedForDegrees(port, 50, steps*360);
+    Port portA = A;
+    Port portB = B;
+    setDecelerationProfile(portA, 1000, 0);
+    setDecelerationProfile(portB, 1000, 0);
+    setMotorSpeedForDegrees(port, 50, steps*360*2);
 }
 
 /**
@@ -114,7 +118,7 @@ void BoostHub::moveForward(int steps) {
  */
 void BoostHub::moveBack(int steps) {
     Port port = AB;
-    setMotorSpeedForDegrees(port, -50, steps*360);
+    setMotorSpeedForDegrees(port, -50, steps*360*2);
 }
 
 /**
@@ -124,10 +128,10 @@ void BoostHub::moveBack(int steps) {
 void BoostHub::rotate(int degrees) {
     if (degrees > 0) {
         // right
-        setMotorSpeedsForDegrees(-50, 50, degrees);
+        setMotorSpeedsForDegrees(-50, 50, degrees*4.5);
     } else {
         // left
-        setMotorSpeedsForDegrees(50, -50, degrees);
+        setMotorSpeedsForDegrees(50, -50, degrees*4.5);
     }
 }
 
@@ -154,10 +158,10 @@ void BoostHub::rotateRight(int degrees = 90) {
 void BoostHub::moveArc(int degrees) {
     if (degrees > 0) {
         // right
-        setMotorSpeedsForDegrees(25, 50, degrees);
+        setMotorSpeedsForDegrees(60, 20, degrees*12);
     } else {
         // left
-        setMotorSpeedsForDegrees(50, 25, degrees);
+        setMotorSpeedsForDegrees(20, 60, degrees*12);
     }
 }
 

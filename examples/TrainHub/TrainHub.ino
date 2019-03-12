@@ -9,32 +9,13 @@
 
 #include "PoweredUpHub.h"
 
-#define GREEN_LED_PIN 13
-#define RED_LED_PIN 12
-
 // create a hub instance
 PoweredUpHub myTrainHub;
-bool isLedOn=false;
 PoweredUpHub::Port _port = PoweredUpHub::Port::A;
 
-void buttonNotification(bool isPressed) {
-   if (isPressed) {
-     if (isLedOn) {
-       digitalWrite(GREEN_LED_PIN, LOW);
-       isLedOn=false;
-     } else {
-       digitalWrite(GREEN_LED_PIN, HIGH);
-       isLedOn=true;
-     }
-   }
-}
-
 void setup() {
-    pinMode(GREEN_LED_PIN, OUTPUT);
-    pinMode(RED_LED_PIN, OUTPUT);
     Serial.begin(115200);
     myTrainHub.init(); // initalize the PoweredUpHub instance
-    myTrainHub.registerButtonCallback(buttonNotification);
 } 
 
 

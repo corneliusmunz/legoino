@@ -1,5 +1,6 @@
 /**
- * A BoostHub basic example to connect a boost hub, set the led color and the name of the hub
+ * A BoostHub basic example to connect a boost hub, set the led color and the name of the hub and
+ * do some basic movements on the boost map grid
  * 
  * (c) Copyright 2019 - Cornelius Munz
  * Released under MIT License
@@ -8,31 +9,12 @@
 
 #include "BoostHub.h"
 
-#define GREEN_LED_PIN 13
-#define RED_LED_PIN 12
-
 // create a hub instance
 BoostHub myBoostHub;
-bool isLedOn=false;
-
-void buttonNotification(bool isPressed) {
-   if (isPressed) {
-     if (isLedOn) {
-       digitalWrite(GREEN_LED_PIN, LOW);
-       isLedOn=false;
-     } else {
-       digitalWrite(GREEN_LED_PIN, HIGH);
-       isLedOn=true;
-     }
-   }
-}
 
 void setup() {
-    pinMode(GREEN_LED_PIN, OUTPUT);
-    pinMode(RED_LED_PIN, OUTPUT);
     Serial.begin(115200);
     myBoostHub.init(); // initalize the BoostHub instance
-    myBoostHub.registerButtonCallback(buttonNotification);
 } 
 
 
@@ -54,11 +36,12 @@ void loop() {
 
     char hubName[] = "myBoostHub";
     myBoostHub.setHubName(hubName);
-  
     myBoostHub.setLedColor(GREEN);
     delay(1000);
     myBoostHub.setLedColor(RED);
     delay(1000);
+
+    // lets do some movements on the boost map
     myBoostHub.moveForward(1);
     delay(2000);
     myBoostHub.rotateLeft(90);
@@ -68,6 +51,10 @@ void loop() {
     myBoostHub.rotateRight(90);
     delay(2000);
     myBoostHub.moveBack(1);
+    delay(2000);
+    myBoostHub.moveArcLeft(90);
+    delay(2000);
+    myBoostHub.moveArcRight(90);
     delay(2000);
     myBoostHub.shutDownHub();
 
