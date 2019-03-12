@@ -1,51 +1,32 @@
 /*
- * Legoino.cpp - Arduino Library for controlling Powered UP and Boost controllers
+ * Lpf2Hub.cpp - Arduino base class for controlling Powered UP and Boost controllers
  * 
  * (c) Copyright 2019 - Cornelius Munz
  * Released under MIT License
  * 
 */
 
-#include "Legoino.h"
-
-// BLE properties
-HubType _hubType;
-BLEUUID _bleUuid;
-BLEUUID _charachteristicUuid;
-BLEAddress *_pServerAddress;
-BLERemoteCharacteristic *_pRemoteCharacteristic;
-
-// status properties
-boolean _isConnecting = false;
-boolean _isConnected = false;
-
-// device properties
-int _rssi = -100;
-int _batteryLevel = 100; //%
-int _voltage = 0;
-int _current = 0;
-
-// Notification callbacks
-ButtonCallback _buttonCallback = nullptr;
-PortCallback _portCallback = nullptr;
+#include "Lpf2Hub.h"
 
 /**
  * Scan for BLE servers and find the first one that advertises the service we are looking for.
  */
-class AdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
+class Lpf2HubAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
 {
+    Lpf2Hub* _lpf2Hub;
+public:
+    Lpf2HubAdvertisedDeviceCallbacks(Lpf2Hub* lpf2Hub) : BLEAdvertisedDeviceCallbacks() {
+        _lpf2Hub = lpf2Hub;
+    }
 
     void onResult(BLEAdvertisedDevice advertisedDevice)
     {
-
-        // Found a device, check if the service is contained
-        if (advertisedDevice.haveServiceUUID() && advertisedDevice.getServiceUUID().equals(_bleUuid))
+        //Found a device, check if the service is contained
+        if (advertisedDevice.haveServiceUUID() && advertisedDevice.getServiceUUID().equals(_lpf2Hub->_bleUuid))
         {
-
             advertisedDevice.getScan()->stop();
-
-            _pServerAddress = new BLEAddress(advertisedDevice.getAddress());
-            _isConnecting = true;
+            _lpf2Hub->_pServerAddress = new BLEAddress(advertisedDevice.getAddress());
+            _lpf2Hub->_isConnecting = true;
         }
     }
 };
@@ -55,7 +36,7 @@ class AdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
  * @param [in] command byte array which contains the ble command
  * @param [in] size length of the command byte array
  */
-void WriteValue(byte command[], int size) { 
+void Lpf2Hub::WriteValue(byte command[], int size) { 
     byte commandWithCommonHeader[size+2] = {size+2, 0x00};
     memcpy(commandWithCommonHeader+2, command, size);
     _pRemoteCharacteristic->writeValue(commandWithCommonHeader, sizeof(commandWithCommonHeader), false);
@@ -66,7 +47,7 @@ void WriteValue(byte command[], int size) {
  * @brief Map speed from -100..100 to the 8bit internal value
  * @param [in] speed -100..100
  */
-byte MapSpeed(int speed) {
+byte Lpf2Hub::MapSpeed(int speed) {
     byte rawSpeed;
     if (speed == 0)
     {
@@ -83,72 +64,57 @@ byte MapSpeed(int speed) {
     return rawSpeed;
 }
 
-byte* Int16ToByteArray(int16_t x) {
-    byte y[2];
+byte* Lpf2Hub::Int16ToByteArray(int16_t x) {
+    static byte y[2];
     y[0] = (byte) (x & 0xff);
     y[1] = (byte) ((x >> 8) & 0xff);
     return y;
 }
 
-static uint8_t ReadUInt8(uint8_t *data, int offset = 0)
+byte* Lpf2Hub::Int32ToByteArray(int32_t x) {
+    static byte y[4];
+    y[0] = (byte) (x & 0xff);
+    y[1] = (byte) ((x >> 8) & 0xff);
+    y[2] = (byte) ((x >> 16) & 0xff);
+    y[3] = (byte) ((x >> 24) & 0xff);
+    return y;
+}
+
+uint8_t Lpf2Hub::ReadUInt8(uint8_t *data, int offset = 0)
 {
     uint8_t value = data[0 + offset];
     return value;
 }
 
-static int8_t ReadInt8(uint8_t *data, int offset = 0)
+int8_t Lpf2Hub::ReadInt8(uint8_t *data, int offset = 0)
 {
     int8_t value = (int8_t)data[0 + offset];
     return value;
 }
 
-static uint16_t ReadUInt16LE(uint8_t *data, int offset = 0)
+uint16_t Lpf2Hub::ReadUInt16LE(uint8_t *data, int offset = 0)
 {
     uint16_t value = data[0 + offset] | (uint16_t)(data[1 + offset] << 8);
     return value;
 }
 
-static int16_t ReadInt16LE(uint8_t *data, int offset = 0)
+int16_t Lpf2Hub::ReadInt16LE(uint8_t *data, int offset = 0)
 {
     int16_t value = data[0 + offset] | (int16_t)(data[1 + offset] << 8);
     return value;
 }
 
-static uint32_t ReadUInt32LE(uint8_t *data, int offset = 0)
+uint32_t Lpf2Hub::ReadUInt32LE(uint8_t *data, int offset = 0)
 {
     uint32_t value = data[0 + offset] | (uint32_t)(data[1 + offset] << 8) | (uint32_t)(data[2 + offset] << 16) | (uint32_t)(data[3 + offset] << 24);
     return value;
 }
 
 /**
- * @brief Convert a raw port value to the corresponding Port datatype
- * @param [in] rawPortValue The raw port value
- */
-Port getPortForRawValue(byte rawPortValue)
-{
-    if (rawPortValue == 0x00)
-    {
-        return A;
-    }
-
-    if (rawPortValue == 0x01)
-    {
-        return B;
-    }
-
-    if (rawPortValue == 0x39)
-    {
-        return AB;
-    }
-
-    return A;
-}
-
-/**
  * @brief Parse the incoming characteristic notification for a Device Info Message
  * @param [in] pData The pointer to the received data
  */
-void parseDeviceInfo(uint8_t *pData)
+void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
 {
     Serial.println("parseDeviceInfo");
     // Advertising name
@@ -260,7 +226,7 @@ void parseDeviceInfo(uint8_t *pData)
  * @brief Parse the incoming characteristic notification for a Port Message
  * @param [in] pData The pointer to the received data
  */
-void parsePortMessage(uint8_t *pData)
+void Lpf2Hub::parsePortMessage(uint8_t *pData)
 {
     Serial.println("parsePortMessage");
     byte port = pData[3];
@@ -275,17 +241,14 @@ void parsePortMessage(uint8_t *pData)
     {
         Serial.print(" is not connected");
     }
-    if (_portCallback != nullptr)
-    {
-        _portCallback(getPortForRawValue(port), isConnected);
-    }
+
 }
 
 /**
  * @brief Parse the incoming characteristic notification for a Sensor Message
  * @param [in] pData The pointer to the received data
  */
-void parseSensorMessage(uint8_t *pData)
+void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 {
     Serial.println("parseSensorMessage");
     if (pData[3] == 0x3b)
@@ -335,7 +298,7 @@ void parseSensorMessage(uint8_t *pData)
  * @brief Parse the incoming characteristic notification for a Port Action Message
  * @param [in] pData The pointer to the received data
  */
-void parsePortAction(uint8_t *pData)
+void Lpf2Hub::parsePortAction(uint8_t *pData)
 {
     Serial.println("parsePortAction");
 }
@@ -347,7 +310,7 @@ void parsePortAction(uint8_t *pData)
  * @param [in] length The length of the data array
  * @param [in] isNotify 
  */
-void notifyCallback(
+void Lpf2Hub::notifyCallback(
     BLERemoteCharacteristic *pBLERemoteCharacteristic,
     uint8_t *pData,
     size_t length,
@@ -389,20 +352,26 @@ void notifyCallback(
     }
 }
 
-Legoino::Legoino(){};
+
+
+Lpf2Hub::Lpf2Hub(){};
 
 /**
  * @brief Init function set the UUIDs and scan for the Hub
  */
-void Legoino::init()
+void Lpf2Hub::init()
 {
-
+    _isConnected=false;
+    _isConnecting=false;
     _bleUuid = BLEUUID(LPF2_UUID);
     _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
+    _hubType = BOOST_MOVE_HUB;
 
     BLEDevice::init("");
     BLEScan *pBLEScan = BLEDevice::getScan();
-    pBLEScan->setAdvertisedDeviceCallbacks(new AdvertisedDeviceCallbacks());
+
+    pBLEScan->setAdvertisedDeviceCallbacks(new Lpf2HubAdvertisedDeviceCallbacks(this));
+
     pBLEScan->setActiveScan(true);
     pBLEScan->start(30);
 
@@ -412,25 +381,16 @@ void Legoino::init()
  * @brief Register the callback function if a button message is received
  * @param [in] buttonCallback Function pointer to the callback function which handles the button notification
  */
-void Legoino::registerButtonCallback(ButtonCallback buttonCallback)
+void Lpf2Hub::registerButtonCallback(ButtonCallback buttonCallback)
 {
     _buttonCallback = buttonCallback;
-}
-
-/**
- * @brief Register the callback function if a port message is received
- * @param [in] portCallback Function pointer to the callback function which handles the port notification
- */
-void Legoino::registerPortCallback(PortCallback portCallback)
-{
-    _portCallback = portCallback;
 }
 
 /**
  * @brief Set the color of the HUB LED with predefined colors
  * @param [in] color one of the available hub colors
  */
-void Legoino::setLedColor(Color color)
+void Lpf2Hub::setLedColor(Color color)
 {
     byte setColorMode[8] = {0x41, 0x32, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00};
     WriteValue(setColorMode, 8);
@@ -444,7 +404,7 @@ void Legoino::setLedColor(Color color)
  * @param [in] green 0..255 
  * @param [in] blue 0..255 
  */
-void Legoino::setLedRGBColor(char red, char green, char blue)
+void Lpf2Hub::setLedRGBColor(char red, char green, char blue)
 {
     byte setRGBMode[8] = {0x41, 0x32, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
     WriteValue(setRGBMode, 8);
@@ -455,7 +415,7 @@ void Legoino::setLedRGBColor(char red, char green, char blue)
 /**
  * @brief Send the Shutdown command to the HUB
  */
-void Legoino::shutDownHub()
+void Lpf2Hub::shutDownHub()
 {
     byte shutdownCommand[2] = {0x02, 0X01};
     WriteValue(shutdownCommand, 2);
@@ -465,7 +425,7 @@ void Legoino::shutDownHub()
  * @brief Set name of the HUB
  * @param [in] name character array which contains the name (max 14 characters are supported)
  */
-void Legoino::setHubName(char name[])
+void Lpf2Hub::setHubName(char name[])
 {
     int nameLength = strlen(name);
     if (nameLength > 14)
@@ -482,29 +442,7 @@ void Legoino::setHubName(char name[])
 }
 
 
-/**
- * @brief Set the motor speed on a defined port. 
- * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
- * @param [in] speed Speed of the Motor -100..0..100 negative values will reverse the rotation
- */
-void Legoino::setMotorSpeed(Port port, int speed)
-{
-    //byte setMotorCommand[10] = {0xA, 0x00, 0x81, port, 0x11, 0x60, 0x00, MapSpeed(speed), 0x00, 0x00};
-    //_pRemoteCharacteristic->writeValue(setMotorCommand, sizeof(setMotorCommand), false);
-    byte setMotorCommand[8] = {0x81, port, 0x11, 0x60, 0x00, MapSpeed(speed), 0x00, 0x00};
-    WriteValue(setMotorCommand, 8);
-}
-
-/**
- * @brief Stop the motor on a defined port. If no port is set, all motors (AB) will be stopped
- * @param [in] port Port of the Hub on which the motor will be stopped (A, B, AB)
- */
-void Legoino::stopMotor(Port port = AB)
-{
-    setMotorSpeed(port, 0);
-}
-
-void activateHubUpdates()
+void Lpf2Hub::activateHubUpdates()
 {
     // Activate reports
     byte setButtonCommand[3] = {0x01, 0x02, 0x02};
@@ -535,7 +473,7 @@ void activateHubUpdates()
 /**
  * @brief Connect to the HUB, get a reference to the characteristic and register for notifications
  */
-bool Legoino::connectHub()
+bool Lpf2Hub::connectHub()
 {
     BLEAddress pAddress = *_pServerAddress;
     BLEClient *pClient = BLEDevice::createClient();
@@ -543,21 +481,27 @@ bool Legoino::connectHub()
     // Connect to the remove BLE Server (HUB)
     pClient->connect(pAddress);
 
+    Serial.println("get pClient");
     BLERemoteService *pRemoteService = pClient->getService(_bleUuid);
     if (pRemoteService == nullptr)
     {
+            Serial.println("get pClient failed");
         return false;
     }
+        Serial.println("get pRemoteService");
+
     _pRemoteCharacteristic = pRemoteService->getCharacteristic(_charachteristicUuid);
     if (_pRemoteCharacteristic == nullptr)
     {
+            Serial.println("get pRemoteService failed");
+
         return false;
     }
 
     // register notifications (callback function) for the characteristic
     if (_pRemoteCharacteristic->canNotify())
     {
-        _pRemoteCharacteristic->registerForNotify(notifyCallback);
+        //_pRemoteCharacteristic->registerForNotify(notifyCallback);
     }
 
     activateHubUpdates();
@@ -572,7 +516,7 @@ bool Legoino::connectHub()
  * @brief Retrieve the connection state. The BLE client (ESP32) has found a service with the desired UUID (HUB)
  * If this state is available, you can try to connect to the Hub
  */
-bool Legoino::isConnecting()
+bool Lpf2Hub::isConnecting()
 {
     return _isConnecting;
 }
@@ -580,7 +524,7 @@ bool Legoino::isConnecting()
 /**
  * @brief Retrieve the connection state. The BLE client (ESP32) is connected to the server (HUB)
  */
-bool Legoino::isConnected()
+bool Lpf2Hub::isConnected()
 {
     return _isConnected;
 }
