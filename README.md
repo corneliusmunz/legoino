@@ -3,7 +3,11 @@ Arduino Library for controlling Powered UP and Boost controllers
 
 *Disclaimer*: LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this project.
 
-[![Legoino SimpleTrain Example](http://img.youtube.com/vi/o1hgZQz3go4/0.jpg)](http://www.youtube.com/watch?v=o1hgZQz3go4 "Legoino SimpleTrain Example")
+Simple Train example
+[![Legoino TrainHub example](http://img.youtube.com/vi/o1hgZQz3go4/0.jpg)](http://www.youtube.com/watch?v=o1hgZQz3go4 "Legoino TrainHub example")
+
+Simple Boost movement example
+[![Legoino BoostHub simple movements example](http://img.youtube.com/vi/VgWObhyUmi0/0.jpg)](http://www.youtube.com/watch?v=VgWObhyUmi0 "Legoino BoostHub simple movements example")
 
 Up to now the Library is only teseted for a Powered Up Train controllers and Boost controllers. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. Up to now the notifications of the hub and the reading of the sensors are not supported. But this feature will come in the next release.
 
