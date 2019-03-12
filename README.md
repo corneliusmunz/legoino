@@ -1,3 +1,8 @@
+![GitHub](https://img.shields.io/github/license/corneliusmunz/legoino.svg)
+![GitHub release](https://img.shields.io/github/release-pre/corneliusmunz/legoino.svg)
+![Gitter](https://img.shields.io/gitter/room/corneliusmunz/legoinochat.svg)
+![](https://img.shields.io/badge/arduino-esp32-green.svg)
+
 # Legoino
 Arduino Library for controlling Powered UP and Boost controllers
 
@@ -13,10 +18,13 @@ Simple Boost movement example
 
 Up to now the Library is only teseted for a Powered Up Train controllers and Boost controllers. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. Up to now the notifications of the hub and the reading of the sensors are not supported. But this feature will come in the next release.
 
-# Setup and Usage
-Just install the Libray via the Arduino Library Manager.
+# Examples
+You can find 3 Examples called "BasicHub.ino", "BoostHub.ino" and "TrainHub.ino" in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". 
 
-The usage is dependent on your hub type. Some basic commands are shared for the hubs and are covered in the Lpf2Hub library. Some other commands ar hub specific (e.g. Boost movement). The hub dependent usage is described below.
+# Setup and Usage
+Just install the Library via the Arduino Library Manager.
+
+The usage is dependent on your hub type. Some basic commands are shared for the hubs and are covered in the Lpf2Hub library. Some other commands ar hub specific (e.g. Boost movement).
 
 ## Boost Hub
 Add the follwoing include in your *.ino sketch
@@ -45,7 +53,7 @@ In the main ```loop``` just add the following connection flow
   }
 ```
 
-Now you are ready to control your actuators or your Hub
+Now you are ready to control your actuators on your Hub
 
 ### Hub control
 You can define the display name of the Hub (e.g. displayed in the PoweredUp Apps) with the following command. 
@@ -165,7 +173,7 @@ In the main ```loop``` just add the following connection flow
     }
   }
 ```
-Now you are ready to control your actuators or your Hub
+Now you are ready to control your actuators on your Hub
 
 ### Hub control
 You can define the display name of the Hub (e.g. displayed in the PoweredUp Apps) with the following command. 
@@ -208,9 +216,6 @@ myTrainHub.stopMotor(A); // Stop motor on Port A
 myTrainHub.stopMotor(); // Stop all motors (Port A and Port B)
 ```
 
-# Examples
-You can find 3 Examples called "BasicHub.ino", "BoostHub.ino" and "TrainHub.ino" in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". 
-
 # Arduino Hardware
 The library is implemented for the ESP32 Boards and does use the ESP32_BLE_Arduino Library.
 
@@ -218,13 +223,13 @@ The library is implemented for the ESP32 Boards and does use the ESP32_BLE_Ardui
 Hands up to Lego, that they have recently open-sourced the Specification
 https://github.com/LEGO/lego-ble-wireless-protocol-docs
 
-Thanks to JorgePe and all contributors for the reverse engenieering part
+Thanks to @JorgePe and all contributors for the reverse engenieering part
 https://github.com/JorgePe/BOOSTreveng
 
-Thanks to jakorten for his SWIFT iOS App
+Thanks to @jakorten for his SWIFT iOS App
 https://github.com/jakorten/UpControl
 
-Thanks Nathan Kellenicki for his brilliant structured node module
+Thanks @nathankellenicki for his brilliant structured node module
 https://github.com/nathankellenicki/node-poweredup
 
 # Remarks
