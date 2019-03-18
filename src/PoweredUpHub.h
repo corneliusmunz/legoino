@@ -15,21 +15,21 @@
 
 class PoweredUpHub : public Lpf2Hub
 {
-  public:
-    //Port definitions specific to PowerdUp Hubs
-    enum Port
-    {
-        A = 0x00,
-        B = 0x01,
-        AB = 0x39
-    };
+public:
+  //Port definitions specific to PowerdUp Hubs
+  enum Port
+  {
+    A = 0x00,
+    B = 0x01,
+    AB = 0x39
+  };
 
-    //Constructor
-    PoweredUpHub();
+  //Constructor
+  PoweredUpHub();
 
-    //Methods
-    void stopMotor(Port port);
-    void setMotorSpeed(Port port, int speed);
+  //Methods
+  void stopMotor(Port port);
+  void setMotorSpeed(Port port, int speed);
 };
 
 #endif
