@@ -6,62 +6,62 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-BoostHub KEYWORD1    BoostHub
-Lpf2Hub KEYWORD1    Lpf2Hub
-PoweredUpHub KEYWORD1    PoweredUpHub
+BoostHub KEYWORD1	BoostHub
+Lpf2Hub KEYWORD1	Lpf2Hub
+PoweredUpHub KEYWORD1	PoweredUpHub
 
-Color   KEYWORD1    Color
-Port    KEYWORD1    Port
+Color	KEYWORD1	Color
+Port	KEYWORD1	Port
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-setLedColor	    KEYWORD2
-setLedRGBColor  KEYWORD2
+setLedColor	KEYWORD2
+setLedRGBColor	KEYWORD2
 setMotorSpeed	KEYWORD2
-stopMotor   	KEYWORD2
-connectHub  	KEYWORD2
-shutDownHub     KEYWORD2
-setHubName      KEYWORD2
+stopMotor	KEYWORD2
+connectHub	KEYWORD2
+shutDownHub	KEYWORD2
+setHubName	KEYWORD2
 
-setAccelerationProfile KEYWORD2
-setDecelerationProfile KEYWORD2
-stopMotor KEYWORD2
-setMotorSpeed KEYWORD2
-setMotorSpeedForTime KEYWORD2
-setMotorSpeedForDegrees KEYWORD2
-setMotorSpeedsForDegrees KEYWORD2
+setAccelerationProfile	KEYWORD2
+setDecelerationProfile	KEYWORD2
+stopMotor	KEYWORD2
+setMotorSpeed	KEYWORD2
+setMotorSpeedForTime	KEYWORD2
+setMotorSpeedForDegrees	KEYWORD2
+setMotorSpeedsForDegrees	KEYWORD2
 
-moveForward KEYWORD2
-moveBack KEYWORD2
-rotate KEYWORD2
-rotateLeft KEYWORD2
-rotateRight KEYWORD2
-moveArc KEYWORD2
-moveArcLeft KEYWORD2
-moveArcRight KEYWORD2
+moveForward	KEYWORD2
+moveBack	KEYWORD2
+rotate	KEYWORD2
+rotateLeft	KEYWORD2
+rotateRight	KEYWORD2
+moveArc	KEYWORD2
+moveArcLeft	KEYWORD2
+moveArcRight	KEYWORD2
 
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
-A               LITERAL1
-B               LITERAL1
-AB              LITERAL1
+A	LITERAL1
+B	LITERAL1
+AB	LITERAL1
 
-BOOST           LITERAL1
-POWEREDUP       LITERAL1
+BOOST	LITERAL1
+POWEREDUP	LITERAL1
 
-BLACK           LITERAL1
-PINK            LITERAL1
-PURPLE          LITERAL1
-BLUE            LITERAL1
-LIGHTBLUE       LITERAL1
-CYAN            LITERAL1
-GREEN           LITERAL1
-YELLOW          LITERAL1
-ORANGE          LITERAL1
-RED             LITERAL1
-WHITE           LITERAL1
-NONE            LITERAL1
+BLACK	LITERAL1
+PINK	LITERAL1
+PURPLE	LITERAL1
+BLUE	LITERAL1
+LIGHTBLUE	LITERAL1
+CYAN	LITERAL1
+GREEN	LITERAL1
+YELLOW	LITERAL1
+ORANGE	LITERAL1
+RED	LITERAL1
+WHITE	LITERAL1
+NONE	LITERAL1
