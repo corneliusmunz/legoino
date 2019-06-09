@@ -53,6 +53,11 @@ typedef enum Color
   NONE = 255
 };
 
+static const char *COLOR_STRING[] = {
+    "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white"
+};
+
+
 class Lpf2Hub
 {
 private:
@@ -65,6 +70,7 @@ private:
   int _current = 0;
   // Notification callbacks
   ButtonCallback _buttonCallback = nullptr;
+  
 
 public:
   Lpf2Hub();
@@ -81,6 +87,7 @@ public:
 
   void registerButtonCallback(ButtonCallback buttonCallback);
   void WriteValue(byte command[], int size);
+  static   void WriteValueStatic(byte command[], int size);
   byte MapSpeed(int speed);
   static byte *Int16ToByteArray(int16_t x);
   static byte *Int32ToByteArray(int32_t x);
@@ -89,11 +96,18 @@ public:
   static unsigned short ReadUInt16LE(uint8_t *data, int offset);
   static signed short ReadInt16LE(uint8_t *data, int offset);
   static unsigned int ReadUInt32LE(uint8_t *data, int offset);
-  void parseDeviceInfo(uint8_t *pData);
-  void parsePortMessage(uint8_t *pData);
-  void parseSensorMessage(uint8_t *pData);
-  void parsePortAction(uint8_t *pData);
-  void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
+  static signed int ReadInt32LE(uint8_t *data, int offset);
+  static void parseDeviceInfo(uint8_t *pData);
+  static void parsePortMessage(uint8_t *pData);
+  static void parseSensorMessage(uint8_t *pData);
+  static void parseBoostDistanceAndColor(uint8_t *data);
+  static void parseBoostTachoMotor(uint8_t *data);
+  static void parseBoostTiltSensor(uint8_t *data);
+  static void parsePortAction(uint8_t *pData);
+  static int getModeForDeviceType(DeviceType deviceType);
+  void activatePortDevice(int portNumber, DeviceType deviceType);
+  void deactivatePortDevice(int portNumber, DeviceType deviceType);
+  static void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
   void activateHubUpdates();
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;

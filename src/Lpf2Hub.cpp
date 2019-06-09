@@ -115,6 +115,24 @@ uint32_t Lpf2Hub::ReadUInt32LE(uint8_t *data, int offset = 0)
     return value;
 }
 
+int32_t Lpf2Hub::ReadInt32LE(uint8_t *data, int offset = 0)
+{
+    int32_t value = data[0 + offset] | (int16_t)(data[1 + offset] << 8) | (uint32_t)(data[2 + offset] << 16) | (uint32_t)(data[3 + offset] << 24);
+    return value;
+}
+
+void Lpf2Hub::activatePortDevice(int portNumber, DeviceType deviceType) {
+    int mode = getModeForDeviceType(deviceType);
+    byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
+    WriteValue(activatePortDeviceMessage, 8);
+}
+
+void Lpf2Hub::deactivatePortDevice(int portNumber, DeviceType deviceType) {
+    int mode = getModeForDeviceType(deviceType);
+    byte deactivatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x00}; 
+    WriteValue(deactivatePortDeviceMessage, 8);
+}
+
 /**
  * @brief Parse the incoming characteristic notification for a Device Info Message
  * @param [in] pData The pointer to the received data
@@ -142,18 +160,22 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
         if (pData[5] == 1)
         {
             Serial.println("button PRESSED");
+            /*
             if (_buttonCallback != nullptr)
             {
                 _buttonCallback(true);
             }
+            */
             return;
         }
         else if (pData[5] == 0)
         {
+            /*
             if (_buttonCallback != nullptr)
             {
                 _buttonCallback(false);
             }
+            */
             Serial.println("button RELEASED");
             return;
         }
@@ -198,16 +220,16 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
     else if (pData[3] == 0x05)
     {
         Serial.print("RSSI update: ");
-        _rssi = ReadInt8(pData, 5);
-        Serial.print(_rssi);
+        int rssi = ReadInt8(pData, 5);
+        Serial.print(rssi);
         Serial.println();
         // Battery level reports
     }
     else if (pData[3] == 0x06)
     {
-        _batteryLevel = ReadUInt8(pData, 5);
+        uint8_t batteryLevel = ReadUInt8(pData, 5);
         Serial.print("Battery level: ");
-        Serial.print(_batteryLevel);
+        Serial.print(batteryLevel);
         Serial.print("%");
         Serial.println();
         // Battery type
@@ -240,11 +262,63 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
     Serial.print(port, HEX);
     if (isConnected)
     {
-        Serial.print(" is connected");
+        Serial.println(" is connected");
     }
     else
     {
-        Serial.print(" is not connected");
+        Serial.println(" is not connected");
+    }
+}
+
+void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData) {
+    int tiltX = pData[4] > 65 ? map(pData[4], 255, 190, 0, -90) :map(pData[4], 0, 65, 0, 90);
+    int tiltY = pData[5] > 65 ? map(pData[5], 255, 190, 0, -90) :map(pData[5], 0, 65, 0, 90);
+    Serial.print("x:");
+    Serial.print(tiltX, DEC);
+    Serial.print(" y:");
+    Serial.println(tiltY, DEC);
+}
+
+void Lpf2Hub::parseBoostTachoMotor(uint8_t *pData){
+    int rotation = ReadInt32LE(pData, 4);
+    Serial.print("Tacho motor rotation: ");
+    Serial.println(rotation, DEC);
+}
+
+void Lpf2Hub::parseBoostDistanceAndColor(uint8_t *pData){
+    int partial = pData[7];
+    int color = pData[4];
+    double distance = (double)pData[5];
+    if(partial > 0) {
+        distance += 1.0/partial;
+    }
+    distance = floor(distance * 25.4) - 20.0;
+
+    Serial.print("Distance: ");
+    Serial.print(distance, DEC);
+    Serial.print(" Color: ");
+    if (color > 10) {
+        Serial.println("undefined");
+    } else {
+        Serial.println(COLOR_STRING[color]);
+    }
+}
+
+int Lpf2Hub::getModeForDeviceType(DeviceType deviceType) {
+    switch (deviceType)
+      {
+         case BASIC_MOTOR:
+            return 0x02;
+         case BOOST_TACHO_MOTOR:
+            return 0x02;
+        case BOOST_MOVE_HUB_MOTOR:
+            return 0x02; 
+        case BOOST_DISTANCE:
+            return 0x08;    
+        case BOOST_TILT:
+            return 0x04;      
+         default:
+            return 0x00;
     }
 }
 
@@ -272,30 +346,11 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
         return;
     }
 
-    switch (pData[4])
-    {
-    case 0x01:
-    {
-        Serial.println("Button: UP");
+    //if Boost Distance and Color
+    //parseBoostDistanceAndColor(pData);
+    
+    parseBoostTiltSensor(pData);
 
-        break;
-    }
-    case 0xff:
-    {
-        Serial.println("Button: DOWN");
-        break;
-    }
-    case 0x7f:
-    {
-        Serial.println("Button: STOP");
-        break;
-    }
-    case 0x00:
-    {
-        Serial.println("Button: RELEASED");
-        break;
-    }
-    }
 }
 
 /**
@@ -320,8 +375,8 @@ void Lpf2Hub::notifyCallback(
     size_t length,
     bool isNotify)
 {
-    Serial.print("Notify callback for characteristic ");
-    Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
+    //Serial.print("Notify callback for characteristic ");
+    //Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
     Serial.print("data: ");
 
     for (int i = 0; i < length; i++)
@@ -387,6 +442,7 @@ void Lpf2Hub::registerButtonCallback(ButtonCallback buttonCallback)
     _buttonCallback = buttonCallback;
 }
 
+
 /**
  * @brief Set the color of the HUB LED with predefined colors
  * @param [in] color one of the available hub colors
@@ -446,8 +502,8 @@ void Lpf2Hub::activateHubUpdates()
 {
     // Activate reports
     byte setButtonCommand[3] = {0x01, 0x02, 0x02};
-    WriteValue(setButtonCommand, 3);
-
+    //WriteValue(setButtonCommand, 3);
+/*
     byte setBatteryLevelCommand[3] = {0x01, 0x06, 0x02};
     WriteValue(setBatteryLevelCommand, 3);
 
@@ -468,6 +524,7 @@ void Lpf2Hub::activateHubUpdates()
 
     byte setBatteryType[3] = {0x01, 0x07, 0x02};
     WriteValue(setBatteryType, 3);
+    */
 }
 
 /**
@@ -501,7 +558,7 @@ bool Lpf2Hub::connectHub()
     // register notifications (callback function) for the characteristic
     if (_pRemoteCharacteristic->canNotify())
     {
-        //_pRemoteCharacteristic->registerForNotify(notifyCallback);
+        _pRemoteCharacteristic->registerForNotify(notifyCallback);
     }
 
     activateHubUpdates();
