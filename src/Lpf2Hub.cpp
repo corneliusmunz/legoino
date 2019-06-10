@@ -271,8 +271,8 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
 }
 
 void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData) {
-    int tiltX = pData[4] > 65 ? map(pData[4], 255, 190, 0, -90) :map(pData[4], 0, 65, 0, 90);
-    int tiltY = pData[5] > 65 ? map(pData[5], 255, 190, 0, -90) :map(pData[5], 0, 65, 0, 90);
+    int tiltX = pData[4] > 64 ? map(pData[4], 255, 191, 0, 90) :map(pData[4], 0, 64, 0, -90);
+    int tiltY = pData[5] > 64 ? map(pData[5], 255, 191, 0, -90) :map(pData[5], 0, 64, 0, 90);
     Serial.print("x:");
     Serial.print(tiltX, DEC);
     Serial.print(" y:");
