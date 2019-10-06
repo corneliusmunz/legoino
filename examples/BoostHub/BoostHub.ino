@@ -11,6 +11,8 @@
 
 // create a hub instance
 BoostHub myBoostHub;
+BoostHub::Port _portC = BoostHub::Port::C;
+BoostHub::Port _portD = BoostHub::Port::D;
 
 void setup() {
     Serial.begin(115200);
@@ -55,6 +57,10 @@ void loop() {
     myBoostHub.moveArcLeft(90);
     delay(2000);
     myBoostHub.moveArcRight(90);
+    delay(2000);
+    myBoostHub.setMotorSpeedForDegrees(_portC, 50, 1*360*2);
+    delay(2000);
+    myBoostHub.setMotorSpeedForDegrees(_portD, 50, 1*360*2);
     delay(2000);
     myBoostHub.shutDownHub();
 
