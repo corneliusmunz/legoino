@@ -20,8 +20,7 @@ public:
   enum Port
   {
     A = 0x00,
-    B = 0x01,
-    AB = 0x39
+    B = 0x01
   };
 
   //Constructor

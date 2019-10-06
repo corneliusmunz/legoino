@@ -17,8 +17,8 @@ PoweredUpHub::PoweredUpHub(){};
  */
 void PoweredUpHub::setMotorSpeed(Port port, int speed = 0)
 {
-    byte setMotorCommand[8] = {0x81, port, 0x11, 0x60, 0x00, MapSpeed(speed), 0x00, 0x00}; //train, batmobil
-    WriteValue(setMotorCommand, 8);
+    byte setMotorCommand[8] = {0x81, port, 0x11, 0x51, 0x00, MapSpeed(speed)}; //train, batmobil
+    WriteValue(setMotorCommand, 6);
 }
 
 /**

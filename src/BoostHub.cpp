@@ -82,11 +82,12 @@ void BoostHub::setMotorSpeedForDegrees(Port port, int speed, int32_t degrees)
 void BoostHub::setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees)
 {
     byte *degreeBytes = Int32ToByteArray(degrees);
-    //both ports A and B (0x39)
+    Port port = AB;
+    //both ports A and B 
     //max power 100 (0x64)
     //End state Brake (127)
     //Use acc and dec profile (0x03 last two bits set)
-    byte setMotorCommand[13] = {0x81, 0x39, 0x11, 0x0C, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], MapSpeed(speedLeft), MapSpeed(speedRight), 0x64, 0x7F, 0x03}; //boost with time
+    byte setMotorCommand[13] = {0x81, port, 0x11, 0x0C, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], MapSpeed(speedLeft), MapSpeed(speedRight), 0x64, 0x7F, 0x03}; //boost with time
     WriteValue(setMotorCommand, 13);
 }
 
