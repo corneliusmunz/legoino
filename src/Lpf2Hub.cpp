@@ -8,6 +8,9 @@
 
 #include "Lpf2Hub.h"
 
+Device connectedDevices[10];
+int numberOfConnectedDevices = 0;
+
 /**
  * Scan for BLE servers and find the first one that advertises the service we are looking for.
  */
@@ -121,14 +124,28 @@ int32_t Lpf2Hub::ReadInt32LE(uint8_t *data, int offset = 0)
     return value;
 }
 
-void Lpf2Hub::activatePortDevice(int portNumber, DeviceType deviceType) {
-    int mode = getModeForDeviceType(deviceType);
+void Lpf2Hub::activatePortDevice(byte portNumber){
+    Serial.println("activatePortDevice(portNumber)");
+    byte deviceType = getDeviceTypeForPortNumber(portNumber);
+    activatePortDevice(portNumber, deviceType);
+}
+
+void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType) {
+    Serial.println("activatePortDevice");
+    byte mode = getModeForDeviceType(deviceType);
+    Serial.print("mode for device: ");
+    Serial.println(mode, HEX);
     byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(activatePortDeviceMessage, 8);
 }
 
-void Lpf2Hub::deactivatePortDevice(int portNumber, DeviceType deviceType) {
-    int mode = getModeForDeviceType(deviceType);
+void Lpf2Hub::deactivatePortDevice(byte portNumber){
+    byte deviceType = getDeviceTypeForPortNumber(portNumber);
+    deactivatePortDevice(portNumber, deviceType);
+}
+
+void Lpf2Hub::deactivatePortDevice(byte portNumber, byte deviceType) {
+    byte mode = getModeForDeviceType(deviceType);
     byte deactivatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x00}; 
     WriteValue(deactivatePortDeviceMessage, 8);
 }
@@ -262,7 +279,11 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
     Serial.print(port, HEX);
     if (isConnected)
     {
-        Serial.println(" is connected");
+        Serial.print(" is connected with device ");
+        Serial.println(pData[5], DEC);
+        Device newDevice = {port, pData[5]};
+        connectedDevices[numberOfConnectedDevices] = newDevice;
+        numberOfConnectedDevices++;    
     }
     else
     {
@@ -271,6 +292,7 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
 }
 
 void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData) {
+    Serial.println("parseBoostTiltSensor");
     int tiltX = pData[4] > 64 ? map(pData[4], 255, 191, 0, 90) :map(pData[4], 0, 64, 0, -90);
     int tiltY = pData[5] > 64 ? map(pData[5], 255, 191, 0, -90) :map(pData[5], 0, 64, 0, 90);
     Serial.print("x:");
@@ -280,12 +302,14 @@ void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData) {
 }
 
 void Lpf2Hub::parseBoostTachoMotor(uint8_t *pData){
+    Serial.println("parseBoostTachoMotor");
     int rotation = ReadInt32LE(pData, 4);
     Serial.print("Tacho motor rotation: ");
     Serial.println(rotation, DEC);
 }
 
 void Lpf2Hub::parseBoostDistanceAndColor(uint8_t *pData){
+    Serial.println("parseBoostDistanceAndColor");
     int partial = pData[7];
     int color = pData[4];
     double distance = (double)pData[5];
@@ -304,12 +328,12 @@ void Lpf2Hub::parseBoostDistanceAndColor(uint8_t *pData){
     }
 }
 
-int Lpf2Hub::getModeForDeviceType(DeviceType deviceType) {
+byte Lpf2Hub::getModeForDeviceType(byte deviceType) {
     switch (deviceType)
       {
-         case BASIC_MOTOR:
+        case BASIC_MOTOR:
             return 0x02;
-         case BOOST_TACHO_MOTOR:
+        case BOOST_TACHO_MOTOR:
             return 0x02;
         case BOOST_MOVE_HUB_MOTOR:
             return 0x02; 
@@ -317,7 +341,7 @@ int Lpf2Hub::getModeForDeviceType(DeviceType deviceType) {
             return 0x08;    
         case BOOST_TILT:
             return 0x04;      
-         default:
+        default:
             return 0x00;
     }
 }
@@ -329,6 +353,7 @@ int Lpf2Hub::getModeForDeviceType(DeviceType deviceType) {
 void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 {
     Serial.println("parseSensorMessage");
+    byte deviceType = getDeviceTypeForPortNumber(pData[3]);
     if (pData[3] == 0x3b)
     {
         int current = ReadUInt16LE(pData, 4);
@@ -345,12 +370,18 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
         Serial.println();
         return;
     }
-
-    //if Boost Distance and Color
-    //parseBoostDistanceAndColor(pData);
-    
-    parseBoostTiltSensor(pData);
-
+    else if (deviceType == BOOST_TACHO_MOTOR)
+    {
+        parseBoostTachoMotor(pData);
+    }
+    else if (deviceType == BOOST_DISTANCE)
+    {
+        parseBoostDistanceAndColor(pData);
+    }
+    else if (deviceType == BOOST_TILT)
+    {
+        parseBoostTiltSensor(pData);
+    }        
 }
 
 /**
@@ -432,6 +463,37 @@ void Lpf2Hub::init()
     pBLEScan->setActiveScan(true);
     pBLEScan->start(30);
 }
+
+/**
+ * @brief Register the connected devices to map the ports to the device types
+ * @param [in] connectedDevices[] Array to a device struct of all connected devices
+ */
+void Lpf2Hub::initConnectedDevices(Device devices[], byte deviceNumbers) 
+{
+    numberOfConnectedDevices = deviceNumbers;
+    for (int idx=0; idx<numberOfConnectedDevices; idx++) {
+        connectedDevices[idx] = devices[idx];
+    }
+}
+
+byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber) 
+{
+    Serial.println("getDeviceTypeForPortNumber");
+    Serial.println(numberOfConnectedDevices, DEC);
+    for (int idx = 0; idx < numberOfConnectedDevices; idx++) {
+        Serial.println(idx, DEC);
+        Serial.println(connectedDevices[idx].PortNumber, HEX);
+        Serial.println(connectedDevices[idx].DeviceType, HEX);
+        if (connectedDevices[idx].PortNumber == portNumber) {
+            Serial.print("deviceType: ");
+            Serial.println(connectedDevices[idx].DeviceType, HEX);
+            return connectedDevices[idx].DeviceType;
+        }
+    }
+
+    return UNDEFINED;
+}
+
 
 /**
  * @brief Register the callback function if a button message is received

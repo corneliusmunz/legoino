@@ -28,6 +28,8 @@ void loop() {
     myBoostHub.connectHub();
     if (myBoostHub.isConnected()) {
       Serial.println("Connected to HUB");
+      myBoostHub.activatePortDevice(0x03, 37);
+      myBoostHub.setLedColor(GREEN);
     } else {
       Serial.println("Failed to connect to HUB");
     }
@@ -36,16 +38,21 @@ void loop() {
   // if connected, you can set the name of the hub, the led color and shut it down
   if (myBoostHub.isConnected()) {
 
-    char hubName[] = "myBoostHub";
-    myBoostHub.setHubName(hubName);
-    myBoostHub.setLedColor(GREEN);
-    delay(1000);
-    myBoostHub.setLedColor(RED);
-    delay(1000);
+    //char hubName[] = "myBoostHub";
+    //myBoostHub.setHubName(hubName);
+    
+    delay(100);
 
     // lets do some movements on the boost map
-    myBoostHub.moveForward(1);
-    delay(2000);
+    //myBoostHub.moveForward(1);
+    //delay(2000);
+
+    //delay(1000);
+    //myBoostHub.moveBack(1);
+    //delay(1000);
+    //myBoostHub.deactivatePortDevice(0x03, 37);
+    //delay(1000);
+    /*
     myBoostHub.rotateLeft(90);
     delay(2000);
     myBoostHub.moveForward(1);
@@ -63,6 +70,7 @@ void loop() {
     myBoostHub.setMotorSpeedForDegrees(_portD, 50, 1*360*2);
     delay(2000);
     myBoostHub.shutDownHub();
+    */
 
   }
   

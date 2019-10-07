@@ -26,6 +26,7 @@ typedef enum HubType
 
 typedef enum DeviceType
 {
+  UNDEFINED = 0,
   BASIC_MOTOR = 1,
   TRAIN_MOTOR = 2,
   LED_LIGHTS = 8,
@@ -35,6 +36,12 @@ typedef enum DeviceType
   BOOST_MOVE_HUB_MOTOR = 39,
   BOOST_TILT = 40,
   POWERED_UP_REMOTE_BUTTON = 55
+};
+
+typedef struct Device
+{
+    byte PortNumber;
+    byte DeviceType;
 };
 
 typedef enum Color
@@ -53,7 +60,7 @@ typedef enum Color
   NONE = 255
 };
 
-static const char *COLOR_STRING[] = {
+ static const char *COLOR_STRING[] = {
     "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white"
 };
 
@@ -68,45 +75,58 @@ private:
   int _batteryLevel = 100; //%
   int _voltage = 0;
   int _current = 0;
+  
   // Notification callbacks
   ButtonCallback _buttonCallback = nullptr;
   
 
 public:
+  enum Port
+  {
+    A = 0x37,
+    B = 0x38,
+    AB = 0x39,
+    C = 0x01,
+    D = 0x02,
+    TILT = 0x3A
+  };
+
   Lpf2Hub();
   void init();
+  void initConnectedDevices(Device devices[], byte deviceNumbers);
   bool connectHub();
   bool isConnected();
   bool isConnecting();
 
   void setHubName(char name[]);
   void shutDownHub();
-
+  static byte getDeviceTypeForPortNumber(byte portNumber);
   void setLedColor(Color color);
   void setLedRGBColor(char red, char green, char blue);
 
   void registerButtonCallback(ButtonCallback buttonCallback);
   void WriteValue(byte command[], int size);
-  static   void WriteValueStatic(byte command[], int size);
-  byte MapSpeed(int speed);
-  static byte *Int16ToByteArray(int16_t x);
-  static byte *Int32ToByteArray(int32_t x);
-  static unsigned char ReadUInt8(uint8_t *data, int offset);
-  static signed char ReadInt8(uint8_t *data, int offset);
-  static unsigned short ReadUInt16LE(uint8_t *data, int offset);
-  static signed short ReadInt16LE(uint8_t *data, int offset);
-  static unsigned int ReadUInt32LE(uint8_t *data, int offset);
-  static signed int ReadInt32LE(uint8_t *data, int offset);
-  static void parseDeviceInfo(uint8_t *pData);
-  static void parsePortMessage(uint8_t *pData);
-  static void parseSensorMessage(uint8_t *pData);
-  static void parseBoostDistanceAndColor(uint8_t *data);
-  static void parseBoostTachoMotor(uint8_t *data);
-  static void parseBoostTiltSensor(uint8_t *data);
-  static void parsePortAction(uint8_t *pData);
-  static int getModeForDeviceType(DeviceType deviceType);
-  void activatePortDevice(int portNumber, DeviceType deviceType);
-  void deactivatePortDevice(int portNumber, DeviceType deviceType);
+  static byte MapSpeed(int speed);
+  static  byte *Int16ToByteArray(int16_t x);
+  static  byte *Int32ToByteArray(int32_t x);
+  static  unsigned char ReadUInt8(uint8_t *data, int offset);
+  static  signed char ReadInt8(uint8_t *data, int offset);
+  static  unsigned short ReadUInt16LE(uint8_t *data, int offset);
+  static  signed short ReadInt16LE(uint8_t *data, int offset);
+  static  unsigned int ReadUInt32LE(uint8_t *data, int offset);
+  static  signed int ReadInt32LE(uint8_t *data, int offset);
+   static void parseDeviceInfo(uint8_t *pData);
+   static void parsePortMessage(uint8_t *pData);
+  static  void parseSensorMessage(uint8_t *pData);
+  static  void parseBoostDistanceAndColor(uint8_t *data);
+  static  void parseBoostTachoMotor(uint8_t *data);
+  static  void parseBoostTiltSensor(uint8_t *data);
+  static  void parsePortAction(uint8_t *pData);
+  static  byte getModeForDeviceType(byte deviceType);
+  void activatePortDevice(byte portNumber, byte deviceType);
+  void activatePortDevice(byte portNumber);
+  void deactivatePortDevice(byte portNumber, byte deviceType);
+  void deactivatePortDevice(byte portNumber);
   static void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
   void activateHubUpdates();
   BLEUUID _bleUuid;
