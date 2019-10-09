@@ -28,7 +28,8 @@ void loop() {
     myBoostHub.connectHub();
     if (myBoostHub.isConnected()) {
       Serial.println("Connected to HUB");
-      myBoostHub.activatePortDevice(0x03, 37);
+      myBoostHub.activatePortDevice(_portC, 37);
+      myBoostHub.activatePortDevice(_portD, 38);
       myBoostHub.setLedColor(GREEN);
     } else {
       Serial.println("Failed to connect to HUB");

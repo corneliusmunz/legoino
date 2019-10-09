@@ -287,8 +287,19 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
     }
     else
     {
-        Serial.println(" is not connected");
-    }
+        Serial.println(" is disconnected");
+        bool hasReachedRemovedIndex = false;
+        for (int i = 0; i < numberOfConnectedDevices; i++) {
+            if (hasReachedRemovedIndex) {
+                connectedDevices[i-1] = connectedDevices[i];
+            }
+            if (!hasReachedRemovedIndex && connectedDevices[i].PortNumber == port) 
+            {
+                hasReachedRemovedIndex = true;
+            }
+        }
+
+        numberOfConnectedDevices--;    }
 }
 
 void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData) {
