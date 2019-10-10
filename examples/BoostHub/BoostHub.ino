@@ -28,9 +28,6 @@ void loop() {
     myBoostHub.connectHub();
     if (myBoostHub.isConnected()) {
       Serial.println("Connected to HUB");
-      myBoostHub.activatePortDevice(_portC, 37);
-      myBoostHub.activatePortDevice(_portD, 38);
-      myBoostHub.setLedColor(GREEN);
     } else {
       Serial.println("Failed to connect to HUB");
     }
@@ -39,54 +36,16 @@ void loop() {
   // if connected, you can set the name of the hub, the led color and shut it down
   if (myBoostHub.isConnected()) {
 
-    //char hubName[] = "myBoostHub";
-    //myBoostHub.setHubName(hubName);
-    
-    delay(100);
-
-    // int rotation = myBoostHub.getRotation();
-    // myBoostHub.setLedHSVColor(abs(rotation), 1.0, 1.0);
-
-    // int rotation = myBoostHub.getRotation()%360;
-    // if (rotation >= 0 && rotation < 30) {
-    //   myBoostHub.setLedColor(PINK);
-    // } else if (rotation >= 30 && rotation < 30){
-    //   myBoostHub.setLedColor(PURPLE);
-    // }else if (rotation >= 60 && rotation < 90){
-    //   myBoostHub.setLedColor(BLUE);
-    // }else if (rotation >= 90 && rotation < 120){
-    //   myBoostHub.setLedColor(LIGHTBLUE);
-    // }else if (rotation >= 120 && rotation < 150){
-    //   myBoostHub.setLedColor(GREEN);
-    // }else if (rotation >= 150 && rotation < 180){
-    //   myBoostHub.setLedColor(ORANGE);
-    // }else if (rotation >= 180 && rotation < 210){
-    //   myBoostHub.setLedColor(RED);
-    // }else if (rotation >= 210 && rotation < 240){
-    //   myBoostHub.setLedColor(WHITE);
-    // }
-    
-    double distance = myBoostHub.getDistance();
-    if (distance < 40.0) {
-      myBoostHub.setLedColor(RED);
-    } else if (distance < 80.0 && distance >=40.0){
-      myBoostHub.setLedColor(ORANGE);
-    }else {
-      myBoostHub.setLedColor(GREEN);
-    } 
-
-    
+    char hubName[] = "myBoostHub";
+    myBoostHub.setHubName(hubName);
+    myBoostHub.setLedColor(GREEN);
+    delay(1000);
+    myBoostHub.setLedColor(RED);
+    delay(1000);
 
     // lets do some movements on the boost map
-    //myBoostHub.moveForward(1);
-    //delay(2000);
-
-    //delay(1000);
-    //myBoostHub.moveBack(1);
-    //delay(1000);
-    //myBoostHub.deactivatePortDevice(0x03, 37);
-    //delay(1000);
-    /*
+    myBoostHub.moveForward(1);
+    delay(2000);
     myBoostHub.rotateLeft(90);
     delay(2000);
     myBoostHub.moveForward(1);
@@ -104,7 +63,6 @@ void loop() {
     myBoostHub.setMotorSpeedForDegrees(_portD, 50, 1*360*2);
     delay(2000);
     myBoostHub.shutDownHub();
-    */
 
   }
   
