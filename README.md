@@ -13,6 +13,17 @@ Simple Boost movement example (just click the image to see the video)
 
 [![Legoino BoostHub simple movements example](http://img.youtube.com/vi/VgWObhyUmi0/0.jpg)](http://www.youtube.com/watch?v=VgWObhyUmi0 "Legoino BoostHub simple movements example")
 
+Simple example to read in the color value and set the LED color of the hub dependently
+[![Legoino BoostHub simple color sensor example](https://youtu.be/_xCd9Owy1nk/0.jpg)](https://youtu.be/_xCd9Owy1nk "Legoino BoostHub simple color sensor example")
+
+
+Simple example to read in the rotation angle of the boost tacho motor and set the LED color of the hub (mapping angle to rainbow color)
+[![Legoino BoostHub simple rotation sensor example](https://youtu.be/c3DHpX55uN0/0.jpg)](https://youtu.be/c3DHpX55uN0 "Legoino BoostHub simple rotation sensor example")
+
+Simple example to read in the distance of the distance/color sensor and set the LED color of the hub dependently
+[![Legoino BoostHub simple distance sensor example](https://youtu.be/TOAQtGGjZ6c/0.jpg)](https://youtu.be/TOAQtGGjZ6c "Legoino BoostHub simple distance sensor example")
+
+
 Up to now the Library is only teseted for a Powered Up Train controllers and Boost controllers. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. Up to now the notifications of the hub and the reading of the sensors are not supported. But this feature will come in the next release.
 
 # Examples

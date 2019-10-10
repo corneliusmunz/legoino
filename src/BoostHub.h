@@ -32,6 +32,10 @@ public:
   //Constructor
   BoostHub();
 
+  //Basic Hub methods
+  void requestSensorValue();
+  void setInputFormatSingle();
+
   //Basic Motor methods
   void setAccelerationProfile(Port port, int16_t time, int8_t profileNumber);
   void setDecelerationProfile(Port port, int16_t time, int8_t profileNumber);
