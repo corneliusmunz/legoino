@@ -66,18 +66,14 @@ void loop() {
     //   myBoostHub.setLedColor(WHITE);
     // }
     
-    int color = myBoostHub.getColor();
-    if (color == 3) {
-      myBoostHub.setLedColor(BLUE);
-    } else if (color == 6){
-      myBoostHub.setLedColor(GREEN);
-    }else if (color == 9){
+    double distance = myBoostHub.getDistance();
+    if (distance < 40.0) {
       myBoostHub.setLedColor(RED);
-    } else if (color == 10){
-      myBoostHub.setLedColor(WHITE);
-    } else {
-      myBoostHub.setLedColor(NONE);
-    }
+    } else if (distance < 80.0 && distance >=40.0){
+      myBoostHub.setLedColor(ORANGE);
+    }else {
+      myBoostHub.setLedColor(GREEN);
+    } 
 
     
 
