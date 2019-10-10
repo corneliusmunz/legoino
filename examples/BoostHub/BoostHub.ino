@@ -44,8 +44,9 @@ void loop() {
     
     delay(100);
 
-    int rotation = myBoostHub.getRotation();
-    myBoostHub.setLedHSVColor(abs(rotation), 1.0, 1.0);
+    // int rotation = myBoostHub.getRotation();
+    // myBoostHub.setLedHSVColor(abs(rotation), 1.0, 1.0);
+
     // int rotation = myBoostHub.getRotation()%360;
     // if (rotation >= 0 && rotation < 30) {
     //   myBoostHub.setLedColor(PINK);
@@ -65,14 +66,18 @@ void loop() {
     //   myBoostHub.setLedColor(WHITE);
     // }
     
-    //     int color = myBoostHub.getColor();
-    // if (color == 3) {
-    //   myBoostHub.setLedColor(BLUE);
-    // } else if (color == 6){
-    //   myBoostHub.setLedColor(GREEN);
-    // }else if (color == 9){
-    //   myBoostHub.setLedColor(RED);
-    // }
+    int color = myBoostHub.getColor();
+    if (color == 3) {
+      myBoostHub.setLedColor(BLUE);
+    } else if (color == 6){
+      myBoostHub.setLedColor(GREEN);
+    }else if (color == 9){
+      myBoostHub.setLedColor(RED);
+    } else if (color == 10){
+      myBoostHub.setLedColor(WHITE);
+    } else {
+      myBoostHub.setLedColor(NONE);
+    }
 
     
 
