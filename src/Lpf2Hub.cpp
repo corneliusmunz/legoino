@@ -10,6 +10,9 @@
 
 Device connectedDevices[10];
 int numberOfConnectedDevices = 0;
+int rotation;
+double distance;
+int color;
 
 /**
  * Scan for BLE servers and find the first one that advertises the service we are looking for.
@@ -314,7 +317,7 @@ void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData) {
 
 void Lpf2Hub::parseBoostTachoMotor(uint8_t *pData){
     Serial.println("parseBoostTachoMotor");
-    int rotation = ReadInt32LE(pData, 4);
+    rotation = ReadInt32LE(pData, 4);
     Serial.print("Tacho motor rotation: ");
     Serial.println(rotation, DEC);
 }
@@ -322,8 +325,8 @@ void Lpf2Hub::parseBoostTachoMotor(uint8_t *pData){
 void Lpf2Hub::parseBoostDistanceAndColor(uint8_t *pData){
     Serial.println("parseBoostDistanceAndColor");
     int partial = pData[7];
-    int color = pData[4];
-    double distance = (double)pData[5];
+    color = pData[4];
+    distance = (double)pData[5];
     if(partial > 0) {
         distance += 1.0/partial;
     }
@@ -505,6 +508,26 @@ byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
     return UNDEFINED;
 }
 
+// Device Lpf2Hub::getDeviceForPortNumber(byte portNumber) 
+// {
+//     for (int idx = 0; idx < numberOfConnectedDevices; idx++) {
+//         if (connectedDevices[idx].PortNumber == portNumber) {
+//             return connectedDevices[idx];
+//         }
+//     }
+//     return UNDEFINED;
+// }
+
+// Device Lpf2Hub::getDeviceForDeviceType(byte deviceType) 
+// {
+//     for (int idx = 0; idx < numberOfConnectedDevices; idx++) {
+//         if (connectedDevices[idx].DeviceType == deviceType) {
+//             return connectedDevices[idx];
+//         }
+//     }
+//     return UNDEFINED;
+// }
+
 
 /**
  * @brief Register the callback function if a button message is received
@@ -540,6 +563,47 @@ void Lpf2Hub::setLedRGBColor(char red, char green, char blue)
     WriteValue(setRGBMode, 8);
     byte setRGBColor[8] = {0x81, 0x32, 0x11, 0x51, 0x01, red, green, blue};
     WriteValue(setRGBColor, 8);
+}
+
+/**
+ * @brief Set the color of the HUB LED with HSV values 
+ * @param [in] hue 0..360 
+ * @param [in] saturation 0..1 
+ * @param [in] value 0..1
+ */
+void Lpf2Hub::setLedHSVColor(int hue, double saturation, double value)
+{
+    hue = hue%360;
+    double huePart = hue/60.0;
+    double fract = huePart - floor(huePart);
+
+    double p = value*(1. - saturation);
+    double q = value*(1. - saturation*fract);
+    double t = value*(1. - saturation*(1. - fract));
+
+    if (huePart >= 0.0 && huePart < 1.0) {
+        setLedRGBColor((char)(value*255), (char)(t*255), (char)(p*255));
+        //RGB = (rgb){.r = V, .g = T, .b = P};
+    } else if (huePart >= 1.0 && huePart < 2.0) {
+        setLedRGBColor((char)(q*255), (char)(value*255), (char)(p*255));
+        //RGB = (rgb){.r = Q, .g = V, .b = P};
+    } else if (huePart >= 2.0 && huePart < 3.0) {
+        setLedRGBColor((char)(p*255), (char)(value*255), (char)(t*255));
+        //RGB = (rgb){.r = P, .g = V, .b = T};
+    } else if (huePart >= 3.0 && huePart < 4.0) {
+        setLedRGBColor((char)(p*255), (char)(q*255), (char)(value*255));
+        //RGB = (rgb){.r = P, .g = Q, .b = V};
+    } else if (huePart >= 4.0 && huePart < 5.0) {
+        setLedRGBColor((char)(t*255), (char)(p*255), (char)(value*255));
+        //RGB = (rgb){.r = T, .g = P, .b = V};    
+    } else if (huePart >= 4.0 && huePart < 5.0) {
+        setLedRGBColor((char)(value*255), (char)(p*255), (char)(q*255));
+        //RGB = (rgb){.r = V, .g = P, .b = Q};
+    } else {
+        setLedRGBColor(0, 0, 0);
+        //RGB = (rgb){.r = 0., .g = 0., .b = 0.};
+    }
+
 }
 
 /**
@@ -657,4 +721,16 @@ bool Lpf2Hub::isConnecting()
 bool Lpf2Hub::isConnected()
 {
     return _isConnected;
+}
+
+int Lpf2Hub::getColor() {
+    return color;
+}
+
+double Lpf2Hub::getDistance() {
+    return distance;
+}
+
+int Lpf2Hub::getRotation() {
+    return rotation;
 }

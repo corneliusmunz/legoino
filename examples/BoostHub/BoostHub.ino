@@ -44,6 +44,38 @@ void loop() {
     
     delay(100);
 
+    int rotation = myBoostHub.getRotation();
+    myBoostHub.setLedHSVColor(abs(rotation), 1.0, 1.0);
+    // int rotation = myBoostHub.getRotation()%360;
+    // if (rotation >= 0 && rotation < 30) {
+    //   myBoostHub.setLedColor(PINK);
+    // } else if (rotation >= 30 && rotation < 30){
+    //   myBoostHub.setLedColor(PURPLE);
+    // }else if (rotation >= 60 && rotation < 90){
+    //   myBoostHub.setLedColor(BLUE);
+    // }else if (rotation >= 90 && rotation < 120){
+    //   myBoostHub.setLedColor(LIGHTBLUE);
+    // }else if (rotation >= 120 && rotation < 150){
+    //   myBoostHub.setLedColor(GREEN);
+    // }else if (rotation >= 150 && rotation < 180){
+    //   myBoostHub.setLedColor(ORANGE);
+    // }else if (rotation >= 180 && rotation < 210){
+    //   myBoostHub.setLedColor(RED);
+    // }else if (rotation >= 210 && rotation < 240){
+    //   myBoostHub.setLedColor(WHITE);
+    // }
+    
+    //     int color = myBoostHub.getColor();
+    // if (color == 3) {
+    //   myBoostHub.setLedColor(BLUE);
+    // } else if (color == 6){
+    //   myBoostHub.setLedColor(GREEN);
+    // }else if (color == 9){
+    //   myBoostHub.setLedColor(RED);
+    // }
+
+    
+
     // lets do some movements on the boost map
     //myBoostHub.moveForward(1);
     //delay(2000);

@@ -103,6 +103,7 @@ public:
   static byte getDeviceTypeForPortNumber(byte portNumber);
   void setLedColor(Color color);
   void setLedRGBColor(char red, char green, char blue);
+  void setLedHSVColor(int hue, double saturation, double value);
 
   void registerButtonCallback(ButtonCallback buttonCallback);
   void WriteValue(byte command[], int size);
@@ -129,6 +130,9 @@ public:
   void deactivatePortDevice(byte portNumber);
   static void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
   void activateHubUpdates();
+  int getRotation();
+  double getDistance();
+  int getColor();
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;
   BLEAddress *_pServerAddress;
