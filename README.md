@@ -14,13 +14,16 @@ Simple Boost movement example (just click the image to see the video)
 [![Legoino BoostHub simple movements example](http://img.youtube.com/vi/VgWObhyUmi0/mqdefault.jpg)](http://www.youtube.com/watch?v=VgWObhyUmi0 "Legoino BoostHub simple movements example")
 
 Simple example to read in the color value and set the LED color of the hub dependently (just click the image to see the video)
+
 [![Legoino BoostHub simple color sensor example](https://img.youtube.com/vi/_xCd9Owy1nk/mqdefault.jpg)](https://youtu.be/_xCd9Owy1nk "Legoino BoostHub simple color sensor example")
 
 
 Simple example to read in the rotation angle of the boost tacho motor and set the LED color of the hub. It is a mapping of the angle to rainbow color (just click the image to see the video)
+
 [![Legoino BoostHub simple rotation sensor example](https://img.youtube.com/vi/c3DHpX55uN0/mqdefault.jpg)](https://youtu.be/c3DHpX55uN0 "Legoino BoostHub simple rotation sensor example")
 
 Simple example to read in the distance of the distance/color sensor and set the LED color of the hub dependently (just click the image to see the video)
+
 [![Legoino BoostHub simple distance sensor example](https://img.youtube.com/vi/TOAQtGGjZ6c/mqdefault.jpg)](https://youtu.be/TOAQtGGjZ6c "Legoino BoostHub simple distance sensor example")
 
 
