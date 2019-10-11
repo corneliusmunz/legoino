@@ -56,7 +56,8 @@ void loop() {
       myBoostHub.setLedColor(ORANGE);
     }else {
       myBoostHub.setLedColor(GREEN);
-
+    }
+    
   }
   
 } // End of loop

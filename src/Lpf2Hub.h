@@ -15,6 +15,16 @@
 #define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
 
+//#define LOGGING_ENABLED
+
+#ifdef LOGGING_ENABLED
+  #define LOGLINE(...) Serial.println(__VA_ARGS__)
+  #define LOG(...) Serial.print(__VA_ARGS__)
+#else
+  #define LOGLINE(...) 
+  #define LOG(...)
+#endif
+
 typedef void (*ButtonCallback)(bool isPressed);
 
 typedef enum HubType
@@ -121,6 +131,7 @@ public:
   static  void parseSensorMessage(uint8_t *pData);
   static  void parseBoostDistanceAndColor(uint8_t *data);
   static  void parseBoostTachoMotor(uint8_t *data);
+  static  void parseBoostHubMotor(uint8_t *pData);
   static  void parseBoostTiltSensor(uint8_t *data);
   static  void parsePortAction(uint8_t *pData);
   static  byte getModeForDeviceType(byte deviceType);
@@ -130,9 +141,23 @@ public:
   void deactivatePortDevice(byte portNumber);
   static void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
   void activateHubUpdates();
-  int getRotation();
+  int getTachoMotorRotation();
   double getDistance();
   int getColor();
+  int getRssi();
+int getBatteryLevel();
+int getBoostHubMotorRotation();
+int getTiltX(); 
+int getTiltY();
+int getFirmwareVersionBuild();
+int getFirmwareVersionBugfix();
+int getFirmwareVersionMajor();
+int getFirmwareVersionMinor();
+int getHardwareVersionBuild();
+int getHardwareVersionBugfix();
+int getHardwareVersionMajor();
+int getHardwareVersionMinor();
+bool isButtonPressed();
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;
   BLEAddress *_pServerAddress;

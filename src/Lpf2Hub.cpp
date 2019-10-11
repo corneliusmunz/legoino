@@ -10,9 +10,33 @@
 
 Device connectedDevices[10];
 int numberOfConnectedDevices = 0;
-int rotation;
-double distance;
-int color;
+
+// Hub orientation
+int Lpf2HubTiltX;
+int Lpf2HubTiltY;
+
+// Boost tacho motor
+int Lpf2HubTachoMotorRotation;
+
+// Distance/Color sensor
+double Lpf2HubDistance;
+int Lpf2HubColor;
+
+// Hub information values
+int Lpf2HubRssi;
+uint8_t Lpf2HubBatteryLevel;
+int Lpf2HubHubMotorRotation;
+bool Lpf2HubHubButtonPressed;
+
+int Lpf2HubFirmwareVersionBuild;
+int Lpf2HubFirmwareVersionBugfix;
+int Lpf2HubFirmwareVersionMajor;
+int Lpf2HubFirmwareVersionMinor;
+
+int Lpf2HubHardwareVersionBuild;
+int Lpf2HubHardwareVersionBugfix;
+int Lpf2HubHardwareVersionMajor;
+int Lpf2HubHardwareVersionMinor;
 
 /**
  * Scan for BLE servers and find the first one that advertises the service we are looking for.
@@ -128,16 +152,16 @@ int32_t Lpf2Hub::ReadInt32LE(uint8_t *data, int offset = 0)
 }
 
 void Lpf2Hub::activatePortDevice(byte portNumber){
-    Serial.println("activatePortDevice(portNumber)");
+    LOGLINE("activatePortDevice(portNumber)");
     byte deviceType = getDeviceTypeForPortNumber(portNumber);
     activatePortDevice(portNumber, deviceType);
 }
 
 void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType) {
-    Serial.println("activatePortDevice");
+    LOGLINE("activatePortDevice");
     byte mode = getModeForDeviceType(deviceType);
-    Serial.print("mode for device: ");
-    Serial.println(mode, HEX);
+    LOG("mode for device: ");
+    LOGLINE(mode, HEX);
     byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(activatePortDeviceMessage, 8);
 }
@@ -159,7 +183,7 @@ void Lpf2Hub::deactivatePortDevice(byte portNumber, byte deviceType) {
  */
 void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
 {
-    Serial.println("parseDeviceInfo");
+    LOGLINE("parseDeviceInfo");
     // Advertising name
     if (pData[3] == 0x01)
     {
@@ -170,102 +194,95 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
             name[i] = pData[5 + i];
         }
         name[charArrayLength + 1] = 0;
-        Serial.print("device name: ");
-        Serial.print(name);
-        Serial.println();
+        LOG("device name: ");
+        LOG(name);
+        LOGLINE();
     }
     // Button press reports
     else if (pData[3] == 0x02)
     {
         if (pData[5] == 1)
-        {
-            Serial.println("button PRESSED");
-            /*
-            if (_buttonCallback != nullptr)
-            {
-                _buttonCallback(true);
-            }
-            */
+        {            
+            // if (_buttonCallback != nullptr)
+            // {
+            //     _buttonCallback(true);
+            // }
+            LOGLINE("button PRESSED");
+            Lpf2HubHubButtonPressed = true;
             return;
         }
         else if (pData[5] == 0)
         {
-            /*
-            if (_buttonCallback != nullptr)
-            {
-                _buttonCallback(false);
-            }
-            */
-            Serial.println("button RELEASED");
+            // if (_buttonCallback != nullptr)
+            // {
+            //     _buttonCallback(false);
+            // }
+            LOGLINE("button RELEASED");
+            Lpf2HubHubButtonPressed = false;
             return;
         }
-        // Firmware version
     }
-    else if (pData[3] == 0x03)
+    else if (pData[3] == 0x03) // Firmware version
     {
-        int build = ReadUInt16LE(pData, 5);
-        int bugfix = ReadUInt8(pData, 7);
-        int major = ReadUInt8(pData, 8) >> 4;
-        int minor = ReadUInt8(pData, 8) & 0xf;
+        Lpf2HubFirmwareVersionBuild = ReadUInt16LE(pData, 5);
+        Lpf2HubFirmwareVersionBugfix = ReadUInt8(pData, 7);
+        Lpf2HubFirmwareVersionMajor = ReadUInt8(pData, 8) >> 4;
+        Lpf2HubFirmwareVersionMinor = ReadUInt8(pData, 8) & 0xf;
 
-        Serial.print("Firmware version major:");
-        Serial.print(major);
-        Serial.print(" minor:");
-        Serial.print(minor);
-        Serial.print(" bugfix:");
-        Serial.print(bugfix);
-        Serial.print(" build:");
-        Serial.print(build);
-        Serial.println();
-        // Hardware version
+        LOG("Firmware version major:");
+        LOG(Lpf2HubFirmwareVersionMajor);
+        LOG(" minor:");
+        LOG(Lpf2HubFirmwareVersionMinor);
+        LOG(" bugfix:");
+        LOG(Lpf2HubFirmwareVersionBugfix);
+        LOG(" build:");
+        LOG(Lpf2HubFirmwareVersionBuild);
+        LOGLINE();   
     }
-    else if (pData[3] == 0x04)
+    else if (pData[3] == 0x04) // Hardware version
     {
-        int build = ReadUInt16LE(pData, 5);
-        int bugfix = ReadUInt8(pData, 7);
-        int major = ReadUInt8(pData, 8) >> 4;
-        int minor = ReadUInt8(pData, 8) & 0xf;
+        Lpf2HubHardwareVersionBuild = ReadUInt16LE(pData, 5);
+        Lpf2HubHardwareVersionBugfix = ReadUInt8(pData, 7);
+        Lpf2HubHardwareVersionMajor = ReadUInt8(pData, 8) >> 4;
+        Lpf2HubHardwareVersionMinor = ReadUInt8(pData, 8) & 0xf;
 
-        Serial.print("Hardware version major:");
-        Serial.print(major);
-        Serial.print(" minor:");
-        Serial.print(minor);
-        Serial.print(" bugfix:");
-        Serial.print(bugfix);
-        Serial.print(" build:");
-        Serial.print(build);
-        Serial.println();
-        // RSSI
+        LOG("Hardware version major:");
+        LOG(Lpf2HubHardwareVersionMajor);
+        LOG(" minor:");
+        LOG(Lpf2HubHardwareVersionMinor);
+        LOG(" bugfix:");
+        LOG(Lpf2HubHardwareVersionBugfix);
+        LOG(" build:");
+        LOG(Lpf2HubHardwareVersionBuild);
+        LOGLINE();
     }
-    else if (pData[3] == 0x05)
+    else if (pData[3] == 0x05) // RSSI
     {
-        Serial.print("RSSI update: ");
-        int rssi = ReadInt8(pData, 5);
-        Serial.print(rssi);
-        Serial.println();
-        // Battery level reports
+        LOG("RSSI update: ");
+        Lpf2HubRssi = ReadInt8(pData, 5);
+        LOG(Lpf2HubRssi);
+        LOGLINE();
     }
-    else if (pData[3] == 0x06)
+    else if (pData[3] == 0x06) // Battery level reports
     {
-        uint8_t batteryLevel = ReadUInt8(pData, 5);
-        Serial.print("Battery level: ");
-        Serial.print(batteryLevel);
-        Serial.print("%");
-        Serial.println();
-        // Battery type
+        Lpf2HubBatteryLevel = ReadUInt8(pData, 5);
+        LOG("Battery level: ");
+        LOG(Lpf2HubBatteryLevel);
+        LOG("%");
+        LOGLINE();
     }
-    else if (pData[3] == 0x07)
+    else if (pData[3] == 0x07) // Battery type
     {
-        Serial.print("Battery type: ");
+        LOG("Battery type: ");
         if (pData[5] == 0x00)
         {
-            Serial.print("Normal");
+            LOG("Normal");
         }
         else if (pData[5] == 0x01)
         {
-            Serial.print("Recharchable");
+            LOG("Recharchable");
         }
-        Serial.println();
+        LOGLINE();
     }
 }
 
@@ -275,22 +292,22 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
  */
 void Lpf2Hub::parsePortMessage(uint8_t *pData)
 {
-    Serial.println("parsePortMessage");
+    LOGLINE("parsePortMessage");
     byte port = pData[3];
     bool isConnected = (pData[4] == 1 || pData[4] == 2) ? true : false;
-    Serial.print("Port ");
-    Serial.print(port, HEX);
+    LOG("Port ");
+    LOG(port, HEX);
     if (isConnected)
     {
-        Serial.print(" is connected with device ");
-        Serial.println(pData[5], DEC);
+        LOG(" is connected with device ");
+        LOGLINE(pData[5], DEC);
         Device newDevice = {port, pData[5]};
         connectedDevices[numberOfConnectedDevices] = newDevice;
         numberOfConnectedDevices++;    
     }
     else
     {
-        Serial.println(" is disconnected");
+        LOGLINE(" is disconnected");
         bool hasReachedRemovedIndex = false;
         for (int i = 0; i < numberOfConnectedDevices; i++) {
             if (hasReachedRemovedIndex) {
@@ -306,39 +323,46 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
 }
 
 void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData) {
-    Serial.println("parseBoostTiltSensor");
-    int tiltX = pData[4] > 64 ? map(pData[4], 255, 191, 0, 90) :map(pData[4], 0, 64, 0, -90);
-    int tiltY = pData[5] > 64 ? map(pData[5], 255, 191, 0, -90) :map(pData[5], 0, 64, 0, 90);
-    Serial.print("x:");
-    Serial.print(tiltX, DEC);
-    Serial.print(" y:");
-    Serial.println(tiltY, DEC);
+    LOGLINE("parseBoostTiltSensor");
+    Lpf2HubTiltX = pData[4] > 64 ? map(pData[4], 255, 191, 0, 90) :map(pData[4], 0, 64, 0, -90);
+    Lpf2HubTiltY = pData[5] > 64 ? map(pData[5], 255, 191, 0, -90) :map(pData[5], 0, 64, 0, 90);
+    LOG("x:");
+    LOG(Lpf2HubTiltX, DEC);
+    LOG(" y:");
+    LOGLINE(Lpf2HubTiltY, DEC);
 }
 
 void Lpf2Hub::parseBoostTachoMotor(uint8_t *pData){
-    Serial.println("parseBoostTachoMotor");
-    rotation = ReadInt32LE(pData, 4);
-    Serial.print("Tacho motor rotation: ");
-    Serial.println(rotation, DEC);
+    LOGLINE("parseBoostTachoMotor");
+    Lpf2HubTachoMotorRotation = ReadInt32LE(pData, 4);
+    LOG("Tacho motor rotation: ");
+    LOGLINE(Lpf2HubTachoMotorRotation, DEC);
+}
+
+void Lpf2Hub::parseBoostHubMotor(uint8_t *pData){
+    LOGLINE("parseBoostHubMotor");
+    Lpf2HubHubMotorRotation = ReadInt32LE(pData, 4);
+    LOG("BoostHub motor rotation: ");
+    LOGLINE(Lpf2HubHubMotorRotation, DEC);
 }
 
 void Lpf2Hub::parseBoostDistanceAndColor(uint8_t *pData){
-    Serial.println("parseBoostDistanceAndColor");
+    LOGLINE("parseBoostDistanceAndColor");
     int partial = pData[7];
-    color = pData[4];
-    distance = (double)pData[5];
+    Lpf2HubColor = pData[4];
+    Lpf2HubDistance = (double)pData[5];
     if(partial > 0) {
-        distance += 1.0/partial;
+        Lpf2HubDistance += 1.0/partial;
     }
-    distance = floor(distance * 25.4) - 20.0;
+    Lpf2HubDistance = floor(Lpf2HubDistance * 25.4) - 20.0;
 
-    Serial.print("Distance: ");
-    Serial.print(distance, DEC);
-    Serial.print(" Color: ");
-    if (color > 10) {
-        Serial.println("undefined");
+    LOG("Distance: ");
+    LOG(Lpf2HubDistance, DEC);
+    LOG(" Color: ");
+    if (Lpf2HubColor > 10) {
+        LOGLINE("undefined");
     } else {
-        Serial.println(COLOR_STRING[color]);
+        LOGLINE(COLOR_STRING[Lpf2HubColor]);
     }
 }
 
@@ -366,22 +390,22 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType) {
  */
 void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 {
-    Serial.println("parseSensorMessage");
+    LOGLINE("parseSensorMessage");
     byte deviceType = getDeviceTypeForPortNumber(pData[3]);
     if (pData[3] == 0x3b)
     {
         int current = ReadUInt16LE(pData, 4);
-        Serial.print("Current of Sensor value: ");
-        Serial.print(current);
-        Serial.println();
+        LOG("Current of Sensor value: ");
+        LOG(current);
+        LOGLINE();
         return;
     }
     else if (pData[3] == 0x3c)
     {
         int voltage = ReadUInt16LE(pData, 4);
-        Serial.print("Voltage of Sensor value: ");
-        Serial.print(voltage);
-        Serial.println();
+        LOG("Voltage of Sensor value: ");
+        LOG(voltage);
+        LOGLINE();
         return;
     }
     else if (deviceType == BOOST_TACHO_MOTOR)
@@ -404,7 +428,7 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
  */
 void Lpf2Hub::parsePortAction(uint8_t *pData)
 {
-    Serial.println("parsePortAction");
+    LOGLINE("parsePortAction");
 }
 
 /**
@@ -420,16 +444,16 @@ void Lpf2Hub::notifyCallback(
     size_t length,
     bool isNotify)
 {
-    //Serial.print("Notify callback for characteristic ");
-    //Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
-    Serial.print("data: ");
+    //LOG("Notify callback for characteristic ");
+    //LOG(pBLERemoteCharacteristic->getUUID().toString().c_str());
+    LOG("data: ");
 
     for (int i = 0; i < length; i++)
     {
-        Serial.print(pData[i], HEX);
-        Serial.print(" ");
+        LOG(pData[i], HEX);
+        LOG(" ");
     }
-    Serial.println();
+    LOGLINE();
 
     switch (pData[2])
     {
@@ -492,15 +516,15 @@ void Lpf2Hub::initConnectedDevices(Device devices[], byte deviceNumbers)
 
 byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber) 
 {
-    Serial.println("getDeviceTypeForPortNumber");
-    Serial.println(numberOfConnectedDevices, DEC);
+    LOGLINE("getDeviceTypeForPortNumber");
+    LOGLINE(numberOfConnectedDevices, DEC);
     for (int idx = 0; idx < numberOfConnectedDevices; idx++) {
-        Serial.println(idx, DEC);
-        Serial.println(connectedDevices[idx].PortNumber, HEX);
-        Serial.println(connectedDevices[idx].DeviceType, HEX);
+        LOGLINE(idx, DEC);
+        LOGLINE(connectedDevices[idx].PortNumber, HEX);
+        LOGLINE(connectedDevices[idx].DeviceType, HEX);
         if (connectedDevices[idx].PortNumber == portNumber) {
-            Serial.print("deviceType: ");
-            Serial.println(connectedDevices[idx].DeviceType, HEX);
+            LOG("deviceType: ");
+            LOGLINE(connectedDevices[idx].DeviceType, HEX);
             return connectedDevices[idx].DeviceType;
         }
     }
@@ -573,7 +597,7 @@ void Lpf2Hub::setLedRGBColor(char red, char green, char blue)
  */
 void Lpf2Hub::setLedHSVColor(int hue, double saturation, double value)
 {
-    hue = hue%360;
+    hue = hue%360; // map hue to 0..360
     double huePart = hue/60.0;
     double fract = huePart - floor(huePart);
 
@@ -583,25 +607,18 @@ void Lpf2Hub::setLedHSVColor(int hue, double saturation, double value)
 
     if (huePart >= 0.0 && huePart < 1.0) {
         setLedRGBColor((char)(value*255), (char)(t*255), (char)(p*255));
-        //RGB = (rgb){.r = V, .g = T, .b = P};
     } else if (huePart >= 1.0 && huePart < 2.0) {
         setLedRGBColor((char)(q*255), (char)(value*255), (char)(p*255));
-        //RGB = (rgb){.r = Q, .g = V, .b = P};
     } else if (huePart >= 2.0 && huePart < 3.0) {
         setLedRGBColor((char)(p*255), (char)(value*255), (char)(t*255));
-        //RGB = (rgb){.r = P, .g = V, .b = T};
     } else if (huePart >= 3.0 && huePart < 4.0) {
         setLedRGBColor((char)(p*255), (char)(q*255), (char)(value*255));
-        //RGB = (rgb){.r = P, .g = Q, .b = V};
     } else if (huePart >= 4.0 && huePart < 5.0) {
         setLedRGBColor((char)(t*255), (char)(p*255), (char)(value*255));
-        //RGB = (rgb){.r = T, .g = P, .b = V};    
-    } else if (huePart >= 4.0 && huePart < 5.0) {
+    } else if (huePart >= 5.0 && huePart < 6.0) {
         setLedRGBColor((char)(value*255), (char)(p*255), (char)(q*255));
-        //RGB = (rgb){.r = V, .g = P, .b = Q};
     } else {
         setLedRGBColor(0, 0, 0);
-        //RGB = (rgb){.r = 0., .g = 0., .b = 0.};
     }
 
 }
@@ -639,8 +656,8 @@ void Lpf2Hub::activateHubUpdates()
 {
     // Activate reports
     byte setButtonCommand[3] = {0x01, 0x02, 0x02};
-    //WriteValue(setButtonCommand, 3);
-/*
+    WriteValue(setButtonCommand, 3);
+
     byte setBatteryLevelCommand[3] = {0x01, 0x06, 0x02};
     WriteValue(setBatteryLevelCommand, 3);
 
@@ -650,18 +667,12 @@ void Lpf2Hub::activateHubUpdates()
     //byte setCurrentReport[8] = {0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
     //WriteValue(setCurrentReport, 8);
 
-    byte setNameCommand[3] = {0x01, 0x01, 0x02};
-    WriteValue(setNameCommand, 3);
-
-    byte setFWCommand[3] = {0x01, 0x03, 0x02};
+    byte setFWCommand[3] = {0x01, 0x03, 0x05};
     WriteValue(setFWCommand, 3);
 
-    byte setHWCommand[3] = {0x01, 0x04, 0x02};
+    byte setHWCommand[3] = {0x01, 0x04, 0x05};
     WriteValue(setHWCommand, 3);
 
-    byte setBatteryType[3] = {0x01, 0x07, 0x02};
-    WriteValue(setBatteryType, 3);
-    */
 }
 
 /**
@@ -675,19 +686,19 @@ bool Lpf2Hub::connectHub()
     // Connect to the remove BLE Server (HUB)
     pClient->connect(pAddress);
 
-    Serial.println("get pClient");
+    LOGLINE("get pClient");
     BLERemoteService *pRemoteService = pClient->getService(_bleUuid);
     if (pRemoteService == nullptr)
     {
-        Serial.println("get pClient failed");
+        LOGLINE("get pClient failed");
         return false;
     }
-    Serial.println("get pRemoteService");
+    LOGLINE("get pRemoteService");
 
     _pRemoteCharacteristic = pRemoteService->getCharacteristic(_charachteristicUuid);
     if (_pRemoteCharacteristic == nullptr)
     {
-        Serial.println("get pRemoteService failed");
+        LOGLINE("get pRemoteService failed");
 
         return false;
     }
@@ -724,13 +735,69 @@ bool Lpf2Hub::isConnected()
 }
 
 int Lpf2Hub::getColor() {
-    return color;
+    return Lpf2HubColor;
 }
 
 double Lpf2Hub::getDistance() {
-    return distance;
+    return Lpf2HubDistance;
 }
 
-int Lpf2Hub::getRotation() {
-    return rotation;
+int Lpf2Hub::getTachoMotorRotation() {
+    return Lpf2HubTachoMotorRotation;
+}
+
+int Lpf2Hub::getBoostHubMotorRotation() {
+    return Lpf2HubHubMotorRotation;
+}
+
+int Lpf2Hub::getRssi() {
+    return Lpf2HubRssi;
+}
+
+int Lpf2Hub::getBatteryLevel() {
+    return Lpf2HubBatteryLevel;
+}
+
+int Lpf2Hub::getTiltX() {
+    return Lpf2HubTiltX;
+}
+
+int Lpf2Hub::getTiltY() {
+    return Lpf2HubTiltY;
+}
+
+int Lpf2Hub::getFirmwareVersionBuild(){
+    return Lpf2HubFirmwareVersionBuild;
+}
+
+int Lpf2Hub::getFirmwareVersionBugfix(){
+    return Lpf2HubFirmwareVersionBugfix;
+}
+
+int Lpf2Hub::getFirmwareVersionMajor(){
+    return Lpf2HubFirmwareVersionMajor;
+}
+
+int Lpf2Hub::getFirmwareVersionMinor(){
+    return Lpf2HubFirmwareVersionMinor;
+}
+
+int Lpf2Hub::getHardwareVersionBuild(){
+    return Lpf2HubHardwareVersionBuild;
+}
+
+int Lpf2Hub::getHardwareVersionBugfix(){
+    return Lpf2HubHardwareVersionBugfix;
+}
+
+int Lpf2Hub::getHardwareVersionMajor(){
+    return Lpf2HubHardwareVersionMajor;
+}
+
+int Lpf2Hub::getHardwareVersionMinor(){
+    return Lpf2HubHardwareVersionMinor;
+}
+
+bool Lpf2Hub::isButtonPressed(){
+    return Lpf2HubHubButtonPressed;
 }
