@@ -248,6 +248,5 @@ Prerequisite of that library is the BLE ESP32 Library with at least version 1.0.
 https://github.com/nkolban/ESP32_BLE_Arduino
 
 # ToDo
-* Notifications for Sensor values and Hub events
 * Test for all sensors/actors
 * Add functionallity (fetch battery status, ... )
