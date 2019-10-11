@@ -121,9 +121,37 @@ myBoostHub.setMotorSpeedsForDegrees(50, 25, 180); // speed motor A 50%, speed mo
 
 ### Sensor values
 
+If you want to read in sensor values, you first have to activate the updates for sensor values with the following command
+```c
+// activate color/distance sensor on port c for updates
+myBoostHub.activatePortDevice(0x02, 37);
+// activate tacho motor on port d for updates
+myBoostHub.activatePortDevice(0x03, 38);
+```
+Every sensor has its own device type value (second parameter). You can find the mapping in the ```Lpf2Hub.h``` file. You should activate the sensor updates after a successful connection to the hub. 
 
+If you have activated the sensor value updates, you can fetch the current values with the following available commands
+```c
+int getTachoMotorRotation(); // continious angle in degrees
+double getDistance(); // distance approximation in mm
+int getColor();
+int getRssi(); // dB
+int getBatteryLevel(); // %
+int getBoostHubMotorRotation(); //continious angle in degrees
+int getTiltX(); // angle
+int getTiltY(); // angle
+int getFirmwareVersionBuild();
+int getFirmwareVersionBugfix();
+int getFirmwareVersionMajor();
+int getFirmwareVersionMinor();
+int getHardwareVersionBuild();
+int getHardwareVersionBugfix();
+int getHardwareVersionMajor();
+int getHardwareVersionMinor();
+bool isButtonPressed();
+```
 
-Up to a limitation of the BLE library implementation it is not possible to use callback functions which are member functions of a class. Therefore, the implementation is based on public variables. 
+Up to a limitation of the BLE library implementation it is not possible to use callback functions which are member functions of a class. Therefore, the implementation is based on public variables and you have to poll the values in your loop and will not be notified when an upadte is available. 
 
 ### Basic movements (Vernie, M.T.R. 4)
 If you want to move Vernie or M.T.R. 4 you can use the following commands. These commands are using the underlying basic motor commands and are adjusted to the boost grid map.
@@ -251,3 +279,4 @@ https://github.com/nkolban/ESP32_BLE_Arduino
 * Test for all sensors/actors
 * Virtual Ports
 * Evaluation how to get rid of global variables
+* Notification for sensor value updates
