@@ -30,7 +30,16 @@ Simple example to read in the distance of the distance/color sensor and set the 
 Up to now the Library is only teseted for a Powered Up Train controllers and Boost controllers. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. Up to now the notifications of the hub and the reading of the sensors are not supported. But this feature will come in the next release.
 
 # Examples
-You can find 3 Examples called "BasicHub.ino", "BoostHub.ino" and "TrainHub.ino" in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". 
+You can find different Examples in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples".
+* **BoostHub.ino:** Example who uses the basic boost moovements (feasable for M.T.R.4 or Vernie model)
+* **BoostHubColorSensor.ino:** Example which reads in the color Sensor value on port C and uses the detected color to set the Hub LED accordingly
+* **BoostHubDeviceInfo.ino:** Example which displays the various device infos (firmware version, battery level, rssi, hardwar version, tilt) in the serial monitor
+* **BoostHubDistanceSensor.ino:** Example which reads in the input of the distance sencor and set the Hub LED color dependent on the distance
+* **BoostHubRotationSensor.ino:** Example which reads in the input of the Tacho motor angle to set the Hub LED dependent on the angle to the scale of rainbow colors
+* **TrainHub.ino:** Example for a PowererdUp Hub to set the speed of a train model
+
+
+
 
 # Setup and Usage
 Just install the Library via the Arduino Library Manager.
