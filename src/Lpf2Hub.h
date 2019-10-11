@@ -157,6 +157,7 @@ int getHardwareVersionBuild();
 int getHardwareVersionBugfix();
 int getHardwareVersionMajor();
 int getHardwareVersionMinor();
+bool isButtonPressed();
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;
   BLEAddress *_pServerAddress;

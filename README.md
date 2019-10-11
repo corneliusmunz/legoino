@@ -7,38 +7,23 @@ Arduino Library for controlling Powered UP and Boost controllers
 
 Simple Train example (just click the image to see the video)
 
-[![Legoino TrainHub example](http://img.youtube.com/vi/o1hgZQz3go4/mqdefault.jpg)](http://www.youtube.com/watch?v=o1hgZQz3go4 "Legoino TrainHub example")
+[![Legoino TrainHub color control example](http://img.youtube.com/vi/GZ0fqe3-Bhw/mqdefault.jpg)](https://youtu.be/GZ0fqe3-Bhw "Legoino TrainHub color control example")
 
 Simple Boost movement example (just click the image to see the video)
 
 [![Legoino BoostHub simple movements example](http://img.youtube.com/vi/VgWObhyUmi0/mqdefault.jpg)](http://www.youtube.com/watch?v=VgWObhyUmi0 "Legoino BoostHub simple movements example")
 
-Simple example to read in the color value and set the LED color of the hub dependently (just click the image to see the video)
-
-[![Legoino BoostHub simple color sensor example](https://img.youtube.com/vi/_xCd9Owy1nk/mqdefault.jpg)](https://youtu.be/_xCd9Owy1nk "Legoino BoostHub simple color sensor example")
-
-
-Simple example to read in the rotation angle of the boost tacho motor and set the LED color of the hub. It is a mapping of the angle to rainbow color (just click the image to see the video)
-
-[![Legoino BoostHub simple rotation sensor example](https://img.youtube.com/vi/c3DHpX55uN0/mqdefault.jpg)](https://youtu.be/c3DHpX55uN0 "Legoino BoostHub simple rotation sensor example")
-
-Simple example to read in the distance of the distance/color sensor and set the LED color of the hub dependently (just click the image to see the video)
-
-[![Legoino BoostHub simple distance sensor example](https://img.youtube.com/vi/TOAQtGGjZ6c/mqdefault.jpg)](https://youtu.be/TOAQtGGjZ6c "Legoino BoostHub simple distance sensor example")
-
-
-Up to now the Library is only teseted for a Powered Up Train controllers and Boost controllers. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. Up to now the notifications of the hub and the reading of the sensors are not supported. But this feature will come in the next release.
+Up to now the Library is only teseted for a Powered Up Train controllers and Boost controllers. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. You also are able to read in hub device infos (rssi, battery level, tilt) and sensor values (color, distance, rotation angle). 
 
 # Examples
-You can find different Examples in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples".
-* **BoostHub.ino:** Example who uses the basic boost moovements (feasable for M.T.R.4 or Vernie model)
-* **BoostHubColorSensor.ino:** Example which reads in the color Sensor value on port C and uses the detected color to set the Hub LED accordingly
+You can find different Examples in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". Just have a look on the videos to see the examples running :smiley: 
+* **BoostHub.ino:** Example who uses the basic boost moovements (feasable for M.T.R.4 or Vernie model). http://www.youtube.com/watch?v=VgWObhyUmi0 
+* **BoostHubColorSensor.ino:** Example which reads in the color Sensor value on port C and uses the detected color to set the Hub LED accordingly. https://youtu.be/_xCd9Owy1nk
 * **BoostHubDeviceInfo.ino:** Example which displays the various device infos (firmware version, battery level, rssi, hardwar version, tilt) in the serial monitor
-* **BoostHubDistanceSensor.ino:** Example which reads in the input of the distance sencor and set the Hub LED color dependent on the distance
-* **BoostHubRotationSensor.ino:** Example which reads in the input of the Tacho motor angle to set the Hub LED dependent on the angle to the scale of rainbow colors
-* **TrainHub.ino:** Example for a PowererdUp Hub to set the speed of a train model
-
-
+* **BoostHubDistanceSensor.ino:** Example which reads in the input of the distance sencor and set the Hub LED color dependent on the distance. https://youtu.be/TOAQtGGjZ6c 
+* **BoostHubRotationSensor.ino:** Example which reads in the input of the Tacho motor angle to set the Hub LED dependent on the angle to the scale of rainbow colors. https://youtu.be/c3DHpX55uN0
+* **TrainHub.ino:** Example for a PowererdUp Hub to set the speed of a train model. http://www.youtube.com/watch?v=o1hgZQz3go4 
+* **TrainColor.ino:** Example of PoweredUp Hub combined with color sensor to control the speed of the train dependent on the detected color. https://youtu.be/GZ0fqe3-Bhw
 
 
 # Setup and Usage
@@ -133,6 +118,12 @@ If you want to set the motor speeds for the hub motors A,B for a specific angle 
 myBoostHub.setMotorSpeedsForDegrees(50, -50, 360); // speed motor A 50%, speed motor B -50%, for 360 degrees. This will lead to a rotation 
 myBoostHub.setMotorSpeedsForDegrees(50, 25, 180); // speed motor A 50%, speed motor B 25%, for 180 degrees. This will lead to a arc movement 
 ```
+
+### Sensor values
+
+
+
+Up to a limitation of the BLE library implementation it is not possible to use callback functions which are member functions of a class. Therefore, the implementation is based on public variables. 
 
 ### Basic movements (Vernie, M.T.R. 4)
 If you want to move Vernie or M.T.R. 4 you can use the following commands. These commands are using the underlying basic motor commands and are adjusted to the boost grid map.
@@ -258,4 +249,5 @@ https://github.com/nkolban/ESP32_BLE_Arduino
 
 # ToDo
 * Test for all sensors/actors
-* Add functionallity (fetch battery status, ... )
+* Virtual Ports
+* Evaluation how to get rid of global variables

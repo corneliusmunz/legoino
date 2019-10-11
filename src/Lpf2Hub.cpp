@@ -26,7 +26,7 @@ int Lpf2HubColor;
 int Lpf2HubRssi;
 uint8_t Lpf2HubBatteryLevel;
 int Lpf2HubHubMotorRotation;
-
+bool Lpf2HubHubButtonPressed;
 
 int Lpf2HubFirmwareVersionBuild;
 int Lpf2HubFirmwareVersionBugfix;
@@ -208,6 +208,7 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
             //     _buttonCallback(true);
             // }
             LOGLINE("button PRESSED");
+            Lpf2HubHubButtonPressed = true;
             return;
         }
         else if (pData[5] == 0)
@@ -217,6 +218,7 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
             //     _buttonCallback(false);
             // }
             LOGLINE("button RELEASED");
+            Lpf2HubHubButtonPressed = false;
             return;
         }
     }
@@ -653,8 +655,8 @@ void Lpf2Hub::setHubName(char name[])
 void Lpf2Hub::activateHubUpdates()
 {
     // Activate reports
-    //byte setButtonCommand[3] = {0x01, 0x02, 0x02};
-    //WriteValue(setButtonCommand, 3);
+    byte setButtonCommand[3] = {0x01, 0x02, 0x02};
+    WriteValue(setButtonCommand, 3);
 
     byte setBatteryLevelCommand[3] = {0x01, 0x06, 0x02};
     WriteValue(setBatteryLevelCommand, 3);
@@ -794,4 +796,8 @@ int Lpf2Hub::getHardwareVersionMajor(){
 
 int Lpf2Hub::getHardwareVersionMinor(){
     return Lpf2HubHardwareVersionMinor;
+}
+
+bool Lpf2Hub::isButtonPressed(){
+    return Lpf2HubHubButtonPressed;
 }
