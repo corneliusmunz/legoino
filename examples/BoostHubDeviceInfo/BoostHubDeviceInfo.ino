@@ -26,7 +26,7 @@ void loop() {
     myBoostHub.connectHub();
     if (myBoostHub.isConnected()) {
       Serial.println("Connected to HUB");
-      myBoostHub.activatePortDevice(0x3A, 40);
+      myBoostHub.activatePortDevice(0x3A, 40); // Tilt-Sensor
     } else {
       Serial.println("Failed to connect to HUB");
     }

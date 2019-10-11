@@ -44,7 +44,7 @@ void loop() {
     delay(100);
    
     // read rotation value in degrees of the boost tacho motor
-    int rotation = myBoostHub.getRotation();
+    int rotation = myBoostHub.getTachoMotorRotation();
 
     // set hub LED color dependent on the absolute angle of the rotation (mapping from angle to rainbow color)
     myBoostHub.setLedHSVColor(abs(rotation), 1.0, 1.0);
