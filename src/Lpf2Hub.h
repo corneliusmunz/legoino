@@ -15,7 +15,7 @@
 #define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
 
-//#define LOGGING_ENABLED
+#define LOGGING_ENABLED
 
 #ifdef LOGGING_ENABLED
   #define LOGLINE(...) Serial.println(__VA_ARGS__)
@@ -133,12 +133,14 @@ public:
   static  void parseBoostTachoMotor(uint8_t *data);
   static  void parseBoostHubMotor(uint8_t *pData);
   static  void parseBoostTiltSensor(uint8_t *data);
+  static void parsePoweredUpRemote(uint8_t *pData);
   static  void parsePortAction(uint8_t *pData);
   static  byte getModeForDeviceType(byte deviceType);
   void activatePortDevice(byte portNumber, byte deviceType);
   void activatePortDevice(byte portNumber);
   void deactivatePortDevice(byte portNumber, byte deviceType);
   void deactivatePortDevice(byte portNumber);
+  void activateButtonReports();
   static void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
   void activateHubUpdates();
   int getTachoMotorRotation();

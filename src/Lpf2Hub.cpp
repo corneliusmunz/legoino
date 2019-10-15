@@ -177,6 +177,12 @@ void Lpf2Hub::deactivatePortDevice(byte portNumber, byte deviceType) {
     WriteValue(deactivatePortDeviceMessage, 8);
 }
 
+void Lpf2Hub::activateButtonReports() {
+    LOGLINE("Activate Button Reports");
+    byte activateButtonReportsMessage[3] = {0x01, 0x02, 0x02}; 
+    WriteValue(activateButtonReportsMessage, 3);
+}
+
 /**
  * @brief Parse the incoming characteristic notification for a Device Info Message
  * @param [in] pData The pointer to the received data
@@ -366,6 +372,23 @@ void Lpf2Hub::parseBoostDistanceAndColor(uint8_t *pData){
     }
 }
 
+void Lpf2Hub::parsePoweredUpRemote(uint8_t *pData) {
+    LOGLINE("parsePoweredUp Remote Button");
+    int port = pData[3];
+    LOG("Port: ");
+    LOG(port, DEC);
+    int buttonState = pData[4];
+    if (buttonState == 0x01) {
+        LOGLINE(" ButtonState: UP");
+    } else if (buttonState == 0xff) {
+        LOGLINE(" ButtonState: DOWN");
+    } else if (buttonState == 0x7f) {
+        LOGLINE(" ButtonState: STOP");
+    } else if (buttonState == 0x00) {
+        LOGLINE(" ButtonState: RELEASED");
+    }
+}
+
 byte Lpf2Hub::getModeForDeviceType(byte deviceType) {
     switch (deviceType)
       {
@@ -420,6 +443,11 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     {
         parseBoostTiltSensor(pData);
     }        
+    else if (deviceType == POWERED_UP_REMOTE_BUTTON)
+    {
+        parsePoweredUpRemote(pData);
+    }        
+
 }
 
 /**
