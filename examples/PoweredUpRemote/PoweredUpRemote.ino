@@ -1,5 +1,6 @@
 /**
- * A Legoino example to connect to a powered up hub and powered up remote
+ * A Legoino example to connect to a Powered Up remote. If the left buttons are pressed,
+ * the color of the Powered Up remote LED will change
  * 
  * (c) Copyright 2019 - Cornelius Munz
  * Released under MIT License
@@ -12,7 +13,6 @@
 PoweredUpRemote myRemote;
 
 PoweredUpRemote::Port _portLeft = PoweredUpRemote::Port::LEFT;
-PoweredUpRemote::Port _portRight = PoweredUpRemote::Port::RIGHT;
 
 
 void setup() {
@@ -29,8 +29,10 @@ void loop() {
     myRemote.connectHub();
     if (myRemote.isConnected()) {
       Serial.println("Connected to Remote");
-      myRemote.activateButtonReports();
-      myRemote.setLedColor(GREEN);
+      // both activations are needed to get status updates
+      myRemote.activateButtonReports(); 
+      myRemote.activatePortDevice(_portLeft, 55);
+      myRemote.setLedColor(WHITE);
     } else {
       Serial.println("Failed to connect to Remote");
     }
@@ -40,6 +42,15 @@ void loop() {
   if (myRemote.isConnected()) {
 
     delay(100);
+    if (myRemote.isLeftRemoteUpButtonPressed()) {
+      myRemote.setLedColor(GREEN);
+    } else if (myRemote.isLeftRemoteDownButtonPressed()) {
+      myRemote.setLedColor(BLUE);
+    } else if (myRemote.isLeftRemoteStopButtonPressed()) {
+      myRemote.setLedColor(RED);
+    } else if (myRemote.isLeftRemoteButtonReleased()) {
+      myRemote.setLedColor(WHITE);      
+    }
 
   }
   
