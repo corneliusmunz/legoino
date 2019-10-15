@@ -177,6 +177,10 @@ void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType)
     LOGLINE(mode, HEX);
     byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(activatePortDeviceMessage, 8);
+    //register device
+    Device newDevice = {portNumber, deviceType};
+    connectedDevices[numberOfConnectedDevices] = newDevice;
+    numberOfConnectedDevices++;
 }
 
 void Lpf2Hub::deactivatePortDevice(byte portNumber)
@@ -190,6 +194,20 @@ void Lpf2Hub::deactivatePortDevice(byte portNumber, byte deviceType)
     byte mode = getModeForDeviceType(deviceType);
     byte deactivatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x00};
     WriteValue(deactivatePortDeviceMessage, 8);
+    //unregister device
+    bool hasReachedRemovedIndex = false;
+    for (int i = 0; i < numberOfConnectedDevices; i++)
+    {
+        if (hasReachedRemovedIndex)
+        {
+            connectedDevices[i - 1] = connectedDevices[i];
+        }
+        if (!hasReachedRemovedIndex && connectedDevices[i].PortNumber == portNumber)
+        {
+            hasReachedRemovedIndex = true;
+        }
+    }
+    numberOfConnectedDevices--;
 }
 
 void Lpf2Hub::activateButtonReports()
@@ -323,27 +341,10 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
     {
         LOG(" is connected with device ");
         LOGLINE(pData[5], DEC);
-        Device newDevice = {port, pData[5]};
-        connectedDevices[numberOfConnectedDevices] = newDevice;
-        numberOfConnectedDevices++;
     }
     else
     {
         LOGLINE(" is disconnected");
-        bool hasReachedRemovedIndex = false;
-        for (int i = 0; i < numberOfConnectedDevices; i++)
-        {
-            if (hasReachedRemovedIndex)
-            {
-                connectedDevices[i - 1] = connectedDevices[i];
-            }
-            if (!hasReachedRemovedIndex && connectedDevices[i].PortNumber == port)
-            {
-                hasReachedRemovedIndex = true;
-            }
-        }
-
-        numberOfConnectedDevices--;
     }
 }
 

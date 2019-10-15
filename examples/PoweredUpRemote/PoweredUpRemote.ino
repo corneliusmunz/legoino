@@ -4,7 +4,7 @@
  * ATTENTION: The connection order is relevant!
  * 1) Power up the ESP32
  * 2) Power up the Remote
- * 3) Power up the Train Hug
+ * 3) Power up the Train Hub
  * 
  * You can change the motor speed with the left (A) remote buttons
  * 
@@ -58,10 +58,11 @@ void loop() {
   }
 
   if (myRemote.isConnected() && myHub.isConnected() && !isInitialized) {
+     Serial.println("System is initialized");
       isInitialized = true;
       // both activations are needed to get status updates
       myRemote.activateButtonReports(); 
-      myRemote.activatePortDevice(_portLeft, 55);
+      myRemote.activatePortDevice(0x01, 55);
       myRemote.setLedColor(WHITE);
       myHub.setLedColor(WHITE);
   }
