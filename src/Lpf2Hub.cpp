@@ -580,7 +580,6 @@ void Lpf2Hub::init()
     _isConnecting = false;
     _bleUuid = BLEUUID(LPF2_UUID);
     _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
-    _hubType = BOOST_MOVE_HUB;
 
     BLEDevice::init("");
     BLEScan *pBLEScan = BLEDevice::getScan();
