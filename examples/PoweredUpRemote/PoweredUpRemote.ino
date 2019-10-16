@@ -4,7 +4,7 @@
  * ATTENTION: The connection order is relevant!
  * 1) Power up the ESP32
  * 2) Power up the Remote
- * 3) Power up the Train Hug
+ * 3) Power up the Train Hub
  * 
  * You can change the motor speed with the left (A) remote buttons
  * 
@@ -21,6 +21,7 @@ PoweredUpRemote myRemote;
 PoweredUpHub myHub;
 
 PoweredUpRemote::Port _portLeft = PoweredUpRemote::Port::LEFT;
+PoweredUpRemote::Port _portRight = PoweredUpRemote::Port::RIGHT;
 PoweredUpHub::Port _portA = PoweredUpHub::Port::A;
 
 int currentSpeed = 0;
@@ -58,10 +59,12 @@ void loop() {
   }
 
   if (myRemote.isConnected() && myHub.isConnected() && !isInitialized) {
+     Serial.println("System is initialized");
       isInitialized = true;
       // both activations are needed to get status updates
       myRemote.activateButtonReports(); 
       myRemote.activatePortDevice(_portLeft, 55);
+      myRemote.activatePortDevice(_portRight, 55);
       myRemote.setLedColor(WHITE);
       myHub.setLedColor(WHITE);
   }
@@ -69,16 +72,16 @@ void loop() {
   // if connected we can control the train motor on Port A with the remote
   if (isInitialized) {
 
-    if (myRemote.isLeftRemoteUpButtonPressed()) {
+    if (myRemote.isLeftRemoteUpButtonPressed() || myRemote.isRightRemoteUpButtonPressed()) {
       myRemote.setLedColor(GREEN);
       updatedSpeed = min(100, currentSpeed+10);
-    } else if (myRemote.isLeftRemoteDownButtonPressed()) {
+    } else if (myRemote.isLeftRemoteDownButtonPressed() || myRemote.isRightRemoteDownButtonPressed()) {
       myRemote.setLedColor(BLUE);
       updatedSpeed = min(100, currentSpeed-10);
-    } else if (myRemote.isLeftRemoteStopButtonPressed()) {
+    } else if (myRemote.isLeftRemoteStopButtonPressed() || myRemote.isRightRemoteStopButtonPressed()) {
       myRemote.setLedColor(RED);
       updatedSpeed = 0;
-    } else if (myRemote.isLeftRemoteButtonReleased()) {
+    } else if (myRemote.isLeftRemoteButtonReleased() || myRemote.isRightRemoteButtonReleased()) {
       myRemote.setLedColor(WHITE);      
     }
 
