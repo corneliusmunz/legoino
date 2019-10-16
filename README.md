@@ -5,6 +5,10 @@ Arduino Library for controlling Powered UP and Boost controllers
 
 *Disclaimer*: LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this project.
 
+Remote control your boost model example (just click the image to see the video)
+
+[![Legoino Boost control example](http://img.youtube.com/vi/UtHMKe2Insw/mqdefault.jpg)](https://youtu.be/UtHMKe2Insw "Legoino boost control example")
+
 Simple Train example (just click the image to see the video)
 
 [![Legoino TrainHub color control example](http://img.youtube.com/vi/GZ0fqe3-Bhw/mqdefault.jpg)](https://youtu.be/GZ0fqe3-Bhw "Legoino TrainHub color control example")
