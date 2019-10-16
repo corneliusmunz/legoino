@@ -21,6 +21,7 @@ PoweredUpRemote myRemote;
 PoweredUpHub myHub;
 
 PoweredUpRemote::Port _portLeft = PoweredUpRemote::Port::LEFT;
+PoweredUpRemote::Port _portRight = PoweredUpRemote::Port::RIGHT;
 PoweredUpHub::Port _portA = PoweredUpHub::Port::A;
 
 int currentSpeed = 0;
@@ -62,7 +63,8 @@ void loop() {
       isInitialized = true;
       // both activations are needed to get status updates
       myRemote.activateButtonReports(); 
-      myRemote.activatePortDevice(0x01, 55);
+      myRemote.activatePortDevice(_portLeft, 55);
+      myRemote.activatePortDevice(_portRight, 55);
       myRemote.setLedColor(WHITE);
       myHub.setLedColor(WHITE);
   }
@@ -70,16 +72,16 @@ void loop() {
   // if connected we can control the train motor on Port A with the remote
   if (isInitialized) {
 
-    if (myRemote.isLeftRemoteUpButtonPressed()) {
+    if (myRemote.isLeftRemoteUpButtonPressed() || myRemote.isRightRemoteUpButtonPressed()) {
       myRemote.setLedColor(GREEN);
       updatedSpeed = min(100, currentSpeed+10);
-    } else if (myRemote.isLeftRemoteDownButtonPressed()) {
+    } else if (myRemote.isLeftRemoteDownButtonPressed() || myRemote.isRightRemoteDownButtonPressed()) {
       myRemote.setLedColor(BLUE);
       updatedSpeed = min(100, currentSpeed-10);
-    } else if (myRemote.isLeftRemoteStopButtonPressed()) {
+    } else if (myRemote.isLeftRemoteStopButtonPressed() || myRemote.isRightRemoteStopButtonPressed()) {
       myRemote.setLedColor(RED);
       updatedSpeed = 0;
-    } else if (myRemote.isLeftRemoteButtonReleased()) {
+    } else if (myRemote.isLeftRemoteButtonReleased() || myRemote.isRightRemoteButtonReleased()) {
       myRemote.setLedColor(WHITE);      
     }
 
