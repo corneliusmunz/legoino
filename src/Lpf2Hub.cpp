@@ -64,8 +64,19 @@ public:
 
     void onResult(BLEAdvertisedDevice advertisedDevice)
     {
-        //Found a device, check if the service is contained
-        if (advertisedDevice.haveServiceUUID() && advertisedDevice.getServiceUUID().equals(_lpf2Hub->_bleUuid))
+        //Found a device, check if the service is contained and optional if address fits requested address
+        #ifdef LOGGING_ENABLED
+        std::string deviceAddress =  advertisedDevice.getAddress().toString();
+        LOG("Device Address: ");
+        for(int i=0; i<deviceAddress.length(); i++) {
+            LOG(deviceAddress[i]);
+        }
+        LOGLINE();
+        #endif
+
+        if (advertisedDevice.haveServiceUUID() 
+        && advertisedDevice.getServiceUUID().equals(_lpf2Hub->_bleUuid)
+        && (_lpf2Hub->_requestedDeviceAddress == nullptr || (_lpf2Hub->_requestedDeviceAddress && advertisedDevice.getAddress().equals(*_lpf2Hub->_requestedDeviceAddress))))
         {
             advertisedDevice.getScan()->stop();
             _lpf2Hub->_pServerAddress = new BLEAddress(advertisedDevice.getAddress());
@@ -589,6 +600,16 @@ void Lpf2Hub::init()
 
     pBLEScan->setActiveScan(true);
     pBLEScan->start(30);
+}
+
+/**
+ * @brief Init function set the UUIDs and scan for the Hub
+ * @param [in] deviceAddress to which the arduino should connect represented by a hex string of the format: 00:00:00:00:00:00
+ */
+void Lpf2Hub::init(std::string deviceAddress) 
+{
+    _requestedDeviceAddress = new BLEAddress(deviceAddress);
+    init();
 }
 
 /**
