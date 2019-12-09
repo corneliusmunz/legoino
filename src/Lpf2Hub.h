@@ -103,6 +103,7 @@ public:
 
   Lpf2Hub();
   void init();
+  void init(std::string deviceAddress);
   void initConnectedDevices(Device devices[], byte deviceNumbers);
   bool connectHub();
   bool isConnected();
@@ -171,6 +172,7 @@ bool isRightRemoteButtonReleased();
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;
   BLEAddress *_pServerAddress;
+  BLEAddress *_requestedDeviceAddress = nullptr;
   BLERemoteCharacteristic *_pRemoteCharacteristic;
 
   boolean _isConnecting;

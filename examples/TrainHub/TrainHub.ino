@@ -16,6 +16,7 @@ PoweredUpHub::Port _port = PoweredUpHub::Port::A;
 void setup() {
     Serial.begin(115200);
     myTrainHub.init(); // initalize the PoweredUpHub instance
+    //myTrainHub.init("90:84:2b:03:19:7f"); //example of initializing an hub with a specific address
 } 
 
 
