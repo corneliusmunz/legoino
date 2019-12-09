@@ -50,6 +50,12 @@ In the ```setup``` part of your Arduino sketch, just initialize your Hub
 myBoostHub.init();
 ```
 
+If you want to connect to a specific hub you can initialize your Hub with a specific address. The address has to be 
+represented by a hex string of the format: ```00:00:00:00:00:00```
+```c
+myBoostHub.init("90:84:2b:03:19:7f");
+```
+
 In the main ```loop``` just add the following connection flow
 ```c
   if (myBoostHub.isConnecting()) {
