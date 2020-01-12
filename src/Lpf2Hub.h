@@ -32,6 +32,7 @@ typedef enum HubType
   BOOST_MOVE_HUB = 2,
   POWERED_UP_HUB = 3,
   POWERED_UP_REMOTE = 4,
+  UNKNOWN = 255,
 };
 
 typedef enum DeviceType
@@ -78,8 +79,6 @@ typedef enum Color
 class Lpf2Hub
 {
 private:
-  // BLE properties
-  HubType _hubType;
   // device properties
   int _rssi = -100;
   int _batteryLevel = 100; //%
@@ -160,6 +159,7 @@ int getHardwareVersionBuild();
 int getHardwareVersionBugfix();
 int getHardwareVersionMajor();
 int getHardwareVersionMinor();
+HubType getHubType();
 bool isButtonPressed();
 bool isLeftRemoteUpButtonPressed();
 bool isLeftRemoteDownButtonPressed();
@@ -177,6 +177,7 @@ bool isRightRemoteButtonReleased();
 
   boolean _isConnecting;
   boolean _isConnected;
+  HubType _hubType;
 };
 
 #endif
