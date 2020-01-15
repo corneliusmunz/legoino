@@ -15,6 +15,12 @@
 #define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
 
+#define LPF2_VOLTAGE_MAX 9.6
+#define LPF2_VOLTAGE_MAX_RAW 3893
+
+#define LPF2_CURRENT_MAX 2444
+#define LPF2_CURRENT_MAX_RAW 4095
+
 //#define LOGGING_ENABLED
 
 #ifdef LOGGING_ENABLED
@@ -29,9 +35,21 @@ typedef void (*ButtonCallback)(bool isPressed);
 
 typedef enum HubType
 {
-  BOOST_MOVE_HUB = 2,
-  POWERED_UP_HUB = 3,
-  POWERED_UP_REMOTE = 4,
+    UNKNOWN = 0,
+    WEDO2_SMART_HUB = 1,
+    BOOST_MOVE_HUB = 2,
+    POWERED_UP_HUB = 3,
+    POWERED_UP_REMOTE = 4,
+    DUPLO_TRAIN_HUB = 5,
+    CONTROL_PLUS_HUB = 6
+};
+
+typedef enum BLEManufacturerData {
+    DUPLO_TRAIN_HUB_ID = 32, //0x20
+    BOOST_MOVE_HUB_ID = 64, //0x40
+    POWERED_UP_HUB_ID = 65, //0x41
+    POWERED_UP_REMOTE_ID = 66, //0x42
+    CONTROL_PLUS_LARGE_HUB_ID = 128 //0x80
 };
 
 typedef enum DeviceType
@@ -78,14 +96,7 @@ typedef enum Color
 class Lpf2Hub
 {
 private:
-  // BLE properties
-  HubType _hubType;
-  // device properties
-  int _rssi = -100;
-  int _batteryLevel = 100; //%
-  int _voltage = 0;
-  int _current = 0;
-  
+
   // Notification callbacks
   ButtonCallback _buttonCallback = nullptr;
   
@@ -149,6 +160,8 @@ public:
   int getColor();
   int getRssi();
 int getBatteryLevel();
+double getHubVoltage();
+double getHubCurrent();
 int getBoostHubMotorRotation();
 int getTiltX(); 
 int getTiltY();
@@ -160,6 +173,7 @@ int getHardwareVersionBuild();
 int getHardwareVersionBugfix();
 int getHardwareVersionMajor();
 int getHardwareVersionMinor();
+HubType getHubType();
 bool isButtonPressed();
 bool isLeftRemoteUpButtonPressed();
 bool isLeftRemoteDownButtonPressed();
@@ -177,6 +191,7 @@ bool isRightRemoteButtonReleased();
 
   boolean _isConnecting;
   boolean _isConnected;
+  HubType _hubType;
 };
 
 #endif

@@ -27,6 +27,8 @@ int Lpf2HubRssi;
 uint8_t Lpf2HubBatteryLevel;
 int Lpf2HubHubMotorRotation;
 bool Lpf2HubHubButtonPressed;
+double Lpf2HubVoltage; //V
+double Lpf2HubCurrent; //mA
 
 int Lpf2HubFirmwareVersionBuild;
 int Lpf2HubFirmwareVersionBugfix;
@@ -80,6 +82,49 @@ public:
         {
             advertisedDevice.getScan()->stop();
             _lpf2Hub->_pServerAddress = new BLEAddress(advertisedDevice.getAddress());
+            LOG("Advertising : ");
+            uint8_t * payload = advertisedDevice.getPayload();
+            int manufacturerDataIndex = 0;
+            for(int i=0; i<advertisedDevice.getPayloadLength()-1; i++) {
+                LOG(payload[i], HEX); 
+                LOG("-");
+                //detection of manufacturer data with length 9 (lego spec)
+                if(payload[i]==0x09 && payload[i+1]==0xFF) {
+                    manufacturerDataIndex = i;
+                    break;
+                }
+            }
+            LOGLINE();
+            
+            //check device type ID
+            switch (payload[manufacturerDataIndex+5])
+            {
+            case DUPLO_TRAIN_HUB_ID:
+                _lpf2Hub->_hubType = DUPLO_TRAIN_HUB;
+                LOGLINE("Hubtype: DUPLO_TRAIN_HUB");
+                break;
+             case BOOST_MOVE_HUB_ID:
+                _lpf2Hub->_hubType = BOOST_MOVE_HUB;
+                LOGLINE("Hubtype: BOOST_MOVE_HUB");
+                break;
+            case POWERED_UP_HUB_ID:
+                _lpf2Hub->_hubType = POWERED_UP_HUB;
+                LOGLINE("Hubtype: POWERED_UP_HUB");
+                break;
+            case POWERED_UP_REMOTE_ID:
+                _lpf2Hub->_hubType = POWERED_UP_REMOTE;
+                LOGLINE("Hubtype: POWERED_UP_REMOTE");
+                break;
+            case CONTROL_PLUS_LARGE_HUB_ID:
+                _lpf2Hub->_hubType = CONTROL_PLUS_HUB;
+                LOGLINE("Hubtype: CONTROL_PLUS_HUB");
+                break;           
+            default:
+                _lpf2Hub->_hubType = UNKNOWN;
+                LOGLINE("Hubtype: UNKNOWN");
+                break;
+            }
+
             _lpf2Hub->_isConnecting = true;
         }
     }
@@ -335,6 +380,12 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
         }
         LOGLINE();
     }
+    else if (pData[3] == 0x0B) // System type ID
+    {
+        LOG("System type ID: ");
+        uint8_t typeId = ReadUInt8(pData, 5);
+        LOG(typeId);
+    }
 }
 
 /**
@@ -491,17 +542,19 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     byte deviceType = getDeviceTypeForPortNumber(pData[3]);
     if (pData[3] == 0x3b)
     {
-        int current = ReadUInt16LE(pData, 4);
-        LOG("Current of Sensor value: ");
-        LOG(current);
+        int currentRaw = ReadUInt16LE(pData, 4);
+        Lpf2HubCurrent = (double)currentRaw * LPF2_CURRENT_MAX/LPF2_CURRENT_MAX_RAW;
+        LOG("Current value [mA]: ");
+        LOG(Lpf2HubCurrent);
         LOGLINE();
         return;
     }
     else if (pData[3] == 0x3c)
     {
-        int voltage = ReadUInt16LE(pData, 4);
-        LOG("Voltage of Sensor value: ");
-        LOG(voltage);
+        int voltageRaw = ReadUInt16LE(pData, 4);
+        Lpf2HubVoltage = (double)voltageRaw * LPF2_VOLTAGE_MAX/LPF2_VOLTAGE_MAX_RAW;
+        LOG("Hub Voltage : ");
+        LOG(Lpf2HubVoltage);
         LOGLINE();
         return;
     }
@@ -592,6 +645,7 @@ void Lpf2Hub::init()
     _isConnecting = false;
     _bleUuid = BLEUUID(LPF2_UUID);
     _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
+    _hubType = UNKNOWN;
 
     BLEDevice::init("");
     BLEScan *pBLEScan = BLEDevice::getScan();
@@ -645,25 +699,6 @@ byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
     return UNDEFINED;
 }
 
-// Device Lpf2Hub::getDeviceForPortNumber(byte portNumber)
-// {
-//     for (int idx = 0; idx < numberOfConnectedDevices; idx++) {
-//         if (connectedDevices[idx].PortNumber == portNumber) {
-//             return connectedDevices[idx];
-//         }
-//     }
-//     return UNDEFINED;
-// }
-
-// Device Lpf2Hub::getDeviceForDeviceType(byte deviceType)
-// {
-//     for (int idx = 0; idx < numberOfConnectedDevices; idx++) {
-//         if (connectedDevices[idx].DeviceType == deviceType) {
-//             return connectedDevices[idx];
-//         }
-//     }
-//     return UNDEFINED;
-// }
 
 /**
  * @brief Register the callback function if a button message is received
@@ -787,8 +822,11 @@ void Lpf2Hub::activateHubUpdates()
     byte setRSSICommand[3] = {0x01, 0x05, 0x02};
     WriteValue(setRSSICommand, 3);
 
-    //byte setCurrentReport[8] = {0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
-    //WriteValue(setCurrentReport, 8);
+    byte setCurrentReport[8] = {0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
+    WriteValue(setCurrentReport, 8);
+
+    byte setVoltageReport[8] = {0x41, 0x3c, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
+    WriteValue(setVoltageReport, 8);
 
     byte setFWCommand[3] = {0x01, 0x03, 0x05};
     WriteValue(setFWCommand, 3);
@@ -886,6 +924,16 @@ int Lpf2Hub::getBatteryLevel()
     return Lpf2HubBatteryLevel;
 }
 
+double Lpf2Hub::getHubVoltage()
+{
+    return Lpf2HubVoltage;
+}
+
+double Lpf2Hub::getHubCurrent()
+{
+    return Lpf2HubCurrent;
+}
+
 int Lpf2Hub::getTiltX()
 {
     return Lpf2HubTiltX;
@@ -934,6 +982,11 @@ int Lpf2Hub::getHardwareVersionMajor()
 int Lpf2Hub::getHardwareVersionMinor()
 {
     return Lpf2HubHardwareVersionMinor;
+}
+
+HubType Lpf2Hub::getHubType()
+{
+    return _hubType;
 }
 
 bool Lpf2Hub::isButtonPressed()
