@@ -25,7 +25,6 @@ int Lpf2HubColor;
 // Hub information values
 int Lpf2HubRssi;
 uint8_t Lpf2HubBatteryLevel;
-HubType Lpf2HubType;
 int Lpf2HubHubMotorRotation;
 bool Lpf2HubHubButtonPressed;
 double Lpf2HubVoltage; //V
@@ -85,19 +84,47 @@ public:
             _lpf2Hub->_pServerAddress = new BLEAddress(advertisedDevice.getAddress());
             LOG("Advertising : ");
             uint8_t * payload = advertisedDevice.getPayload();
-            for(int i=0; i<advertisedDevice.getPayloadLength(); i++) {
+            int manufacturerDataIndex = 0;
+            for(int i=0; i<advertisedDevice.getPayloadLength()-1; i++) {
                 LOG(payload[i], HEX); 
+                LOG("-");
+                //detection of manufacturer data with length 9 (lego spec)
+                if(payload[i]==0x09 && payload[i+1]==0xFF) {
+                    manufacturerDataIndex = i;
+                    break;
+                }
             }
             LOGLINE();
-
-            //check for device capabilities and device type ID
-            if (payload[26] == 0x42 && payload[27] == 0x0A)
-                _lpf2Hub->_hubType = POWERED_UP_REMOTE;
-            else if (payload[26] == 0x41 && payload[27] == 0x07)
+            
+            //check device type ID
+            switch (payload[manufacturerDataIndex+5])
+            {
+            case DUPLO_TRAIN_HUB_ID:
+                _lpf2Hub->_hubType = DUPLO_TRAIN_HUB;
+                LOGLINE("Hubtype: DUPLO_TRAIN_HUB");
+                break;
+             case BOOST_MOVE_HUB_ID:
+                _lpf2Hub->_hubType = BOOST_MOVE_HUB;
+                LOGLINE("Hubtype: BOOST_MOVE_HUB");
+                break;
+            case POWERED_UP_HUB_ID:
                 _lpf2Hub->_hubType = POWERED_UP_HUB;
-            //TODO : add else if on BOOST_MOVE_HUB for those which have it to test !!!
-            else 
+                LOGLINE("Hubtype: POWERED_UP_HUB");
+                break;
+            case POWERED_UP_REMOTE_ID:
+                _lpf2Hub->_hubType = POWERED_UP_REMOTE;
+                LOGLINE("Hubtype: POWERED_UP_REMOTE");
+                break;
+            case CONTROL_PLUS_LARGE_HUB_ID:
+                _lpf2Hub->_hubType = CONTROL_PLUS_HUB;
+                LOGLINE("Hubtype: CONTROL_PLUS_HUB");
+                break;           
+            default:
                 _lpf2Hub->_hubType = UNKNOWN;
+                LOGLINE("Hubtype: UNKNOWN");
+                break;
+            }
+
             _lpf2Hub->_isConnecting = true;
         }
     }
@@ -358,7 +385,6 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
         LOG("System type ID: ");
         uint8_t typeId = ReadUInt8(pData, 5);
         LOG(typeId);
-        //Lpf2HubType
     }
 }
 

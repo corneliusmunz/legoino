@@ -21,6 +21,7 @@
 #define LPF2_CURRENT_MAX 2444
 #define LPF2_CURRENT_MAX_RAW 4095
 
+//#define LOGGING_ENABLED
 
 #ifdef LOGGING_ENABLED
   #define LOGLINE(...) Serial.println(__VA_ARGS__)
@@ -34,10 +35,21 @@ typedef void (*ButtonCallback)(bool isPressed);
 
 typedef enum HubType
 {
-  BOOST_MOVE_HUB = 2,
-  POWERED_UP_HUB = 3,
-  POWERED_UP_REMOTE = 4,
-  UNKNOWN = 255,
+    UNKNOWN = 0,
+    WEDO2_SMART_HUB = 1,
+    BOOST_MOVE_HUB = 2,
+    POWERED_UP_HUB = 3,
+    POWERED_UP_REMOTE = 4,
+    DUPLO_TRAIN_HUB = 5,
+    CONTROL_PLUS_HUB = 6
+};
+
+typedef enum BLEManufacturerData {
+    DUPLO_TRAIN_HUB_ID = 32, //0x20
+    BOOST_MOVE_HUB_ID = 64, //0x40
+    POWERED_UP_HUB_ID = 65, //0x41
+    POWERED_UP_REMOTE_ID = 66, //0x42
+    CONTROL_PLUS_LARGE_HUB_ID = 128 //0x80
 };
 
 typedef enum DeviceType
@@ -84,12 +96,7 @@ typedef enum Color
 class Lpf2Hub
 {
 private:
-  // device properties
-  int _rssi = -100;
-  int _batteryLevel = 100; //%
-  int _voltage = 0;
-  int _current = 0;
-  
+
   // Notification callbacks
   ButtonCallback _buttonCallback = nullptr;
   
