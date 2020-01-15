@@ -25,6 +25,7 @@ int Lpf2HubColor;
 // Hub information values
 int Lpf2HubRssi;
 uint8_t Lpf2HubBatteryLevel;
+HubType Lpf2HubType;
 int Lpf2HubHubMotorRotation;
 bool Lpf2HubHubButtonPressed;
 double Lpf2HubVoltage; //V
@@ -82,6 +83,21 @@ public:
         {
             advertisedDevice.getScan()->stop();
             _lpf2Hub->_pServerAddress = new BLEAddress(advertisedDevice.getAddress());
+            LOG("Advertising : ");
+            uint8_t * payload = advertisedDevice.getPayload();
+            for(int i=0; i<advertisedDevice.getPayloadLength(); i++) {
+                LOG(payload[i], HEX); 
+            }
+            LOGLINE();
+
+            //check for device capabilities and device type ID
+            if (payload[26] == 0x42 && payload[27] == 0x0A)
+                _lpf2Hub->_hubType = POWERED_UP_REMOTE;
+            else if (payload[26] == 0x41 && payload[27] == 0x07)
+                _lpf2Hub->_hubType = POWERED_UP_HUB;
+            //TODO : add else if on BOOST_MOVE_HUB for those which have it to test !!!
+            else 
+                _lpf2Hub->_hubType = UNKNOWN;
             _lpf2Hub->_isConnecting = true;
         }
     }
@@ -336,6 +352,13 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
             LOG("Recharchable");
         }
         LOGLINE();
+    }
+    else if (pData[3] == 0x0B) // System type ID
+    {
+        LOG("System type ID: ");
+        uint8_t typeId = ReadUInt8(pData, 5);
+        LOG(typeId);
+        //Lpf2HubType
     }
 }
 
@@ -596,6 +619,7 @@ void Lpf2Hub::init()
     _isConnecting = false;
     _bleUuid = BLEUUID(LPF2_UUID);
     _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
+    _hubType = UNKNOWN;
 
     BLEDevice::init("");
     BLEScan *pBLEScan = BLEDevice::getScan();
@@ -932,6 +956,11 @@ int Lpf2Hub::getHardwareVersionMajor()
 int Lpf2Hub::getHardwareVersionMinor()
 {
     return Lpf2HubHardwareVersionMinor;
+}
+
+HubType Lpf2Hub::getHubType()
+{
+    return _hubType;
 }
 
 bool Lpf2Hub::isButtonPressed()
