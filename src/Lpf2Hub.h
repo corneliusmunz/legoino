@@ -15,7 +15,12 @@
 #define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
 
-//#define LOGGING_ENABLED
+#define LPF2_VOLTAGE_MAX 9.6
+#define LPF2_VOLTAGE_MAX_RAW 3893
+
+#define LPF2_CURRENT_MAX 2444
+#define LPF2_CURRENT_MAX_RAW 4095
+
 
 #ifdef LOGGING_ENABLED
   #define LOGLINE(...) Serial.println(__VA_ARGS__)
@@ -149,6 +154,8 @@ public:
   int getColor();
   int getRssi();
 int getBatteryLevel();
+double getHubVoltage();
+double getHubCurrent();
 int getBoostHubMotorRotation();
 int getTiltX(); 
 int getTiltY();
