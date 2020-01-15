@@ -28,8 +28,8 @@ bool isInitialized = false;
 
 void setup() {
     Serial.begin(115200);
-    myRemote.init(); // initalize the listening hub
-    myHub.init(); // initalize the listening hub
+    myRemote.init(); // initialize the remote hub
+    myHub.init(); // initialize the listening hub
 } 
 
 
@@ -60,8 +60,6 @@ void loop() {
   {
     if (myHub.getHubType() == POWERED_UP_HUB)
     {
-     // myHub._isConnecting = true;
-      //myHub._pServerAddress = new BLEAddress(myListeningHub._pServerAddress->toString()); 
       myHub.connectHub();
       myHub.setLedColor(GREEN);
       Serial.println("powered up hub connected.");
