@@ -27,6 +27,8 @@ int Lpf2HubRssi;
 uint8_t Lpf2HubBatteryLevel;
 int Lpf2HubHubMotorRotation;
 bool Lpf2HubHubButtonPressed;
+double Lpf2HubVoltage; //V
+double Lpf2HubCurrent; //mA
 
 int Lpf2HubFirmwareVersionBuild;
 int Lpf2HubFirmwareVersionBugfix;
@@ -491,17 +493,19 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     byte deviceType = getDeviceTypeForPortNumber(pData[3]);
     if (pData[3] == 0x3b)
     {
-        int current = ReadUInt16LE(pData, 4);
-        LOG("Current of Sensor value: ");
-        LOG(current);
+        int currentRaw = ReadUInt16LE(pData, 4);
+        Lpf2HubCurrent = (double)currentRaw * LPF2_CURRENT_MAX/LPF2_CURRENT_MAX_RAW;
+        LOG("Current value [mA]: ");
+        LOG(Lpf2HubCurrent);
         LOGLINE();
         return;
     }
     else if (pData[3] == 0x3c)
     {
-        int voltage = ReadUInt16LE(pData, 4);
-        LOG("Voltage of Sensor value: ");
-        LOG(voltage);
+        int voltageRaw = ReadUInt16LE(pData, 4);
+        Lpf2HubVoltage = (double)voltageRaw * LPF2_VOLTAGE_MAX/LPF2_VOLTAGE_MAX_RAW;
+        LOG("Hub Voltage : ");
+        LOG(Lpf2HubVoltage);
         LOGLINE();
         return;
     }
@@ -645,25 +649,6 @@ byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
     return UNDEFINED;
 }
 
-// Device Lpf2Hub::getDeviceForPortNumber(byte portNumber)
-// {
-//     for (int idx = 0; idx < numberOfConnectedDevices; idx++) {
-//         if (connectedDevices[idx].PortNumber == portNumber) {
-//             return connectedDevices[idx];
-//         }
-//     }
-//     return UNDEFINED;
-// }
-
-// Device Lpf2Hub::getDeviceForDeviceType(byte deviceType)
-// {
-//     for (int idx = 0; idx < numberOfConnectedDevices; idx++) {
-//         if (connectedDevices[idx].DeviceType == deviceType) {
-//             return connectedDevices[idx];
-//         }
-//     }
-//     return UNDEFINED;
-// }
 
 /**
  * @brief Register the callback function if a button message is received
@@ -787,8 +772,11 @@ void Lpf2Hub::activateHubUpdates()
     byte setRSSICommand[3] = {0x01, 0x05, 0x02};
     WriteValue(setRSSICommand, 3);
 
-    //byte setCurrentReport[8] = {0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
-    //WriteValue(setCurrentReport, 8);
+    byte setCurrentReport[8] = {0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
+    WriteValue(setCurrentReport, 8);
+
+    byte setVoltageReport[8] = {0x41, 0x3c, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
+    WriteValue(setVoltageReport, 8);
 
     byte setFWCommand[3] = {0x01, 0x03, 0x05};
     WriteValue(setFWCommand, 3);
@@ -884,6 +872,16 @@ int Lpf2Hub::getRssi()
 int Lpf2Hub::getBatteryLevel()
 {
     return Lpf2HubBatteryLevel;
+}
+
+double Lpf2Hub::getHubVoltage()
+{
+    return Lpf2HubVoltage;
+}
+
+double Lpf2Hub::getHubCurrent()
+{
+    return Lpf2HubCurrent;
 }
 
 int Lpf2Hub::getTiltX()
