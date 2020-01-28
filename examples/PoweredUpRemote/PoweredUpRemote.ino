@@ -77,7 +77,7 @@ void loop() {
       updatedSpeed = min(100, currentSpeed+10);
     } else if (myRemote.isLeftRemoteDownButtonPressed() || myRemote.isRightRemoteDownButtonPressed()) {
       myRemote.setLedColor(BLUE);
-      updatedSpeed = min(100, currentSpeed-10);
+      updatedSpeed = max(-100, currentSpeed-10);
     } else if (myRemote.isLeftRemoteStopButtonPressed() || myRemote.isRightRemoteStopButtonPressed()) {
       myRemote.setLedColor(RED);
       updatedSpeed = 0;
