@@ -15,13 +15,17 @@ PoweredUpHub::Port _port = PoweredUpHub::Port::A;
 
 void setup() {
     Serial.begin(115200);
-    myTrainHub.init(); // initalize the PoweredUpHub instance
-    //myTrainHub.init("90:84:2b:03:19:7f"); //example of initializing an hub with a specific address
 } 
 
 
 // main loop
 void loop() {
+
+  if (!myTrainHub.isConnected() && !myTrainHub.isConnecting()) 
+  {
+    myTrainHub.init(); // initalize the PoweredUpHub instance
+    //myTrainHub.init("90:84:2b:03:19:7f"); //example of initializing an hub with a specific address
+  }
 
   // connect flow. Search for BLE services and try to connect if the uuid of the hub is found
   if (myTrainHub.isConnecting()) {
@@ -50,9 +54,10 @@ void loop() {
     myTrainHub.setMotorSpeed(_port, -35);
     delay(1000);
     myTrainHub.stopMotor(_port);
-    delay(1000);    
-    myTrainHub.shutDownHub();
+    delay(1000);
 
+  } else {
+    Serial.println("Train hub is disconnected");
   }
   
 } // End of loop
