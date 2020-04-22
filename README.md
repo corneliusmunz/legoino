@@ -50,6 +50,7 @@ In the ```setup``` part of your Arduino sketch, just initialize your Hub
 ```c
 myBoostHub.init();
 ```
+Alternatively you can use the ```init()``` function also in the main loop if you want to check the ```isConnected()``` status e.g. to reconnect automatically the hub.
 
 If you want to connect to a specific hub you can initialize your Hub with a specific address. The address has to be 
 represented by a hex string of the format: ```00:00:00:00:00:00```

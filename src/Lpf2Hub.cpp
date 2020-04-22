@@ -52,6 +52,34 @@ bool Lpf2HubRemoteRightStopButtonPressed;
 bool Lpf2HubRemoteRightButtonReleased;
 
 /**
+ * Derived class which could be added as an instance to the BLEClient for callback handling
+ * The current hub is given as a parameter in the constructor to be able to set the 
+ * status flags on a disconnect event accordingly
+ */
+class Lpf2HubClientCallback : public BLEClientCallbacks
+{
+
+    Lpf2Hub *_lpf2Hub;
+
+public:
+    Lpf2HubClientCallback(Lpf2Hub *lpf2Hub) : BLEClientCallbacks()
+    {
+        _lpf2Hub = lpf2Hub;
+    }
+
+    void onConnect(BLEClient *bleClient)
+    {
+    }
+
+    void onDisconnect(BLEClient *bleClient)
+    {
+        _lpf2Hub->_isConnecting = false;
+        _lpf2Hub->_isConnected = false;
+        LOGLINE("onDisconnect BLECLient event");
+    }
+};
+
+/**
  * Scan for BLE servers and find the first one that advertises the service we are looking for.
  */
 class Lpf2HubAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
@@ -868,6 +896,9 @@ bool Lpf2Hub::connectHub()
     {
         _pRemoteCharacteristic->registerForNotify(notifyCallback);
     }
+
+    // add callback instance to get notified if a disconnect event appears
+    pClient->setClientCallbacks(new Lpf2HubClientCallback(this));
 
     activateHubUpdates();
 
