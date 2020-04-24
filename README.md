@@ -92,7 +92,7 @@ You can either define a color of the LED in the HUB via predifined colors or you
 ```c
 myBoostHub.setLedColor(GREEN);
 ```
-Available colors are: BLACK, PINK, PURPLE, BLUE, LIGHT_BLUE, CYAN, GREEN, YELLOW, ORANGE, RED, WHITE
+Available colors are: BLACK, PINK, PURPLE, BLUE, LIGHTBLUE, CYAN, GREEN, YELLOW, ORANGE, RED, WHITE
 
 ```c
 myBoostHub.setLedRGBColor(255, 50, 0);
