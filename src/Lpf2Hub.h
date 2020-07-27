@@ -10,7 +10,7 @@
 #define Lpf2Hub_h
 
 #include "Arduino.h"
-#include "BLEDevice.h"
+#include "NimBLEDevice.h"
 
 #define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
@@ -21,7 +21,7 @@
 #define LPF2_CURRENT_MAX 2444
 #define LPF2_CURRENT_MAX_RAW 4095
 
-//#define LOGGING_ENABLED
+#define LOGGING_ENABLED
 
 #ifdef LOGGING_ENABLED
   #define LOGLINE(...) Serial.println(__VA_ARGS__)
@@ -153,7 +153,7 @@ public:
   void deactivatePortDevice(byte portNumber, byte deviceType);
   void deactivatePortDevice(byte portNumber);
   void activateButtonReports();
-  static void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
+  static void notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
   void activateHubUpdates();
   int getTachoMotorRotation();
   double getDistance();

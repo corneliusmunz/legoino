@@ -82,21 +82,21 @@ public:
 /**
  * Scan for BLE servers and find the first one that advertises the service we are looking for.
  */
-class Lpf2HubAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
+class Lpf2HubAdvertisedDeviceCallbacks : public NimBLEAdvertisedDeviceCallbacks
 {
     Lpf2Hub *_lpf2Hub;
 
 public:
-    Lpf2HubAdvertisedDeviceCallbacks(Lpf2Hub *lpf2Hub) : BLEAdvertisedDeviceCallbacks()
+    Lpf2HubAdvertisedDeviceCallbacks(Lpf2Hub *lpf2Hub) : NimBLEAdvertisedDeviceCallbacks()
     {
         _lpf2Hub = lpf2Hub;
     }
 
-    void onResult(BLEAdvertisedDevice advertisedDevice)
+    void onResult(NimBLEAdvertisedDevice *advertisedDevice)
     {
         //Found a device, check if the service is contained and optional if address fits requested address
         #ifdef LOGGING_ENABLED
-        std::string deviceAddress =  advertisedDevice.getAddress().toString();
+        std::string deviceAddress =  advertisedDevice->getAddress().toString();
         LOG("Device Address: ");
         for(int i=0; i<deviceAddress.length(); i++) {
             LOG(deviceAddress[i]);
@@ -104,16 +104,16 @@ public:
         LOGLINE();
         #endif
 
-        if (advertisedDevice.haveServiceUUID() 
-        && advertisedDevice.getServiceUUID().equals(_lpf2Hub->_bleUuid)
-        && (_lpf2Hub->_requestedDeviceAddress == nullptr || (_lpf2Hub->_requestedDeviceAddress && advertisedDevice.getAddress().equals(*_lpf2Hub->_requestedDeviceAddress))))
+        if (advertisedDevice->haveServiceUUID() 
+        && advertisedDevice->getServiceUUID().equals(_lpf2Hub->_bleUuid)
+        && (_lpf2Hub->_requestedDeviceAddress == nullptr || (_lpf2Hub->_requestedDeviceAddress && advertisedDevice->getAddress().equals(*_lpf2Hub->_requestedDeviceAddress))))
         {
-            advertisedDevice.getScan()->stop();
-            _lpf2Hub->_pServerAddress = new BLEAddress(advertisedDevice.getAddress());
+            advertisedDevice->getScan()->stop();
+            _lpf2Hub->_pServerAddress = new BLEAddress(advertisedDevice->getAddress());
             LOG("Advertising : ");
-            uint8_t * payload = advertisedDevice.getPayload();
+            uint8_t * payload = advertisedDevice->getPayload();
             int manufacturerDataIndex = 0;
-            for(int i=0; i<advertisedDevice.getPayloadLength()-1; i++) {
+            for(int i=0; i<advertisedDevice->getPayloadLength()-1; i++) {
                 LOG(payload[i], HEX); 
                 LOG("-");
                 //detection of manufacturer data with length 9 (lego spec)
@@ -621,7 +621,7 @@ void Lpf2Hub::parsePortAction(uint8_t *pData)
  * @param [in] isNotify 
  */
 void Lpf2Hub::notifyCallback(
-    BLERemoteCharacteristic *pBLERemoteCharacteristic,
+    NimBLERemoteCharacteristic *pBLERemoteCharacteristic,
     uint8_t *pData,
     size_t length,
     bool isNotify)

@@ -10,7 +10,7 @@
 #define PoweredUpRemote_h
 
 #include "Arduino.h"
-#include "BLEDevice.h"
+#include "NimBLEDevice.h"
 #include "Lpf2Hub.h"
 
 class PoweredUpRemote : public Lpf2Hub
