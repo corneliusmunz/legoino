@@ -869,10 +869,73 @@ void Lpf2Hub::activateHubUpdates()
 bool Lpf2Hub::connectHub()
 {
     BLEAddress pAddress = *_pServerAddress;
-    BLEClient *pClient = BLEDevice::createClient();
+    NimBLEClient* pClient = nullptr;
+    
+    Serial.print("Number of Clients: ");
+    Serial.println(NimBLEDevice::getClientListSize(), DEC);
 
-    // Connect to the remove BLE Server (HUB)
-    pClient->connect(pAddress);
+        /** Check if we have a client we should reuse first **/
+    if(NimBLEDevice::getClientListSize()) {
+        /** Special case when we already know this device, we send false as the 
+         *  second argument in connect() to prevent refreshing the service database.
+         *  This saves considerable time and power.
+         */
+        pClient = NimBLEDevice::getClientByPeerAddress(pAddress);
+        if(pClient){
+            if(!pClient->connect(pAddress, BLE_ADDR_PUBLIC, false)) {
+                Serial.println("Reconnect failed");
+                return false;
+            }
+            Serial.println("Reconnected client");
+        } 
+        /** We don't already have a client that knows this device,
+         *  we will check for a client that is disconnected that we can use.
+         */
+        else {
+            pClient = NimBLEDevice::getDisconnectedClient();
+        }
+    }
+    
+    /** No client to reuse? Create a new one. */
+    if(!pClient) {
+        if(NimBLEDevice::getClientListSize() >= NIMBLE_MAX_CONNECTIONS) {
+            Serial.print("Max clients reached - no more connections available: ");
+            Serial.println(NimBLEDevice::getClientListSize(), DEC);
+            return false;
+        }
+        
+        pClient = NimBLEDevice::createClient();
+        Serial.println("New client created");
+    
+        //pClient->setConnectionParams(20,20,0,1000);
+        /** Set how long we are willing to wait for the connection to complete (seconds), default is 30. */
+        //pClient->setConnectTimeout(5);
+
+        //pClient->setClientCallbacks(&clientCB, false);
+        /** Set initial connection parameters: These settings are 15ms interval, 0 latency, 120ms timout. 
+         *  These settings are safe for 3 clients to connect reliably, can go faster if you have less 
+         *  connections. Timeout should be a multiple of the interval, minimum is 100ms.
+         *  Min interval: 12 * 1.25ms = 15, Max interval: 12 * 1.25ms = 15, 0 latency, 51 * 10ms = 510ms timeout 
+         */
+        //pClient->setConnectionParams(12,12,0,51);
+        /** Set how long we are willing to wait for the connection to complete (seconds), default is 30. */
+        //pClient->setConnectTimeout(5);
+        
+
+
+    }         
+    
+    if(!pClient->isConnected()) {
+        if (!pClient->connect(pAddress)) {
+            Serial.println("Failed to connect");
+            return false;
+        }
+    }
+    
+    Serial.print("Connected to: ");
+    Serial.println(pClient->getPeerAddress().toString().c_str());
+    Serial.print("RSSI: ");
+    Serial.println(pClient->getRssi());
 
     LOGLINE("get pClient");
     BLERemoteService *pRemoteService = pClient->getService(_bleUuid);

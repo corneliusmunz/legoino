@@ -21,7 +21,7 @@
 #define LPF2_CURRENT_MAX 2444
 #define LPF2_CURRENT_MAX_RAW 4095
 
-#define LOGGING_ENABLED
+//#define LOGGING_ENABLED
 
 #ifdef LOGGING_ENABLED
   #define LOGLINE(...) Serial.println(__VA_ARGS__)
