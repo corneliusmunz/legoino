@@ -882,7 +882,7 @@ bool Lpf2Hub::connectHub()
          */
         pClient = NimBLEDevice::getClientByPeerAddress(pAddress);
         if(pClient){
-            if(!pClient->connect(pAddress, BLE_ADDR_PUBLIC, false)) {
+            if(!pClient->connect(pAddress, false)) {
                 Serial.println("Reconnect failed");
                 return false;
             }
