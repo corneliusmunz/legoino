@@ -246,6 +246,38 @@ int32_t Lpf2Hub::ReadInt32LE(uint8_t *data, int offset = 0)
     return value;
 }
 
+void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType) 
+{
+    LOG("registerPortDevice Port:");
+    LOG(portNumber, HEX);
+    LOG(" DeviceType:");
+    LOGLINE(deviceType, HEX);
+
+    Device newDevice = {portNumber, deviceType};
+    connectedDevices[numberOfConnectedDevices] = newDevice;
+    numberOfConnectedDevices++;
+}
+
+void Lpf2Hub::deregisterPortDevice(byte portNumber) 
+{
+    LOG("deregisterPortDevice Port:");
+    LOGLINE(portNumber, HEX);
+
+    bool hasReachedRemovedIndex = false;
+    for (int i = 0; i < numberOfConnectedDevices; i++)
+    {
+        if (hasReachedRemovedIndex)
+        {
+            connectedDevices[i - 1] = connectedDevices[i];
+        }
+        if (!hasReachedRemovedIndex && connectedDevices[i].PortNumber == portNumber)
+        {
+            hasReachedRemovedIndex = true;
+        }
+    }
+    numberOfConnectedDevices--;
+}
+
 void Lpf2Hub::activatePortDevice(byte portNumber)
 {
     LOGLINE("activatePortDevice(portNumber)");
@@ -261,10 +293,10 @@ void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType)
     LOGLINE(mode, HEX);
     byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(activatePortDeviceMessage, 8);
-    //register device
-    Device newDevice = {portNumber, deviceType};
-    connectedDevices[numberOfConnectedDevices] = newDevice;
-    numberOfConnectedDevices++;
+    // //register device
+    // Device newDevice = {portNumber, deviceType};
+    // connectedDevices[numberOfConnectedDevices] = newDevice;
+    // numberOfConnectedDevices++;
 }
 
 void Lpf2Hub::deactivatePortDevice(byte portNumber)
@@ -278,20 +310,20 @@ void Lpf2Hub::deactivatePortDevice(byte portNumber, byte deviceType)
     byte mode = getModeForDeviceType(deviceType);
     byte deactivatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x00};
     WriteValue(deactivatePortDeviceMessage, 8);
-    //unregister device
-    bool hasReachedRemovedIndex = false;
-    for (int i = 0; i < numberOfConnectedDevices; i++)
-    {
-        if (hasReachedRemovedIndex)
-        {
-            connectedDevices[i - 1] = connectedDevices[i];
-        }
-        if (!hasReachedRemovedIndex && connectedDevices[i].PortNumber == portNumber)
-        {
-            hasReachedRemovedIndex = true;
-        }
-    }
-    numberOfConnectedDevices--;
+    // //unregister device
+    // bool hasReachedRemovedIndex = false;
+    // for (int i = 0; i < numberOfConnectedDevices; i++)
+    // {
+    //     if (hasReachedRemovedIndex)
+    //     {
+    //         connectedDevices[i - 1] = connectedDevices[i];
+    //     }
+    //     if (!hasReachedRemovedIndex && connectedDevices[i].PortNumber == portNumber)
+    //     {
+    //         hasReachedRemovedIndex = true;
+    //     }
+    // }
+    // numberOfConnectedDevices--;
 }
 
 void Lpf2Hub::activateButtonReports()
@@ -431,10 +463,12 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
     {
         LOG(" is connected with device ");
         LOGLINE(pData[5], DEC);
+        registerPortDevice(port, pData[5]);
     }
     else
     {
         LOGLINE(" is disconnected");
+        deregisterPortDevice(port);
     }
 }
 
@@ -957,7 +991,7 @@ bool Lpf2Hub::connectHub()
     // register notifications (callback function) for the characteristic
     if (_pRemoteCharacteristic->canNotify())
     {
-        _pRemoteCharacteristic->registerForNotify(notifyCallback);
+        _pRemoteCharacteristic->registerForNotify(std::bind(&Lpf2Hub::notifyCallback, this, _1, _2, _3, _4));
     }
 
     // add callback instance to get notified if a disconnect event appears

@@ -11,6 +11,8 @@
 
 #include "Arduino.h"
 #include "NimBLEDevice.h"
+#include <functional>
+using namespace std::placeholders;
 
 #define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
@@ -122,7 +124,7 @@ public:
 
   void setHubName(char name[]);
   void shutDownHub();
-  static byte getDeviceTypeForPortNumber(byte portNumber);
+  byte getDeviceTypeForPortNumber(byte portNumber);
   void setLedColor(Color color);
   void setLedRGBColor(char red, char green, char blue);
   void setLedHSVColor(int hue, double saturation, double value);
@@ -138,22 +140,24 @@ public:
   static  signed short ReadInt16LE(uint8_t *data, int offset);
   static  unsigned int ReadUInt32LE(uint8_t *data, int offset);
   static  signed int ReadInt32LE(uint8_t *data, int offset);
-   static void parseDeviceInfo(uint8_t *pData);
-   static void parsePortMessage(uint8_t *pData);
-  static  void parseSensorMessage(uint8_t *pData);
+  void parseDeviceInfo(uint8_t *pData);
+  void parsePortMessage(uint8_t *pData);
+  void parseSensorMessage(uint8_t *pData);
   static  void parseBoostDistanceAndColor(uint8_t *data);
   static  void parseBoostTachoMotor(uint8_t *data);
   static  void parseBoostHubMotor(uint8_t *pData);
   static  void parseBoostTiltSensor(uint8_t *data);
   static void parsePoweredUpRemote(uint8_t *pData);
-  static  void parsePortAction(uint8_t *pData);
+  void parsePortAction(uint8_t *pData);
   static  byte getModeForDeviceType(byte deviceType);
+  void registerPortDevice(byte portNumber, byte deviceType);
+  void deregisterPortDevice(byte portNumber);
   void activatePortDevice(byte portNumber, byte deviceType);
   void activatePortDevice(byte portNumber);
   void deactivatePortDevice(byte portNumber, byte deviceType);
   void deactivatePortDevice(byte portNumber);
   void activateButtonReports();
-  static void notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
+  void notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
   void activateHubUpdates();
   int getTachoMotorRotation();
   double getDistance();
