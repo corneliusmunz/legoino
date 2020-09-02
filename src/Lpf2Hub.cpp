@@ -8,9 +8,6 @@
 
 #include "Lpf2Hub.h"
 
-Device connectedDevices[10];
-int numberOfConnectedDevices = 0;
-
 // Hub orientation
 int Lpf2HubTiltX;
 int Lpf2HubTiltY;
@@ -21,24 +18,6 @@ int Lpf2HubTachoMotorRotation;
 // Distance/Color sensor
 double Lpf2HubDistance;
 int Lpf2HubColor;
-
-// Hub information values
-int Lpf2HubRssi;
-uint8_t Lpf2HubBatteryLevel;
-int Lpf2HubHubMotorRotation;
-bool Lpf2HubHubButtonPressed;
-double Lpf2HubVoltage; //V
-double Lpf2HubCurrent; //mA
-
-int Lpf2HubFirmwareVersionBuild;
-int Lpf2HubFirmwareVersionBugfix;
-int Lpf2HubFirmwareVersionMajor;
-int Lpf2HubFirmwareVersionMinor;
-
-int Lpf2HubHardwareVersionBuild;
-int Lpf2HubHardwareVersionBugfix;
-int Lpf2HubHardwareVersionMajor;
-int Lpf2HubHardwareVersionMinor;
 
 // PoweredUp Remote
 bool Lpf2HubRemoteLeftUpButtonPressed;

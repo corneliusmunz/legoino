@@ -193,6 +193,28 @@ public:
   boolean _isConnecting;
   boolean _isConnected;
   HubType _hubType;
+
+private:
+  Device connectedDevices[10];
+  int numberOfConnectedDevices = 0;
+
+  // Hub information values
+  int Lpf2HubRssi;
+  uint8_t Lpf2HubBatteryLevel;
+  int Lpf2HubHubMotorRotation;
+  bool Lpf2HubHubButtonPressed;
+  double Lpf2HubVoltage; //V
+  double Lpf2HubCurrent; //mA
+
+  int Lpf2HubFirmwareVersionBuild;
+  int Lpf2HubFirmwareVersionBugfix;
+  int Lpf2HubFirmwareVersionMajor;
+  int Lpf2HubFirmwareVersionMinor;
+
+  int Lpf2HubHardwareVersionBuild;
+  int Lpf2HubHardwareVersionBugfix;
+  int Lpf2HubHardwareVersionMajor;
+  int Lpf2HubHardwareVersionMinor;
 };
 
 #endif
