@@ -26,32 +26,33 @@ using namespace std::placeholders;
 //#define LOGGING_ENABLED
 
 #ifdef LOGGING_ENABLED
-  #define LOGLINE(...) Serial.println(__VA_ARGS__)
-  #define LOG(...) Serial.print(__VA_ARGS__)
+#define LOGLINE(...) Serial.println(__VA_ARGS__)
+#define LOG(...) Serial.print(__VA_ARGS__)
 #else
-  #define LOGLINE(...) 
-  #define LOG(...)
+#define LOGLINE(...)
+#define LOG(...)
 #endif
 
 typedef void (*ButtonCallback)(bool isPressed);
 
 typedef enum HubType
 {
-    UNKNOWN = 0,
-    WEDO2_SMART_HUB = 1,
-    BOOST_MOVE_HUB = 2,
-    POWERED_UP_HUB = 3,
-    POWERED_UP_REMOTE = 4,
-    DUPLO_TRAIN_HUB = 5,
-    CONTROL_PLUS_HUB = 6
+  UNKNOWN = 0,
+  WEDO2_SMART_HUB = 1,
+  BOOST_MOVE_HUB = 2,
+  POWERED_UP_HUB = 3,
+  POWERED_UP_REMOTE = 4,
+  DUPLO_TRAIN_HUB = 5,
+  CONTROL_PLUS_HUB = 6
 };
 
-typedef enum BLEManufacturerData {
-    DUPLO_TRAIN_HUB_ID = 32, //0x20
-    BOOST_MOVE_HUB_ID = 64, //0x40
-    POWERED_UP_HUB_ID = 65, //0x41
-    POWERED_UP_REMOTE_ID = 66, //0x42
-    CONTROL_PLUS_LARGE_HUB_ID = 128 //0x80
+typedef enum BLEManufacturerData
+{
+  DUPLO_TRAIN_HUB_ID = 32,        //0x20
+  BOOST_MOVE_HUB_ID = 64,         //0x40
+  POWERED_UP_HUB_ID = 65,         //0x41
+  POWERED_UP_REMOTE_ID = 66,      //0x42
+  CONTROL_PLUS_LARGE_HUB_ID = 128 //0x80
 };
 
 typedef enum DeviceType
@@ -70,8 +71,8 @@ typedef enum DeviceType
 
 typedef struct Device
 {
-    byte PortNumber;
-    byte DeviceType;
+  byte PortNumber;
+  byte DeviceType;
 };
 
 typedef enum Color
@@ -90,18 +91,14 @@ typedef enum Color
   NONE = 255
 };
 
- static const char *COLOR_STRING[] = {
-    "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white"
-};
-
+static const char *COLOR_STRING[] = {
+    "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white"};
 
 class Lpf2Hub
 {
 private:
-
   // Notification callbacks
   ButtonCallback _buttonCallback = nullptr;
-  
 
 public:
   enum Port
@@ -132,14 +129,14 @@ public:
   void registerButtonCallback(ButtonCallback buttonCallback);
   void WriteValue(byte command[], int size);
   static byte MapSpeed(int speed);
-  static  byte *Int16ToByteArray(int16_t x);
-  static  byte *Int32ToByteArray(int32_t x);
-  static  unsigned char ReadUInt8(uint8_t *data, int offset);
-  static  signed char ReadInt8(uint8_t *data, int offset);
-  static  unsigned short ReadUInt16LE(uint8_t *data, int offset);
-  static  signed short ReadInt16LE(uint8_t *data, int offset);
-  static  unsigned int ReadUInt32LE(uint8_t *data, int offset);
-  static  signed int ReadInt32LE(uint8_t *data, int offset);
+  static byte *Int16ToByteArray(int16_t x);
+  static byte *Int32ToByteArray(int32_t x);
+  static unsigned char ReadUInt8(uint8_t *data, int offset);
+  static signed char ReadInt8(uint8_t *data, int offset);
+  static unsigned short ReadUInt16LE(uint8_t *data, int offset);
+  static signed short ReadInt16LE(uint8_t *data, int offset);
+  static unsigned int ReadUInt32LE(uint8_t *data, int offset);
+  static signed int ReadInt32LE(uint8_t *data, int offset);
   void parseDeviceInfo(uint8_t *pData);
   void parsePortMessage(uint8_t *pData);
   void parseSensorMessage(uint8_t *pData);
@@ -163,30 +160,30 @@ public:
   double getDistance();
   int getColor();
   int getRssi();
-int getBatteryLevel();
-double getHubVoltage();
-double getHubCurrent();
-int getBoostHubMotorRotation();
-int getTiltX(); 
-int getTiltY();
-int getFirmwareVersionBuild();
-int getFirmwareVersionBugfix();
-int getFirmwareVersionMajor();
-int getFirmwareVersionMinor();
-int getHardwareVersionBuild();
-int getHardwareVersionBugfix();
-int getHardwareVersionMajor();
-int getHardwareVersionMinor();
-HubType getHubType();
-bool isButtonPressed();
-bool isLeftRemoteUpButtonPressed();
-bool isLeftRemoteDownButtonPressed();
-bool isLeftRemoteStopButtonPressed();
-bool isLeftRemoteButtonReleased();
-bool isRightRemoteUpButtonPressed();
-bool isRightRemoteDownButtonPressed();
-bool isRightRemoteStopButtonPressed();
-bool isRightRemoteButtonReleased();
+  int getBatteryLevel();
+  double getHubVoltage();
+  double getHubCurrent();
+  int getBoostHubMotorRotation();
+  int getTiltX();
+  int getTiltY();
+  int getFirmwareVersionBuild();
+  int getFirmwareVersionBugfix();
+  int getFirmwareVersionMajor();
+  int getFirmwareVersionMinor();
+  int getHardwareVersionBuild();
+  int getHardwareVersionBugfix();
+  int getHardwareVersionMajor();
+  int getHardwareVersionMinor();
+  HubType getHubType();
+  bool isButtonPressed();
+  bool isLeftRemoteUpButtonPressed();
+  bool isLeftRemoteDownButtonPressed();
+  bool isLeftRemoteStopButtonPressed();
+  bool isLeftRemoteButtonReleased();
+  bool isRightRemoteUpButtonPressed();
+  bool isRightRemoteDownButtonPressed();
+  bool isRightRemoteStopButtonPressed();
+  bool isRightRemoteButtonReleased();
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;
   BLEAddress *_pServerAddress;
