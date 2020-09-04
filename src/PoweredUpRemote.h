@@ -29,7 +29,6 @@ public:
   //Methods
   void setLedColor(Color color);
   void setLedRGBColor(char red, char green, char blue);
-
 };
 
 #endif

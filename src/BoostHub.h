@@ -16,7 +16,7 @@
 class BoostHub : public Lpf2Hub
 {
 public:
-    //Port definitions specific to Boost Hubs
+  //Port definitions specific to Boost Hubs
   enum Port
   {
     A = 0x00,

@@ -8,27 +8,12 @@
 
 #include "Lpf2Hub.h"
 
-// Hub orientation
-int Lpf2HubTiltX;
-int Lpf2HubTiltY;
-
 // Boost tacho motor
 int Lpf2HubTachoMotorRotation;
 
 // Distance/Color sensor
 double Lpf2HubDistance;
 int Lpf2HubColor;
-
-// PoweredUp Remote
-bool Lpf2HubRemoteLeftUpButtonPressed;
-bool Lpf2HubRemoteLeftDownButtonPressed;
-bool Lpf2HubRemoteLeftStopButtonPressed;
-bool Lpf2HubRemoteLeftButtonReleased;
-
-bool Lpf2HubRemoteRightUpButtonPressed;
-bool Lpf2HubRemoteRightDownButtonPressed;
-bool Lpf2HubRemoteRightStopButtonPressed;
-bool Lpf2HubRemoteRightButtonReleased;
 
 /**
  * Derived class which could be added as an instance to the BLEClient for callback handling
@@ -73,44 +58,45 @@ public:
 
     void onResult(NimBLEAdvertisedDevice *advertisedDevice)
     {
-        //Found a device, check if the service is contained and optional if address fits requested address
-        #ifdef LOGGING_ENABLED
-        std::string deviceAddress =  advertisedDevice->getAddress().toString();
+//Found a device, check if the service is contained and optional if address fits requested address
+#ifdef LOGGING_ENABLED
+        std::string deviceAddress = advertisedDevice->getAddress().toString();
         LOG("Device Address: ");
-        for(int i=0; i<deviceAddress.length(); i++) {
+        for (int i = 0; i < deviceAddress.length(); i++)
+        {
             LOG(deviceAddress[i]);
         }
         LOGLINE();
-        #endif
+#endif
 
-        if (advertisedDevice->haveServiceUUID() 
-        && advertisedDevice->getServiceUUID().equals(_lpf2Hub->_bleUuid)
-        && (_lpf2Hub->_requestedDeviceAddress == nullptr || (_lpf2Hub->_requestedDeviceAddress && advertisedDevice->getAddress().equals(*_lpf2Hub->_requestedDeviceAddress))))
+        if (advertisedDevice->haveServiceUUID() && advertisedDevice->getServiceUUID().equals(_lpf2Hub->_bleUuid) && (_lpf2Hub->_requestedDeviceAddress == nullptr || (_lpf2Hub->_requestedDeviceAddress && advertisedDevice->getAddress().equals(*_lpf2Hub->_requestedDeviceAddress))))
         {
             advertisedDevice->getScan()->stop();
             _lpf2Hub->_pServerAddress = new BLEAddress(advertisedDevice->getAddress());
             LOG("Advertising : ");
-            uint8_t * payload = advertisedDevice->getPayload();
+            uint8_t *payload = advertisedDevice->getPayload();
             int manufacturerDataIndex = 0;
-            for(int i=0; i<advertisedDevice->getPayloadLength()-1; i++) {
-                LOG(payload[i], HEX); 
+            for (int i = 0; i < advertisedDevice->getPayloadLength() - 1; i++)
+            {
+                LOG(payload[i], HEX);
                 LOG("-");
                 //detection of manufacturer data with length 9 (lego spec)
-                if(payload[i]==0x09 && payload[i+1]==0xFF) {
+                if (payload[i] == 0x09 && payload[i + 1] == 0xFF)
+                {
                     manufacturerDataIndex = i;
                     break;
                 }
             }
             LOGLINE();
-            
+
             //check device type ID
-            switch (payload[manufacturerDataIndex+5])
+            switch (payload[manufacturerDataIndex + 5])
             {
             case DUPLO_TRAIN_HUB_ID:
                 _lpf2Hub->_hubType = DUPLO_TRAIN_HUB;
                 LOGLINE("Hubtype: DUPLO_TRAIN_HUB");
                 break;
-             case BOOST_MOVE_HUB_ID:
+            case BOOST_MOVE_HUB_ID:
                 _lpf2Hub->_hubType = BOOST_MOVE_HUB;
                 LOGLINE("Hubtype: BOOST_MOVE_HUB");
                 break;
@@ -122,12 +108,12 @@ public:
                 _lpf2Hub->_hubType = POWERED_UP_REMOTE;
                 LOGLINE("Hubtype: POWERED_UP_REMOTE");
                 break;
-            case CONTROL_PLUS_LARGE_HUB_ID:
+            case CONTROL_PLUS_HUB_ID:
                 _lpf2Hub->_hubType = CONTROL_PLUS_HUB;
                 LOGLINE("Hubtype: CONTROL_PLUS_HUB");
-                break;           
+                break;
             default:
-                _lpf2Hub->_hubType = UNKNOWN;
+                _lpf2Hub->_hubType = UNKNOWNHUB;
                 LOGLINE("Hubtype: UNKNOWN");
                 break;
             }
@@ -225,7 +211,7 @@ int32_t Lpf2Hub::ReadInt32LE(uint8_t *data, int offset = 0)
     return value;
 }
 
-void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType) 
+void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType)
 {
     LOG("registerPortDevice Port:");
     LOG(portNumber, HEX);
@@ -237,7 +223,7 @@ void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType)
     numberOfConnectedDevices++;
 }
 
-void Lpf2Hub::deregisterPortDevice(byte portNumber) 
+void Lpf2Hub::deregisterPortDevice(byte portNumber)
 {
     LOG("deregisterPortDevice Port:");
     LOGLINE(portNumber, HEX);
@@ -320,71 +306,71 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
     {
         if (pData[5] == 1)
         {
-            // if (_buttonCallback != nullptr)
-            // {
-            //     _buttonCallback(true);
-            // }
+            if (_buttonCallback != nullptr)
+            {
+                _buttonCallback(true);
+            }
             LOGLINE("button PRESSED");
-            Lpf2HubHubButtonPressed = true;
+            _lpf2HubHubButtonPressed = true;
             return;
         }
         else if (pData[5] == 0)
         {
-            // if (_buttonCallback != nullptr)
-            // {
-            //     _buttonCallback(false);
-            // }
+            if (_buttonCallback != nullptr)
+            {
+                _buttonCallback(false);
+            }
             LOGLINE("button RELEASED");
-            Lpf2HubHubButtonPressed = false;
+            _lpf2HubHubButtonPressed = false;
             return;
         }
     }
     else if (pData[3] == 0x03) // Firmware version
     {
-        Lpf2HubFirmwareVersionBuild = ReadUInt16LE(pData, 5);
-        Lpf2HubFirmwareVersionBugfix = ReadUInt8(pData, 7);
-        Lpf2HubFirmwareVersionMajor = ReadUInt8(pData, 8) >> 4;
-        Lpf2HubFirmwareVersionMinor = ReadUInt8(pData, 8) & 0xf;
+        _lpf2HubFirmwareVersionBuild = ReadUInt16LE(pData, 5);
+        _lpf2HubFirmwareVersionBugfix = ReadUInt8(pData, 7);
+        _lpf2HubFirmwareVersionMajor = ReadUInt8(pData, 8) >> 4;
+        _lpf2HubFirmwareVersionMinor = ReadUInt8(pData, 8) & 0xf;
 
         LOG("Firmware version major:");
-        LOG(Lpf2HubFirmwareVersionMajor);
+        LOG(_lpf2HubFirmwareVersionMajor);
         LOG(" minor:");
-        LOG(Lpf2HubFirmwareVersionMinor);
+        LOG(_lpf2HubFirmwareVersionMinor);
         LOG(" bugfix:");
-        LOG(Lpf2HubFirmwareVersionBugfix);
+        LOG(_lpf2HubFirmwareVersionBugfix);
         LOG(" build:");
-        LOG(Lpf2HubFirmwareVersionBuild);
+        LOG(_lpf2HubFirmwareVersionBuild);
         LOGLINE();
     }
     else if (pData[3] == 0x04) // Hardware version
     {
-        Lpf2HubHardwareVersionBuild = ReadUInt16LE(pData, 5);
-        Lpf2HubHardwareVersionBugfix = ReadUInt8(pData, 7);
-        Lpf2HubHardwareVersionMajor = ReadUInt8(pData, 8) >> 4;
-        Lpf2HubHardwareVersionMinor = ReadUInt8(pData, 8) & 0xf;
+        _lpf2HubHardwareVersionBuild = ReadUInt16LE(pData, 5);
+        _lpf2HubHardwareVersionBugfix = ReadUInt8(pData, 7);
+        _lpf2HubHardwareVersionMajor = ReadUInt8(pData, 8) >> 4;
+        _lpf2HubHardwareVersionMinor = ReadUInt8(pData, 8) & 0xf;
 
         LOG("Hardware version major:");
-        LOG(Lpf2HubHardwareVersionMajor);
+        LOG(_lpf2HubHardwareVersionMajor);
         LOG(" minor:");
-        LOG(Lpf2HubHardwareVersionMinor);
+        LOG(_lpf2HubHardwareVersionMinor);
         LOG(" bugfix:");
-        LOG(Lpf2HubHardwareVersionBugfix);
+        LOG(_lpf2HubHardwareVersionBugfix);
         LOG(" build:");
-        LOG(Lpf2HubHardwareVersionBuild);
+        LOG(_lpf2HubHardwareVersionBuild);
         LOGLINE();
     }
     else if (pData[3] == 0x05) // RSSI
     {
         LOG("RSSI update: ");
-        Lpf2HubRssi = ReadInt8(pData, 5);
-        LOG(Lpf2HubRssi);
+        _lpf2HubRssi = ReadInt8(pData, 5);
+        LOG(_lpf2HubRssi);
         LOGLINE();
     }
     else if (pData[3] == 0x06) // Battery level reports
     {
-        Lpf2HubBatteryLevel = ReadUInt8(pData, 5);
+        _lpf2HubBatteryLevel = ReadUInt8(pData, 5);
         LOG("Battery level: ");
-        LOG(Lpf2HubBatteryLevel);
+        LOG(_lpf2HubBatteryLevel);
         LOG("%");
         LOGLINE();
     }
@@ -436,12 +422,26 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
 void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData)
 {
     LOGLINE("parseBoostTiltSensor");
-    Lpf2HubTiltX = pData[4] > 64 ? map(pData[4], 255, 191, 0, 90) : map(pData[4], 0, 64, 0, -90);
-    Lpf2HubTiltY = pData[5] > 64 ? map(pData[5], 255, 191, 0, -90) : map(pData[5], 0, 64, 0, 90);
+    _lpf2HubTiltX = ReadInt8(pData, 4);
+    _lpf2HubTiltY = ReadInt8(pData, 5);
     LOG("x:");
-    LOG(Lpf2HubTiltX, DEC);
+    LOG(_lpf2HubTiltX, DEC);
     LOG(" y:");
-    LOGLINE(Lpf2HubTiltY, DEC);
+    LOGLINE(_lpf2HubTiltY, DEC);
+}
+
+void Lpf2Hub::parseControlPlusHubTiltSensor(uint8_t *pData)
+{
+    LOGLINE("parseControlPlusTiltSensor");
+    _lpf2HubTiltX = ReadInt16LE(pData, 4);
+    _lpf2HubTiltY = ReadInt16LE(pData, 6);
+    _lpf2HubTiltZ = ReadInt16LE(pData, 8);
+    LOG("x:");
+    LOG(_lpf2HubTiltX, DEC);
+    LOG(" y:");
+    LOG(_lpf2HubTiltY, DEC);
+    LOG(" z:");
+    LOGLINE(_lpf2HubTiltZ, DEC);
 }
 
 void Lpf2Hub::parseBoostTachoMotor(uint8_t *pData)
@@ -455,9 +455,9 @@ void Lpf2Hub::parseBoostTachoMotor(uint8_t *pData)
 void Lpf2Hub::parseBoostHubMotor(uint8_t *pData)
 {
     LOGLINE("parseBoostHubMotor");
-    Lpf2HubHubMotorRotation = ReadInt32LE(pData, 4);
+    _lpf2HubHubMotorRotation = ReadInt32LE(pData, 4);
     LOG("BoostHub motor rotation: ");
-    LOGLINE(Lpf2HubHubMotorRotation, DEC);
+    LOGLINE(_lpf2HubHubMotorRotation, DEC);
 }
 
 void Lpf2Hub::parseBoostDistanceAndColor(uint8_t *pData)
@@ -495,43 +495,55 @@ void Lpf2Hub::parsePoweredUpRemote(uint8_t *pData)
     if (buttonState == 0x01)
     {
         LOGLINE(" ButtonState: UP");
-        if (port == 0x00) {
-            Lpf2HubRemoteLeftUpButtonPressed = true;
-        } else if (port == 0x01) {
-            Lpf2HubRemoteRightUpButtonPressed = true;
+        if (port == 0x00)
+        {
+            _lpf2HubRemoteLeftUpButtonPressed = true;
+        }
+        else if (port == 0x01)
+        {
+            _lpf2HubRemoteRightUpButtonPressed = true;
         }
     }
     else if (buttonState == 0xff)
     {
         LOGLINE(" ButtonState: DOWN");
-        if (port == 0x00) {
-            Lpf2HubRemoteLeftDownButtonPressed = true;
-        } else if (port == 0x01) {
-            Lpf2HubRemoteRightDownButtonPressed = true;
+        if (port == 0x00)
+        {
+            _lpf2HubRemoteLeftDownButtonPressed = true;
+        }
+        else if (port == 0x01)
+        {
+            _lpf2HubRemoteRightDownButtonPressed = true;
         }
     }
     else if (buttonState == 0x7f)
     {
         LOGLINE(" ButtonState: STOP");
-        if (port == 0x00) {
-            Lpf2HubRemoteLeftStopButtonPressed = true;
-        } else if (port == 0x01) {
-            Lpf2HubRemoteRightStopButtonPressed = true;
+        if (port == 0x00)
+        {
+            _lpf2HubRemoteLeftStopButtonPressed = true;
+        }
+        else if (port == 0x01)
+        {
+            _lpf2HubRemoteRightStopButtonPressed = true;
         }
     }
     else if (buttonState == 0x00)
     {
         LOGLINE(" ButtonState: RELEASED");
-        if (port == 0x00) {
-            Lpf2HubRemoteLeftUpButtonPressed = false;
-            Lpf2HubRemoteLeftDownButtonPressed = false;
-            Lpf2HubRemoteLeftStopButtonPressed = false;
-            Lpf2HubRemoteLeftButtonReleased = true;
-        } else if (port == 0x01) {
-            Lpf2HubRemoteRightUpButtonPressed = false;
-            Lpf2HubRemoteRightDownButtonPressed = false;
-            Lpf2HubRemoteRightStopButtonPressed = false;
-            Lpf2HubRemoteRightButtonReleased = true;            
+        if (port == 0x00)
+        {
+            _lpf2HubRemoteLeftUpButtonPressed = false;
+            _lpf2HubRemoteLeftDownButtonPressed = false;
+            _lpf2HubRemoteLeftStopButtonPressed = false;
+            _lpf2HubRemoteLeftButtonReleased = true;
+        }
+        else if (port == 0x01)
+        {
+            _lpf2HubRemoteRightUpButtonPressed = false;
+            _lpf2HubRemoteRightDownButtonPressed = false;
+            _lpf2HubRemoteRightStopButtonPressed = false;
+            _lpf2HubRemoteRightButtonReleased = true;
         }
     }
 }
@@ -540,16 +552,22 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
 {
     switch (deviceType)
     {
-    case BASIC_MOTOR:
+    case SIMPLE_MEDIUM_LINEAR_MOTOR:
         return 0x02;
-    case BOOST_TACHO_MOTOR:
+    case TRAIN_MOTOR:
         return 0x02;
-    case BOOST_MOVE_HUB_MOTOR:
+    case MEDIUM_LINEAR_MOTOR:
         return 0x02;
-    case BOOST_DISTANCE:
+    case MOVE_HUB_MEDIUM_LINEAR_MOTOR:
+        return 0x02;
+    case COLOR_DISTANCE_SENSOR:
         return 0x08;
-    case BOOST_TILT:
-        return 0x04;
+    case MOVE_HUB_TILT_SENSOR:
+        return 0x00;
+    case TECHNIC_MEDIUM_ANGULAR_MOTOR:
+        return 0x02;
+    case TECHNIC_LARGE_ANGULAR_MOTOR:
+        return 0x02;
     default:
         return 0x00;
     }
@@ -566,34 +584,38 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     if (pData[3] == 0x3b)
     {
         int currentRaw = ReadUInt16LE(pData, 4);
-        Lpf2HubCurrent = (double)currentRaw * LPF2_CURRENT_MAX/LPF2_CURRENT_MAX_RAW;
+        _lpf2HubCurrent = (double)currentRaw * LPF2_CURRENT_MAX / LPF2_CURRENT_MAX_RAW;
         LOG("Current value [mA]: ");
-        LOG(Lpf2HubCurrent);
+        LOG(_lpf2HubCurrent);
         LOGLINE();
         return;
     }
     else if (pData[3] == 0x3c)
     {
         int voltageRaw = ReadUInt16LE(pData, 4);
-        Lpf2HubVoltage = (double)voltageRaw * LPF2_VOLTAGE_MAX/LPF2_VOLTAGE_MAX_RAW;
+        _lpf2HubVoltage = (double)voltageRaw * LPF2_VOLTAGE_MAX / LPF2_VOLTAGE_MAX_RAW;
         LOG("Hub Voltage : ");
-        LOG(Lpf2HubVoltage);
+        LOG(_lpf2HubVoltage);
         LOGLINE();
         return;
     }
-    else if (deviceType == BOOST_TACHO_MOTOR)
+    else if (deviceType == MEDIUM_LINEAR_MOTOR || deviceType == MOVE_HUB_MEDIUM_LINEAR_MOTOR)
     {
         parseBoostTachoMotor(pData);
     }
-    else if (deviceType == BOOST_DISTANCE)
+    else if (deviceType == COLOR_DISTANCE_SENSOR)
     {
         parseBoostDistanceAndColor(pData);
     }
-    else if (deviceType == BOOST_TILT)
+    else if (deviceType == MOVE_HUB_TILT_SENSOR)
     {
         parseBoostTiltSensor(pData);
     }
-    else if (deviceType == POWERED_UP_REMOTE_BUTTON)
+    else if (deviceType == TECHNIC_MEDIUM_HUB_TILT_SENSOR)
+    {
+        parseControlPlusHubTiltSensor(pData);
+    }
+    else if (deviceType == REMOTE_CONTROL_BUTTON)
     {
         parsePoweredUpRemote(pData);
     }
@@ -621,8 +643,8 @@ void Lpf2Hub::notifyCallback(
     size_t length,
     bool isNotify)
 {
-    //LOG("Notify callback for characteristic ");
-    //LOG(pBLERemoteCharacteristic->getUUID().toString().c_str());
+    LOG("Notify callback for characteristic ");
+    LOG(pBLERemoteCharacteristic->getUUID().toString().c_str());
     LOG("data: ");
 
     for (int i = 0; i < length; i++)
@@ -668,7 +690,7 @@ void Lpf2Hub::init()
     _isConnecting = false;
     _bleUuid = BLEUUID(LPF2_UUID);
     _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
-    _hubType = UNKNOWN;
+    _hubType = UNKNOWNHUB;
 
     BLEDevice::init("");
     BLEScan *pBLEScan = BLEDevice::getScan();
@@ -683,7 +705,7 @@ void Lpf2Hub::init()
  * @brief Init function set the UUIDs and scan for the Hub
  * @param [in] deviceAddress to which the arduino should connect represented by a hex string of the format: 00:00:00:00:00:00
  */
-void Lpf2Hub::init(std::string deviceAddress) 
+void Lpf2Hub::init(std::string deviceAddress)
 {
     _requestedDeviceAddress = new BLEAddress(deviceAddress);
     init();
@@ -719,9 +741,8 @@ byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
         }
     }
 
-    return UNDEFINED;
+    return UNKNOWNDEVICE;
 }
-
 
 /**
  * @brief Register the callback function if a button message is received
@@ -864,69 +885,60 @@ void Lpf2Hub::activateHubUpdates()
 bool Lpf2Hub::connectHub()
 {
     BLEAddress pAddress = *_pServerAddress;
-    NimBLEClient* pClient = nullptr;
-    
+    NimBLEClient *pClient = nullptr;
+
     Serial.print("Number of Clients: ");
     Serial.println(NimBLEDevice::getClientListSize(), DEC);
 
-        /** Check if we have a client we should reuse first **/
-    if(NimBLEDevice::getClientListSize()) {
+    /** Check if we have a client we should reuse first **/
+    if (NimBLEDevice::getClientListSize())
+    {
         /** Special case when we already know this device, we send false as the 
          *  second argument in connect() to prevent refreshing the service database.
          *  This saves considerable time and power.
          */
         pClient = NimBLEDevice::getClientByPeerAddress(pAddress);
-        if(pClient){
-            if(!pClient->connect(pAddress, false)) {
+        if (pClient)
+        {
+            if (!pClient->connect(pAddress, false))
+            {
                 Serial.println("Reconnect failed");
                 return false;
             }
             Serial.println("Reconnected client");
-        } 
+        }
         /** We don't already have a client that knows this device,
          *  we will check for a client that is disconnected that we can use.
          */
-        else {
+        else
+        {
             pClient = NimBLEDevice::getDisconnectedClient();
         }
     }
-    
+
     /** No client to reuse? Create a new one. */
-    if(!pClient) {
-        if(NimBLEDevice::getClientListSize() >= NIMBLE_MAX_CONNECTIONS) {
+    if (!pClient)
+    {
+        if (NimBLEDevice::getClientListSize() >= NIMBLE_MAX_CONNECTIONS)
+        {
             Serial.print("Max clients reached - no more connections available: ");
             Serial.println(NimBLEDevice::getClientListSize(), DEC);
             return false;
         }
-        
+
         pClient = NimBLEDevice::createClient();
         Serial.println("New client created");
-    
-        //pClient->setConnectionParams(20,20,0,1000);
-        /** Set how long we are willing to wait for the connection to complete (seconds), default is 30. */
-        //pClient->setConnectTimeout(5);
+    }
 
-        //pClient->setClientCallbacks(&clientCB, false);
-        /** Set initial connection parameters: These settings are 15ms interval, 0 latency, 120ms timout. 
-         *  These settings are safe for 3 clients to connect reliably, can go faster if you have less 
-         *  connections. Timeout should be a multiple of the interval, minimum is 100ms.
-         *  Min interval: 12 * 1.25ms = 15, Max interval: 12 * 1.25ms = 15, 0 latency, 51 * 10ms = 510ms timeout 
-         */
-        //pClient->setConnectionParams(12,12,0,51);
-        /** Set how long we are willing to wait for the connection to complete (seconds), default is 30. */
-        //pClient->setConnectTimeout(5);
-        
-
-
-    }         
-    
-    if(!pClient->isConnected()) {
-        if (!pClient->connect(pAddress)) {
+    if (!pClient->isConnected())
+    {
+        if (!pClient->connect(pAddress))
+        {
             Serial.println("Failed to connect");
             return false;
         }
     }
-    
+
     Serial.print("Connected to: ");
     Serial.println(pClient->getPeerAddress().toString().c_str());
     Serial.print("RSSI: ");
@@ -952,7 +964,7 @@ bool Lpf2Hub::connectHub()
     // register notifications (callback function) for the characteristic
     if (_pRemoteCharacteristic->canNotify())
     {
-        _pRemoteCharacteristic->registerForNotify(std::bind(&Lpf2Hub::notifyCallback, this, _1, _2, _3, _4));
+        _pRemoteCharacteristic->subscribe(true, std::bind(&Lpf2Hub::notifyCallback, this, _1, _2, _3, _4), true);
     }
 
     // add callback instance to get notified if a disconnect event appears
@@ -1000,77 +1012,82 @@ int Lpf2Hub::getTachoMotorRotation()
 
 int Lpf2Hub::getBoostHubMotorRotation()
 {
-    return Lpf2HubHubMotorRotation;
+    return _lpf2HubHubMotorRotation;
 }
 
 int Lpf2Hub::getRssi()
 {
-    return Lpf2HubRssi;
+    return _lpf2HubRssi;
 }
 
 int Lpf2Hub::getBatteryLevel()
 {
-    return Lpf2HubBatteryLevel;
+    return _lpf2HubBatteryLevel;
 }
 
 double Lpf2Hub::getHubVoltage()
 {
-    return Lpf2HubVoltage;
+    return _lpf2HubVoltage;
 }
 
 double Lpf2Hub::getHubCurrent()
 {
-    return Lpf2HubCurrent;
+    return _lpf2HubCurrent;
 }
 
 int Lpf2Hub::getTiltX()
 {
-    return Lpf2HubTiltX;
+    return _lpf2HubTiltX;
 }
 
 int Lpf2Hub::getTiltY()
 {
-    return Lpf2HubTiltY;
+    return _lpf2HubTiltY;
+}
+
+int Lpf2Hub::getTiltZ()
+{
+    return _lpf2HubTiltZ;
 }
 
 int Lpf2Hub::getFirmwareVersionBuild()
 {
-    return Lpf2HubFirmwareVersionBuild;
+    return _lpf2HubFirmwareVersionBuild;
 }
 
 int Lpf2Hub::getFirmwareVersionBugfix()
 {
-    return Lpf2HubFirmwareVersionBugfix;
+    return _lpf2HubFirmwareVersionBugfix;
 }
 
 int Lpf2Hub::getFirmwareVersionMajor()
 {
-    return Lpf2HubFirmwareVersionMajor;
+    return _lpf2HubFirmwareVersionMajor;
 }
 
 int Lpf2Hub::getFirmwareVersionMinor()
 {
-    return Lpf2HubFirmwareVersionMinor;
+    return _lpf2HubFirmwareVersionMinor;
 }
 
 int Lpf2Hub::getHardwareVersionBuild()
 {
-    return Lpf2HubHardwareVersionBuild;
+    return _lpf2HubHardwareVersionBuild;
 }
 
 int Lpf2Hub::getHardwareVersionBugfix()
 {
-    return Lpf2HubHardwareVersionBugfix;
+    return _lpf2HubHardwareVersionBugfix;
 }
 
 int Lpf2Hub::getHardwareVersionMajor()
 {
-    return Lpf2HubHardwareVersionMajor;
+    return _lpf2HubHardwareVersionMajor;
 }
 
 int Lpf2Hub::getHardwareVersionMinor()
 {
-    return Lpf2HubHardwareVersionMinor;
+    return _lpf2HubHardwareVersionMinor;
 }
 
 HubType Lpf2Hub::getHubType()
@@ -1080,45 +1097,45 @@ HubType Lpf2Hub::getHubType()
 
 bool Lpf2Hub::isButtonPressed()
 {
-    return Lpf2HubHubButtonPressed;
+    return _lpf2HubHubButtonPressed;
 }
 
 bool Lpf2Hub::isLeftRemoteUpButtonPressed()
 {
-    return Lpf2HubRemoteLeftUpButtonPressed;
+    return _lpf2HubRemoteLeftUpButtonPressed;
 }
 
 bool Lpf2Hub::isLeftRemoteDownButtonPressed()
 {
-    return Lpf2HubRemoteLeftDownButtonPressed;
+    return _lpf2HubRemoteLeftDownButtonPressed;
 }
 
 bool Lpf2Hub::isLeftRemoteStopButtonPressed()
 {
-    return Lpf2HubRemoteLeftStopButtonPressed;
+    return _lpf2HubRemoteLeftStopButtonPressed;
 }
 
 bool Lpf2Hub::isLeftRemoteButtonReleased()
 {
-    return Lpf2HubRemoteLeftButtonReleased;
+    return _lpf2HubRemoteLeftButtonReleased;
 }
 
 bool Lpf2Hub::isRightRemoteUpButtonPressed()
 {
-    return Lpf2HubRemoteRightUpButtonPressed;
+    return _lpf2HubRemoteRightUpButtonPressed;
 }
 
 bool Lpf2Hub::isRightRemoteDownButtonPressed()
 {
-    return Lpf2HubRemoteRightDownButtonPressed;
+    return _lpf2HubRemoteRightDownButtonPressed;
 }
 
 bool Lpf2Hub::isRightRemoteStopButtonPressed()
 {
-    return Lpf2HubRemoteRightStopButtonPressed;
+    return _lpf2HubRemoteRightStopButtonPressed;
 }
 
 bool Lpf2Hub::isRightRemoteButtonReleased()
 {
-    return Lpf2HubRemoteRightButtonReleased;
+    return _lpf2HubRemoteRightButtonReleased;
 }

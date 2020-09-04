@@ -83,7 +83,7 @@ void BoostHub::setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t d
 {
     byte *degreeBytes = Int32ToByteArray(degrees);
     Port port = AB;
-    //both ports A and B 
+    //both ports A and B
     //max power 100 (0x64)
     //End state Brake (127)
     //Use acc and dec profile (0x03 last two bits set)
@@ -97,8 +97,8 @@ void BoostHub::requestSensorValue()
     WriteValue(requestPortValue, 3);
 }
 
-void BoostHub::setInputFormatSingle(){
-    //byte inputFormatValue[8] = {0x41, 0x01, 0x08, 0x01, 0x00, 0x00, 0x00, 0x01}; //color and distance on port C (1)
+void BoostHub::setInputFormatSingle()
+{
     byte inputFormatValue[8] = {0x41, 0x01, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01}; //boost tacho motor on port C (1)
     WriteValue(inputFormatValue, 8);
 }

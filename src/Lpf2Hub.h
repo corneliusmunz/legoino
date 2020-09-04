@@ -11,17 +11,8 @@
 
 #include "Arduino.h"
 #include "NimBLEDevice.h"
-#include <functional>
 using namespace std::placeholders;
-
-#define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
-#define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
-
-#define LPF2_VOLTAGE_MAX 9.6
-#define LPF2_VOLTAGE_MAX_RAW 3893
-
-#define LPF2_CURRENT_MAX 2444
-#define LPF2_CURRENT_MAX_RAW 4095
+#include "Lpf2HubConst.h"
 
 //#define LOGGING_ENABLED
 
@@ -35,64 +26,11 @@ using namespace std::placeholders;
 
 typedef void (*ButtonCallback)(bool isPressed);
 
-typedef enum HubType
-{
-  UNKNOWN = 0,
-  WEDO2_SMART_HUB = 1,
-  BOOST_MOVE_HUB = 2,
-  POWERED_UP_HUB = 3,
-  POWERED_UP_REMOTE = 4,
-  DUPLO_TRAIN_HUB = 5,
-  CONTROL_PLUS_HUB = 6
-};
-
-typedef enum BLEManufacturerData
-{
-  DUPLO_TRAIN_HUB_ID = 32,        //0x20
-  BOOST_MOVE_HUB_ID = 64,         //0x40
-  POWERED_UP_HUB_ID = 65,         //0x41
-  POWERED_UP_REMOTE_ID = 66,      //0x42
-  CONTROL_PLUS_LARGE_HUB_ID = 128 //0x80
-};
-
-typedef enum DeviceType
-{
-  UNDEFINED = 0,
-  BASIC_MOTOR = 1,
-  TRAIN_MOTOR = 2,
-  LED_LIGHTS = 8,
-  BOOST_LED = 22,
-  BOOST_DISTANCE = 37,
-  BOOST_TACHO_MOTOR = 38,
-  BOOST_MOVE_HUB_MOTOR = 39,
-  BOOST_TILT = 40,
-  POWERED_UP_REMOTE_BUTTON = 55
-};
-
 typedef struct Device
 {
   byte PortNumber;
   byte DeviceType;
 };
-
-typedef enum Color
-{
-  BLACK = 0,
-  PINK = 1,
-  PURPLE = 2,
-  BLUE = 3,
-  LIGHTBLUE = 4,
-  CYAN = 5,
-  GREEN = 6,
-  YELLOW = 7,
-  ORANGE = 8,
-  RED = 9,
-  WHITE = 10,
-  NONE = 255
-};
-
-static const char *COLOR_STRING[] = {
-    "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white"};
 
 class Lpf2Hub
 {
@@ -101,16 +39,6 @@ private:
   ButtonCallback _buttonCallback = nullptr;
 
 public:
-  enum Port
-  {
-    A = 0x37,
-    B = 0x38,
-    AB = 0x39,
-    C = 0x01,
-    D = 0x02,
-    TILT = 0x3A
-  };
-
   Lpf2Hub();
   void init();
   void init(std::string deviceAddress);
@@ -144,6 +72,7 @@ public:
   void parseBoostTachoMotor(uint8_t *data);
   void parseBoostHubMotor(uint8_t *pData);
   void parseBoostTiltSensor(uint8_t *data);
+  void parseControlPlusHubTiltSensor(uint8_t *pData);
   void parsePoweredUpRemote(uint8_t *pData);
   void parsePortAction(uint8_t *pData);
   byte getModeForDeviceType(byte deviceType);
@@ -166,6 +95,7 @@ public:
   int getBoostHubMotorRotation();
   int getTiltX();
   int getTiltY();
+  int getTiltZ();
   int getFirmwareVersionBuild();
   int getFirmwareVersionBugfix();
   int getFirmwareVersionMajor();
@@ -184,37 +114,53 @@ public:
   bool isRightRemoteDownButtonPressed();
   bool isRightRemoteStopButtonPressed();
   bool isRightRemoteButtonReleased();
+
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;
   BLEAddress *_pServerAddress;
   BLEAddress *_requestedDeviceAddress = nullptr;
   BLERemoteCharacteristic *_pRemoteCharacteristic;
-
   boolean _isConnecting;
   boolean _isConnected;
   HubType _hubType;
 
 private:
-  Device connectedDevices[10];
+  Device connectedDevices[13];
   int numberOfConnectedDevices = 0;
 
   // Hub information values
-  int Lpf2HubRssi;
-  uint8_t Lpf2HubBatteryLevel;
-  int Lpf2HubHubMotorRotation;
-  bool Lpf2HubHubButtonPressed;
-  double Lpf2HubVoltage; //V
-  double Lpf2HubCurrent; //mA
+  int _lpf2HubRssi;
+  uint8_t _lpf2HubBatteryLevel;
+  int _lpf2HubHubMotorRotation;
+  bool _lpf2HubHubButtonPressed;
+  double _lpf2HubVoltage; //V
+  double _lpf2HubCurrent; //mA
 
-  int Lpf2HubFirmwareVersionBuild;
-  int Lpf2HubFirmwareVersionBugfix;
-  int Lpf2HubFirmwareVersionMajor;
-  int Lpf2HubFirmwareVersionMinor;
+  int _lpf2HubFirmwareVersionBuild;
+  int _lpf2HubFirmwareVersionBugfix;
+  int _lpf2HubFirmwareVersionMajor;
+  int _lpf2HubFirmwareVersionMinor;
 
-  int Lpf2HubHardwareVersionBuild;
-  int Lpf2HubHardwareVersionBugfix;
-  int Lpf2HubHardwareVersionMajor;
-  int Lpf2HubHardwareVersionMinor;
+  int _lpf2HubHardwareVersionBuild;
+  int _lpf2HubHardwareVersionBugfix;
+  int _lpf2HubHardwareVersionMajor;
+  int _lpf2HubHardwareVersionMinor;
+
+  // PoweredUp Remote
+  bool _lpf2HubRemoteLeftUpButtonPressed;
+  bool _lpf2HubRemoteLeftDownButtonPressed;
+  bool _lpf2HubRemoteLeftStopButtonPressed;
+  bool _lpf2HubRemoteLeftButtonReleased;
+
+  bool _lpf2HubRemoteRightUpButtonPressed;
+  bool _lpf2HubRemoteRightDownButtonPressed;
+  bool _lpf2HubRemoteRightStopButtonPressed;
+  bool _lpf2HubRemoteRightButtonReleased;
+
+  // Hub orientation
+  int _lpf2HubTiltX;
+  int _lpf2HubTiltY;
+  int _lpf2HubTiltZ;
 };
 
 #endif
