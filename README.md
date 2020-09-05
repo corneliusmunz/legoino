@@ -1,5 +1,5 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/legoinochat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[Latest release ![Release Version](https://img.shields.io/github/release/corneliusmunz/legoino.svg?style=plastic)
+[Latest release ![Release Version](https://img.shields.io/github/release/corneliusmunz/legoino.svg?style=plastic)]
 
 # Legoino
 
