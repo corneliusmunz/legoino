@@ -1,9 +1,14 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/legoinochat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[Latest release ![Release Version](https://img.shields.io/github/release/corneliusmunz/legoino.svg?style=plastic)
 
 # Legoino
+
 Arduino Library for controlling Powered UP and Boost controllers
 
 *Disclaimer*: LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this project.
+
+*Attention*:
+From version 0.7.0 on, the legoino library switched from the former BLE ESP32 Library to the new NimBLE-Arduino library (https://github.com/h2zero/NimBLE-Arduino) which is needed in version 1.0.1 So just install as a prerequesite the version 1.0.1 of that library via the Arduino Library manager or the platform.io library manager (https://www.arduinolibraries.info/libraries/nim-ble-arduino)
 
 Remote control your boost model example (just click the image to see the video)
 
@@ -17,7 +22,7 @@ Simple Boost movement example (just click the image to see the video)
 
 [![Legoino BoostHub simple movements example](http://img.youtube.com/vi/VgWObhyUmi0/mqdefault.jpg)](http://www.youtube.com/watch?v=VgWObhyUmi0 "Legoino BoostHub simple movements example")
 
-Up to now the Library is only teseted for a Powered Up Train controllers and Boost controllers. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. You also are able to read in hub device infos (rssi, battery level, tilt) and sensor values (color, distance, rotation angle). 
+Up to now the Library is only teseted for a Powered Up Train controllers, Boost controllers and Control+ Hubs. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. You also are able to read in hub device infos (rssi, battery level, tilt) and sensor values (color, distance, rotation angle). 
 
 # Examples
 You can find different Examples in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". Just have a look on the videos to see the examples running :smiley: 
@@ -267,8 +272,17 @@ myTrainHub.stopMotor(A); // Stop motor on Port A
 myTrainHub.stopMotor(); // Stop all motors (Port A and Port B)
 ```
 
+## Control+ Hubs (Lego technic hubs)
+Add the follwoing include in your *.ino sketch
+
+```c
+#include "ControlPlusHub.h"
+```
+
+All the other stuff is the same as for the other Hub types.
+
 # Arduino Hardware
-The library is implemented for the ESP32 Boards and does use the ESP32_BLE_Arduino Library.
+The library is implemented for the ESP32 Boards and does use the ESP32 NimBLE-Arduino Library.
 
 # Credits
 Hands up to Lego, that they have recently open-sourced the Specification
@@ -283,12 +297,11 @@ https://github.com/jakorten/UpControl
 Thanks [@nathankellenicki](https://github.com/nathankellenicki) for his brilliant structured node module
 https://github.com/nathankellenicki/node-poweredup
 
+Thanks to [@h2zero](https://github.com/h2zero/NimBLE-Arduino) for developing a new BLE library based on the NimBLE project and supporting legoino with the posibility in changing the callback functions that it works also for member functions.
+
 # Remarks
-Prerequisite of that library is the BLE ESP32 Library with at least version 1.0.1 Otherwise the notifcations of changed charachteristic values will not work
-https://github.com/nkolban/ESP32_BLE_Arduino
+Prerequisite of that library is the NimBLE-Arduino library (https://github.com/h2zero/NimBLE-Arduino) with at least version 1.0.1 Otherwise the notifcations of changed charachteristic values will not work.
 
 # ToDo
-* Test for all sensors/actors
 * Virtual Ports
-* Evaluation how to get rid of global variables
 * Notification for sensor value updates
