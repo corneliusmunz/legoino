@@ -10,7 +10,7 @@
 #define PoweredUpRemote_h
 
 #include "Arduino.h"
-#include "BLEDevice.h"
+#include "NimBLEDevice.h"
 #include "Lpf2Hub.h"
 
 class PoweredUpRemote : public Lpf2Hub
@@ -29,7 +29,6 @@ public:
   //Methods
   void setLedColor(Color color);
   void setLedRGBColor(char red, char green, char blue);
-
 };
 
 #endif

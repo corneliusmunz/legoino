@@ -14,7 +14,7 @@ PoweredUpRemote::PoweredUpRemote(){};
  * @brief Set the color of the HUB LED with predefined colors
  * @param [in] color one of the available hub colors
  */
-void PoweredUpRemote::setLedColor(Color color) 
+void PoweredUpRemote::setLedColor(Color color)
 {
     byte setColorMode[8] = {0x41, 0x34, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00};
     WriteValue(setColorMode, 8);
