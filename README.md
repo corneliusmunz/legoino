@@ -1,5 +1,5 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/legoinochat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Release Version](https://img.shields.io/github/release/corneliusmunz/legoino.svg?style=plastic)](https://github.com/corneliusmunz/legoino/releases/)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/corneliusmunz/legoino)
 # Legoino
 
 Arduino Library for controlling Powered UP and Boost controllers
