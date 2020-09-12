@@ -11,6 +11,15 @@
 ControlPlusHub::ControlPlusHub(){};
 
 /**
+ * @brief Stop the motor on a defined port.
+ * @param [in] port Port of the Hub on which the motor will be stopped (A, B, AB, C, D)
+ */
+void ControlPlusHub::stopMotor(Port port)
+{
+    setMotorSpeed(port, 0);
+}
+
+/**
  * @brief Set the motor speed on a defined port. 
  * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
  * @param [in] speed Speed of the Motor -100..0..100 negative values will reverse the rotation
