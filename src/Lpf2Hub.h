@@ -41,7 +41,9 @@ private:
 public:
   Lpf2Hub();
   void init();
+  void init(uint32_t scanDuration);
   void init(std::string deviceAddress);
+  void init(std::string deviceAddress, uint32_t scanDuration);
   void initConnectedDevices(Device devices[], byte deviceNumbers);
   bool connectHub();
   bool isConnected();
@@ -128,6 +130,8 @@ private:
   Device connectedDevices[13];
   int numberOfConnectedDevices = 0;
 
+  //BLE settings
+  uint32_t _scanDuration = 1;
   // Hub information values
   int _lpf2HubRssi;
   uint8_t _lpf2HubBatteryLevel;
