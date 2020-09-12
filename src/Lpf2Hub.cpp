@@ -698,7 +698,7 @@ void Lpf2Hub::init()
     pBLEScan->setAdvertisedDeviceCallbacks(new Lpf2HubAdvertisedDeviceCallbacks(this));
 
     pBLEScan->setActiveScan(true);
-    pBLEScan->start(30);
+    pBLEScan->start(_scanDuration);
 }
 
 /**
@@ -708,6 +708,19 @@ void Lpf2Hub::init()
 void Lpf2Hub::init(std::string deviceAddress)
 {
     _requestedDeviceAddress = new BLEAddress(deviceAddress);
+    init();
+}
+
+void Lpf2Hub::init(uint32_t scanDuration)
+{
+    _scanDuration = scanDuration;
+    init();
+}
+
+void Lpf2Hub::init(std::string deviceAddress, uint32_t scanDuration)
+{
+    _requestedDeviceAddress = new BLEAddress(deviceAddress);
+    _scanDuration = scanDuration;
     init();
 }
 

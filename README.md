@@ -1,4 +1,5 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/legoinochat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+![Release Version](https://img.shields.io/github/release/corneliusmunz/legoino.svg?style=plastic)
 # Legoino
 
 Arduino Library for controlling Powered UP and Boost controllers
@@ -32,7 +33,7 @@ You can find different Examples in the "examples" folder. You can select the exa
 * **TrainHub.ino:** Example for a PowererdUp Hub to set the speed of a train model. http://www.youtube.com/watch?v=o1hgZQz3go4 
 * **TrainColor.ino:** Example of PoweredUp Hub combined with color sensor to control the speed of the train dependent on the detected color. https://youtu.be/GZ0fqe3-Bhw
 * **PoweredUpRemoteAutoDetection.ino:** Example of connection of PoweredUp and PoweredUpRemote where the device type is fetched automatically and the order in which you switched on the hubs is no longer relevant. 
-
+* **ControlPlusHub.ino:** Example of connection of ControlPlusHub (TechnicHub) where a Tacho Motor on Port D is controlled.
 
 # Setup and Usage
 Just install the Library via the Arduino Library Manager.
@@ -59,6 +60,16 @@ If you want to connect to a specific hub you can initialize your Hub with a spec
 represented by a hex string of the format: ```00:00:00:00:00:00```
 ```c
 myBoostHub.init("90:84:2b:03:19:7f");
+```
+
+If you want to change the BLE scan duration to detect a new Hub you can use the init function with a time parameter in seconds. The default value is 1 second. In former versions of the library it was 30 seconds which sometimes led to errors during the connection process.
+```c
+myBoostHub.init(2); // 2 seconds scan duration
+```
+
+Alternatively you can set the scan duration and the specific address of a hub in the init function with two parameters.
+```c
+myBoostHub.init("90:84:2b:03:19:7f", 2); // connect to hub with address and a scan duration of 2 seconds
 ```
 
 In the main ```loop``` just add the following connection flow
