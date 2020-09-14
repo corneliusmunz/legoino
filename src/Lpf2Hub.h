@@ -48,6 +48,7 @@ public:
   bool connectHub();
   bool isConnected();
   bool isConnecting();
+  NimBLEAddress getHubAddress();
 
   void setHubName(char name[]);
   void shutDownHub();

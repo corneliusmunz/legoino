@@ -721,6 +721,12 @@ void Lpf2Hub::initConnectedDevices(Device devices[], byte deviceNumbers)
     }
 }
 
+NimBLEAddress Lpf2Hub::getHubAddress() {
+    NimBLEAddress pAddress = *_pServerAddress;
+    return pAddress;
+}
+
+
 byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
 {
     LOGLINE("getDeviceTypeForPortNumber");
