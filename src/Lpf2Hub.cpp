@@ -58,66 +58,50 @@ public:
 
     void onResult(NimBLEAdvertisedDevice *advertisedDevice)
     {
-//Found a device, check if the service is contained and optional if address fits requested address
-#ifdef LOGGING_ENABLED
-        std::string deviceAddress = advertisedDevice->getAddress().toString();
-        LOG("Device Address: ");
-        for (int i = 0; i < deviceAddress.length(); i++)
-        {
-            LOG(deviceAddress[i]);
-        }
-        LOGLINE();
-#endif
+        //Found a device, check if the service is contained and optional if address fits requested address
+        LOGLINE(advertisedDevice->toString().c_str());
 
         if (advertisedDevice->haveServiceUUID() && advertisedDevice->getServiceUUID().equals(_lpf2Hub->_bleUuid) && (_lpf2Hub->_requestedDeviceAddress == nullptr || (_lpf2Hub->_requestedDeviceAddress && advertisedDevice->getAddress().equals(*_lpf2Hub->_requestedDeviceAddress))))
         {
             advertisedDevice->getScan()->stop();
             _lpf2Hub->_pServerAddress = new BLEAddress(advertisedDevice->getAddress());
-            LOG("Advertising : ");
-            uint8_t *payload = advertisedDevice->getPayload();
-            int manufacturerDataIndex = 0;
-            for (int i = 0; i < advertisedDevice->getPayloadLength() - 1; i++)
+
+            if (advertisedDevice->haveManufacturerData())
             {
-                LOG(payload[i], HEX);
-                LOG("-");
-                //detection of manufacturer data with length 9 (lego spec)
-                if (payload[i] == 0x09 && payload[i + 1] == 0xFF)
+                uint8_t *manufacturerData = (uint8_t *)advertisedDevice->getManufacturerData().data();
+                uint8_t manufacturerDataLength = advertisedDevice->getManufacturerData().length();
+                if (manufacturerDataLength >= 3)
                 {
-                    manufacturerDataIndex = i;
-                    break;
+                    //check device type ID
+                    switch (manufacturerData[3])
+                    {
+                    case DUPLO_TRAIN_HUB_ID:
+                        _lpf2Hub->_hubType = DUPLO_TRAIN_HUB;
+                        LOGLINE("Hubtype: DUPLO_TRAIN_HUB");
+                        break;
+                    case BOOST_MOVE_HUB_ID:
+                        _lpf2Hub->_hubType = BOOST_MOVE_HUB;
+                        LOGLINE("Hubtype: BOOST_MOVE_HUB");
+                        break;
+                    case POWERED_UP_HUB_ID:
+                        _lpf2Hub->_hubType = POWERED_UP_HUB;
+                        LOGLINE("Hubtype: POWERED_UP_HUB");
+                        break;
+                    case POWERED_UP_REMOTE_ID:
+                        _lpf2Hub->_hubType = POWERED_UP_REMOTE;
+                        LOGLINE("Hubtype: POWERED_UP_REMOTE");
+                        break;
+                    case CONTROL_PLUS_HUB_ID:
+                        _lpf2Hub->_hubType = CONTROL_PLUS_HUB;
+                        LOGLINE("Hubtype: CONTROL_PLUS_HUB");
+                        break;
+                    default:
+                        _lpf2Hub->_hubType = UNKNOWNHUB;
+                        LOGLINE("Hubtype: UNKNOWN");
+                        break;
+                    }
                 }
             }
-            LOGLINE();
-
-            //check device type ID
-            switch (payload[manufacturerDataIndex + 5])
-            {
-            case DUPLO_TRAIN_HUB_ID:
-                _lpf2Hub->_hubType = DUPLO_TRAIN_HUB;
-                LOGLINE("Hubtype: DUPLO_TRAIN_HUB");
-                break;
-            case BOOST_MOVE_HUB_ID:
-                _lpf2Hub->_hubType = BOOST_MOVE_HUB;
-                LOGLINE("Hubtype: BOOST_MOVE_HUB");
-                break;
-            case POWERED_UP_HUB_ID:
-                _lpf2Hub->_hubType = POWERED_UP_HUB;
-                LOGLINE("Hubtype: POWERED_UP_HUB");
-                break;
-            case POWERED_UP_REMOTE_ID:
-                _lpf2Hub->_hubType = POWERED_UP_REMOTE;
-                LOGLINE("Hubtype: POWERED_UP_REMOTE");
-                break;
-            case CONTROL_PLUS_HUB_ID:
-                _lpf2Hub->_hubType = CONTROL_PLUS_HUB;
-                LOGLINE("Hubtype: CONTROL_PLUS_HUB");
-                break;
-            default:
-                _lpf2Hub->_hubType = UNKNOWNHUB;
-                LOGLINE("Hubtype: UNKNOWN");
-                break;
-            }
-
             _lpf2Hub->_isConnecting = true;
         }
     }
