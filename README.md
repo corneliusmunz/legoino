@@ -100,6 +100,17 @@ myBoostHub.shutDownHub();
 ```
 The Hub will disconnect and then shut down. 
 
+After the Hub is connected you can get the address of the Hub as a ```NimBLEAddress``` structure using the following command
+```
+myBoostHub.getHubAddress();
+```
+To print it out you can e.g. use the following commands
+```
+Serial.print("Hub address: ");
+Serial.println(myBoostHub.getHubAddress().toString().c_str());
+```
+
+
 ### LED control
 
 You can either define a color of the LED in the HUB via predifined colors or you can define the color via RGB values
@@ -292,6 +303,15 @@ All the other stuff is the same as for the other Hub types.
 
 # Arduino Hardware
 The library is implemented for the ESP32 Boards and does use the ESP32 NimBLE-Arduino Library.
+
+# Connection to more than 3 hubs
+It is possible to connect to up to 9 hubs in parallel with an common ESP32 board. To enable the connection to more than 3 hubs, you have to change a single configuration of the NimBLE library. Just open the ```nimconfig.h``` file located in your arduino library folder in the directory ```NimBLE-Arduino/src```. Open the file with an editor and change the following settings to your demands
+```
+/** @brief Sets the number of simultaneous connections (esp controller max is 9) */
+#define CONFIG_BT_NIMBLE_MAX_CONNECTIONS 3
+```
+
+Then close the Arduino environment and open it again to force the rebuild of the library. Open your sketch build and upload it and be happy with multiple connections.
 
 # Credits
 Hands up to Lego, that they have recently open-sourced the Specification
