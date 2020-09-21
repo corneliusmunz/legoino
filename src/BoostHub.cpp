@@ -17,7 +17,7 @@ BoostHub::BoostHub(){};
  */
 void BoostHub::setMotorSpeed(Port port, int speed)
 {
-    byte setMotorCommand[8] = {0x81, port, 0x11, 0x01, MapSpeed(speed), 0x64, 0x7f, 0x03}; //boost
+    byte setMotorCommand[8] = {0x81, port, 0x11, 0x01, LegoinoCommon::MapSpeed(speed), 0x64, 0x7f, 0x03}; //boost
     WriteValue(setMotorCommand, 8);
 }
 
@@ -29,7 +29,7 @@ void BoostHub::setMotorSpeed(Port port, int speed)
  */
 void BoostHub::setAccelerationProfile(Port port, int16_t time, int8_t profileNumber)
 {
-    byte *timeBytes = Int16ToByteArray(time);
+    byte *timeBytes = LegoinoCommon::Int16ToByteArray(time);
     byte setMotorCommand[7] = {0x81, port, 0x10, 0x05, timeBytes[0], timeBytes[1], profileNumber};
     WriteValue(setMotorCommand, 7);
 }
@@ -42,7 +42,7 @@ void BoostHub::setAccelerationProfile(Port port, int16_t time, int8_t profileNum
  */
 void BoostHub::setDecelerationProfile(Port port, int16_t time, int8_t profileNumber)
 {
-    byte *timeBytes = Int16ToByteArray(time);
+    byte *timeBytes = LegoinoCommon::Int16ToByteArray(time);
     byte setMotorCommand[7] = {0x81, port, 0x10, 0x06, timeBytes[0], timeBytes[1], profileNumber};
     WriteValue(setMotorCommand, 7);
 }
@@ -58,8 +58,8 @@ void BoostHub::setMotorSpeedForTime(Port port, int speed, int16_t time = 0)
     //max power 100 (0x64)
     //End state Brake (127)
     //Use acc and dec profile (0x03 last two bits set)
-    byte *timeBytes = Int16ToByteArray(time);
-    byte setMotorCommand[10] = {0x81, port, 0x11, 0x09, timeBytes[0], timeBytes[1], MapSpeed(speed), 0x64, 0x7F, 0x03}; //boost with time
+    byte *timeBytes = LegoinoCommon::Int16ToByteArray(time);
+    byte setMotorCommand[10] = {0x81, port, 0x11, 0x09, timeBytes[0], timeBytes[1], LegoinoCommon::MapSpeed(speed), 0x64, 0x7F, 0x03}; //boost with time
     WriteValue(setMotorCommand, 10);
 }
 
@@ -71,23 +71,23 @@ void BoostHub::setMotorSpeedForTime(Port port, int speed, int16_t time = 0)
  */
 void BoostHub::setMotorSpeedForDegrees(Port port, int speed, int32_t degrees)
 {
-    byte *degreeBytes = Int32ToByteArray(degrees);
+    byte *degreeBytes = LegoinoCommon::Int32ToByteArray(degrees);
     //max power 100 (0x64)
     //End state Brake (127)
     //Use acc and dec profile (0x03 last two bits set)
-    byte setMotorCommand[12] = {0x81, port, 0x11, 0x0B, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], MapSpeed(speed), 0x64, 0x7F, 0x03}; //boost with time
+    byte setMotorCommand[12] = {0x81, port, 0x11, 0x0B, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], LegoinoCommon::MapSpeed(speed), 0x64, 0x7F, 0x03}; //boost with time
     WriteValue(setMotorCommand, 12);
 }
 
 void BoostHub::setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees)
 {
-    byte *degreeBytes = Int32ToByteArray(degrees);
+    byte *degreeBytes = LegoinoCommon::Int32ToByteArray(degrees);
     Port port = AB;
     //both ports A and B
     //max power 100 (0x64)
     //End state Brake (127)
     //Use acc and dec profile (0x03 last two bits set)
-    byte setMotorCommand[13] = {0x81, port, 0x11, 0x0C, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], MapSpeed(speedLeft), MapSpeed(speedRight), 0x64, 0x7F, 0x03}; //boost with time
+    byte setMotorCommand[13] = {0x81, port, 0x11, 0x0C, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], LegoinoCommon::MapSpeed(speedLeft), LegoinoCommon::MapSpeed(speedRight), 0x64, 0x7F, 0x03}; //boost with time
     WriteValue(setMotorCommand, 13);
 }
 

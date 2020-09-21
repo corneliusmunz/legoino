@@ -13,16 +13,7 @@
 #include "NimBLEDevice.h"
 using namespace std::placeholders;
 #include "Lpf2HubConst.h"
-
-//#define LOGGING_ENABLED
-
-#ifdef LOGGING_ENABLED
-#define LOGLINE(...) Serial.println(__VA_ARGS__)
-#define LOG(...) Serial.print(__VA_ARGS__)
-#else
-#define LOGLINE(...)
-#define LOG(...)
-#endif
+#include "LegoinoCommon.h"
 
 typedef void (*ButtonCallback)(bool isPressed);
 
@@ -59,15 +50,7 @@ public:
 
   void registerButtonCallback(ButtonCallback buttonCallback);
   void WriteValue(byte command[], int size);
-  static byte MapSpeed(int speed);
-  static byte *Int16ToByteArray(int16_t x);
-  static byte *Int32ToByteArray(int32_t x);
-  static unsigned char ReadUInt8(uint8_t *data, int offset);
-  static signed char ReadInt8(uint8_t *data, int offset);
-  static unsigned short ReadUInt16LE(uint8_t *data, int offset);
-  static signed short ReadInt16LE(uint8_t *data, int offset);
-  static unsigned int ReadUInt32LE(uint8_t *data, int offset);
-  static signed int ReadInt32LE(uint8_t *data, int offset);
+
   void parseDeviceInfo(uint8_t *pData);
   void parsePortMessage(uint8_t *pData);
   void parseSensorMessage(uint8_t *pData);

@@ -17,7 +17,7 @@ PoweredUpHub::PoweredUpHub(){};
  */
 void PoweredUpHub::setMotorSpeed(Port port, int speed = 0)
 {
-    byte setMotorCommand[8] = {0x81, port, 0x11, 0x51, 0x00, MapSpeed(speed)}; //train, batmobil
+    byte setMotorCommand[8] = {0x81, port, 0x11, 0x51, 0x00, LegoinoCommon::MapSpeed(speed)}; //train, batmobil
     WriteValue(setMotorCommand, 6);
 }
 

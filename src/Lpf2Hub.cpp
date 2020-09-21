@@ -119,81 +119,6 @@ void Lpf2Hub::WriteValue(byte command[], int size)
     _pRemoteCharacteristic->writeValue(commandWithCommonHeader, sizeof(commandWithCommonHeader), false);
 }
 
-/**
- * @brief Map speed from -100..100 to the 8bit internal value
- * @param [in] speed -100..100
- */
-byte Lpf2Hub::MapSpeed(int speed)
-{
-    byte rawSpeed;
-    if (speed == 0)
-    {
-        rawSpeed = 127; // stop motor
-    }
-    else if (speed > 0)
-    {
-        rawSpeed = map(speed, 0, 100, 0, 126);
-    }
-    else
-    {
-        rawSpeed = map(-speed, 0, 100, 255, 128);
-    }
-    return rawSpeed;
-}
-
-byte *Lpf2Hub::Int16ToByteArray(int16_t x)
-{
-    static byte y[2];
-    y[0] = (byte)(x & 0xff);
-    y[1] = (byte)((x >> 8) & 0xff);
-    return y;
-}
-
-byte *Lpf2Hub::Int32ToByteArray(int32_t x)
-{
-    static byte y[4];
-    y[0] = (byte)(x & 0xff);
-    y[1] = (byte)((x >> 8) & 0xff);
-    y[2] = (byte)((x >> 16) & 0xff);
-    y[3] = (byte)((x >> 24) & 0xff);
-    return y;
-}
-
-uint8_t Lpf2Hub::ReadUInt8(uint8_t *data, int offset = 0)
-{
-    uint8_t value = data[0 + offset];
-    return value;
-}
-
-int8_t Lpf2Hub::ReadInt8(uint8_t *data, int offset = 0)
-{
-    int8_t value = (int8_t)data[0 + offset];
-    return value;
-}
-
-uint16_t Lpf2Hub::ReadUInt16LE(uint8_t *data, int offset = 0)
-{
-    uint16_t value = data[0 + offset] | (uint16_t)(data[1 + offset] << 8);
-    return value;
-}
-
-int16_t Lpf2Hub::ReadInt16LE(uint8_t *data, int offset = 0)
-{
-    int16_t value = data[0 + offset] | (int16_t)(data[1 + offset] << 8);
-    return value;
-}
-
-uint32_t Lpf2Hub::ReadUInt32LE(uint8_t *data, int offset = 0)
-{
-    uint32_t value = data[0 + offset] | (uint32_t)(data[1 + offset] << 8) | (uint32_t)(data[2 + offset] << 16) | (uint32_t)(data[3 + offset] << 24);
-    return value;
-}
-
-int32_t Lpf2Hub::ReadInt32LE(uint8_t *data, int offset = 0)
-{
-    int32_t value = data[0 + offset] | (int16_t)(data[1 + offset] << 8) | (uint32_t)(data[2 + offset] << 16) | (uint32_t)(data[3 + offset] << 24);
-    return value;
-}
 
 void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType)
 {
@@ -311,10 +236,10 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
     }
     else if (pData[3] == 0x03) // Firmware version
     {
-        _lpf2HubFirmwareVersionBuild = ReadUInt16LE(pData, 5);
-        _lpf2HubFirmwareVersionBugfix = ReadUInt8(pData, 7);
-        _lpf2HubFirmwareVersionMajor = ReadUInt8(pData, 8) >> 4;
-        _lpf2HubFirmwareVersionMinor = ReadUInt8(pData, 8) & 0xf;
+        _lpf2HubFirmwareVersionBuild = LegoinoCommon::ReadUInt16LE(pData, 5);
+        _lpf2HubFirmwareVersionBugfix = LegoinoCommon::ReadUInt8(pData, 7);
+        _lpf2HubFirmwareVersionMajor = LegoinoCommon::ReadUInt8(pData, 8) >> 4;
+        _lpf2HubFirmwareVersionMinor = LegoinoCommon::ReadUInt8(pData, 8) & 0xf;
 
         LOG("Firmware version major:");
         LOG(_lpf2HubFirmwareVersionMajor);
@@ -328,10 +253,10 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
     }
     else if (pData[3] == 0x04) // Hardware version
     {
-        _lpf2HubHardwareVersionBuild = ReadUInt16LE(pData, 5);
-        _lpf2HubHardwareVersionBugfix = ReadUInt8(pData, 7);
-        _lpf2HubHardwareVersionMajor = ReadUInt8(pData, 8) >> 4;
-        _lpf2HubHardwareVersionMinor = ReadUInt8(pData, 8) & 0xf;
+        _lpf2HubHardwareVersionBuild = LegoinoCommon::ReadUInt16LE(pData, 5);
+        _lpf2HubHardwareVersionBugfix = LegoinoCommon::ReadUInt8(pData, 7);
+        _lpf2HubHardwareVersionMajor = LegoinoCommon::ReadUInt8(pData, 8) >> 4;
+        _lpf2HubHardwareVersionMinor = LegoinoCommon::ReadUInt8(pData, 8) & 0xf;
 
         LOG("Hardware version major:");
         LOG(_lpf2HubHardwareVersionMajor);
@@ -346,13 +271,13 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
     else if (pData[3] == 0x05) // RSSI
     {
         LOG("RSSI update: ");
-        _lpf2HubRssi = ReadInt8(pData, 5);
+        _lpf2HubRssi = LegoinoCommon::ReadInt8(pData, 5);
         LOG(_lpf2HubRssi);
         LOGLINE();
     }
     else if (pData[3] == 0x06) // Battery level reports
     {
-        _lpf2HubBatteryLevel = ReadUInt8(pData, 5);
+        _lpf2HubBatteryLevel = LegoinoCommon::ReadUInt8(pData, 5);
         LOG("Battery level: ");
         LOG(_lpf2HubBatteryLevel);
         LOG("%");
@@ -374,7 +299,7 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
     else if (pData[3] == 0x0B) // System type ID
     {
         LOG("System type ID: ");
-        uint8_t typeId = ReadUInt8(pData, 5);
+        uint8_t typeId = LegoinoCommon::ReadUInt8(pData, 5);
         LOG(typeId);
     }
 }
@@ -406,8 +331,8 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
 void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData)
 {
     LOGLINE("parseBoostTiltSensor");
-    _lpf2HubTiltX = ReadInt8(pData, 4);
-    _lpf2HubTiltY = ReadInt8(pData, 5);
+    _lpf2HubTiltX = LegoinoCommon::ReadInt8(pData, 4);
+    _lpf2HubTiltY = LegoinoCommon::ReadInt8(pData, 5);
     LOG("x:");
     LOG(_lpf2HubTiltX, DEC);
     LOG(" y:");
@@ -417,9 +342,9 @@ void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData)
 void Lpf2Hub::parseControlPlusHubTiltSensor(uint8_t *pData)
 {
     LOGLINE("parseControlPlusTiltSensor");
-    _lpf2HubTiltX = ReadInt16LE(pData, 4);
-    _lpf2HubTiltY = ReadInt16LE(pData, 6);
-    _lpf2HubTiltZ = ReadInt16LE(pData, 8);
+    _lpf2HubTiltX = LegoinoCommon::ReadInt16LE(pData, 4);
+    _lpf2HubTiltY = LegoinoCommon::ReadInt16LE(pData, 6);
+    _lpf2HubTiltZ = LegoinoCommon::ReadInt16LE(pData, 8);
     LOG("x:");
     LOG(_lpf2HubTiltX, DEC);
     LOG(" y:");
@@ -431,7 +356,7 @@ void Lpf2Hub::parseControlPlusHubTiltSensor(uint8_t *pData)
 void Lpf2Hub::parseBoostTachoMotor(uint8_t *pData)
 {
     LOGLINE("parseBoostTachoMotor");
-    Lpf2HubTachoMotorRotation = ReadInt32LE(pData, 4);
+    Lpf2HubTachoMotorRotation = LegoinoCommon::ReadInt32LE(pData, 4);
     LOG("Tacho motor rotation: ");
     LOGLINE(Lpf2HubTachoMotorRotation, DEC);
 }
@@ -439,7 +364,7 @@ void Lpf2Hub::parseBoostTachoMotor(uint8_t *pData)
 void Lpf2Hub::parseBoostHubMotor(uint8_t *pData)
 {
     LOGLINE("parseBoostHubMotor");
-    _lpf2HubHubMotorRotation = ReadInt32LE(pData, 4);
+    _lpf2HubHubMotorRotation = LegoinoCommon::ReadInt32LE(pData, 4);
     LOG("BoostHub motor rotation: ");
     LOGLINE(_lpf2HubHubMotorRotation, DEC);
 }
@@ -567,7 +492,7 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     byte deviceType = getDeviceTypeForPortNumber(pData[3]);
     if (pData[3] == 0x3b)
     {
-        int currentRaw = ReadUInt16LE(pData, 4);
+        int currentRaw = LegoinoCommon::ReadUInt16LE(pData, 4);
         _lpf2HubCurrent = (double)currentRaw * LPF2_CURRENT_MAX / LPF2_CURRENT_MAX_RAW;
         LOG("Current value [mA]: ");
         LOG(_lpf2HubCurrent);
@@ -576,7 +501,7 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     }
     else if (pData[3] == 0x3c)
     {
-        int voltageRaw = ReadUInt16LE(pData, 4);
+        int voltageRaw = LegoinoCommon::ReadUInt16LE(pData, 4);
         _lpf2HubVoltage = (double)voltageRaw * LPF2_VOLTAGE_MAX / LPF2_VOLTAGE_MAX_RAW;
         LOG("Hub Voltage : ");
         LOG(_lpf2HubVoltage);
