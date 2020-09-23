@@ -14,15 +14,24 @@
 // create a hub instance
 Lpf2HubEmulation myEmulatedHub;
 
+void writeValueCallback(byte port, byte value) {
+  Serial.println("writeValueCallback");
+  Serial.println(port, HEX);
+  Serial.println(value, HEX);
+}
+
 void setup() {
     Serial.begin(115200);
+    myEmulatedHub.setWriteCallback(&writeValueCallback);
     myEmulatedHub.start();
+    
 } 
 
 
 // main loop
 void loop() {
 
+  myEmulatedHub.initializePorts();
   
   
 } // End of loop

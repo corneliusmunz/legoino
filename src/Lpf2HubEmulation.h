@@ -44,13 +44,12 @@
 #define CHARACTERISTIC_UUID "00001624-1212-EFDE-1623-785FEABCD123"
 
 
-typedef void (*WriteCallback)(byte port, byte deviceType, byte value);
+typedef void (*WriteCallback)(byte port, byte value);
 
 class Lpf2HubEmulation
 {
 private:
   // Notification callbacks if values are written to the characteristic
-  WriteCallback _writeCallback = nullptr;
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;
   BLEAddress *_pServerAddress;
@@ -63,9 +62,12 @@ public:
   Lpf2HubEmulation();
   void start();
   void initializePorts();
+  void setWriteCallback(WriteCallback callback);
   bool isConnected = false;
   bool isPortInitialized = false;
   BLECharacteristic *pCharacteristic;
+  WriteCallback writeCallback = nullptr;
+
 
   // int setBatteryLevel(int batteryLevel);
   // double setHubVoltage(double voltage);
