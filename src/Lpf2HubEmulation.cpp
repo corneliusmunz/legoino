@@ -149,28 +149,40 @@ void Lpf2HubEmulation::start() {
   _pAdvertising->setScanResponse(true);
 
   //Techinc HUB
-  const char  ArrManufacturerData[8] = {0x97,0x03,0x00,0x80,0x06,0x00,0x41,0x00};
+  //const char  ArrManufacturerData[8] = {0x97,0x03,0x00,0x80,0x06,0x00,0x41,0x00};
 
   //City HUB
-  //const char  ArrManufacturerData[8] = {0x97,0x03,0x00,0x41,0x07,0x3E,0x3F,0x00};
-  std::string ManufacturerData(ArrManufacturerData ,sizeof(ArrManufacturerData));
-  char advLEGO[] = {0x02,0x01,0x06,0x11,0x07,0x23,0xD1,0xBC,0xEA,0x5F,0x78,0x23,0x16,0xDE,0xEF,
-                          0x12,0x12,0x23,0x16,0x00,0x00,0x09,0xFF,0x97,0x03,0x00,0x41,0x07,0xB2,0x43,0x00};
+  const char  ArrManufacturerData[8] = {0x97,0x03,0x00,0x41,0x07,0x00,0x43,0x00};
+  std::string ManufacturerData(ArrManufacturerData , sizeof(ArrManufacturerData));
+  //PoweredUp Hub
+  // char advLEGO[] = {0x02,0x01,0x06,0x11,0x07,0x23,0xD1,0xBC,0xEA,0x5F,0x78,0x23,0x16,0xDE,0xEF,
+  //                         0x12,0x12,0x23,0x16,0x00,0x00,0x09,0xFF,0x97,0x03,0x00,0x41,0x07,0xB2,0x43,0x00};
+//Technic HUB
+    // char advLEGO[] = {0x02,0x01,0x06,0x11,0x07,0x23,0xD1,0xBC,0xEA,0x5F,0x78,0x23,0x16,0xDE,0xEF,
+    //                       0x12,0x12,0x23,0x16,0x00,0x00,0x09,0xFF,0x97,0x03,0x00,0x80,0x06,0x00,0x41,0x00};
   
-  NimBLEAdvertisementData oScanResponseData = NimBLEAdvertisementData();
-  oScanResponseData.addData(advLEGO, 31);
-  // oScanResponseData.setShortName("Fake Hub");
-  // oScanResponseData.setManufacturerData(ManufacturerData);
-  //oScanResponseData.addData(advLEGO, 31);
-  std::string payload = oScanResponseData.getPayload();
-  LOG("AdvertisementData payload: ");
+  NimBLEAdvertisementData advertisementData = NimBLEAdvertisementData();
+  advertisementData.setManufacturerData(ManufacturerData);
+  // Not needed because the name is already part of the device
+  // if it is added, the max length of 31 bytes is reached and the Service UUID or Manufacturer Data is then missing
+  // because of a lenght check in addData to the payload structure
+//  advertisementData.setName("Fake Hub"); 
+  advertisementData.setCompleteServices(NimBLEUUID(SERVICE_UUID));
+
+  std::string payload = advertisementData.getPayload();
+  LOG("AdvertisementData payload (");
+  LOG(payload.length(), DEC);
+  LOG("): ");
   for (int i=0; i<payload.length(); i++) {
     LOG(" ");
     LOG(payload[i], HEX);
   }
   LOGLINE("");
-  _pAdvertising->setScanResponseData(oScanResponseData);
-  _pAdvertising->setAdvertisementData(oScanResponseData);
+
+  // scan response data is not needed. It could be used to add some more data but it seems that it is not requested by
+  // the Lego apps
+  //_pAdvertising->setScanResponseData(advertisementData);
+  _pAdvertising->setAdvertisementData(advertisementData);
 
 
 
