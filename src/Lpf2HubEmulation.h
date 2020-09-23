@@ -62,7 +62,10 @@ private:
 public:
   Lpf2HubEmulation();
   void start();
-  BLECharacteristic *_pCharacteristic;
+  void initializePorts();
+  bool isConnected = false;
+  bool isPortInitialized = false;
+  BLECharacteristic *pCharacteristic;
 
   // int setBatteryLevel(int batteryLevel);
   // double setHubVoltage(double voltage);

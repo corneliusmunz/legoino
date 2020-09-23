@@ -28,35 +28,20 @@ public:
 
     void onConnect(NimBLEServer* pServer) {
       LOGLINE("Device connected");
-            delay(1000);
-            LOGLINE("Send Hub port configuration");
-            
-            //Boost motor on Port_A
-            byte PORT_A_INFORMATION[]={0x0F, 0x00, 0x04, 0x00, 0x01, 0x26, 0x00,0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x10};
-            _lpf2HubEmulation->_pCharacteristic->setValue(PORT_A_INFORMATION,15);
-            _lpf2HubEmulation->_pCharacteristic->notify();
-            delay(100);
-            //Boost motor on Port_B
-            byte PORT_B_INFORMATION[]={0x0F, 0x00, 0x04, 0x01, 0x01, 0x26, 0x00,0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x10};
-            _lpf2HubEmulation->_pCharacteristic->setValue(PORT_B_INFORMATION,15);
-            _lpf2HubEmulation->_pCharacteristic->notify();
-            delay(100);
-
-            //Led
-            byte PORT_LIGHT_INFORMATION[]={0x0F, 0x00, 0x04, 0x32, 0x01, 0x17, 0x00,0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x10};
-            _lpf2HubEmulation->_pCharacteristic->setValue(PORT_LIGHT_INFORMATION,15);
-            _lpf2HubEmulation->_pCharacteristic->notify();
-
-            delay(50);
+      _lpf2HubEmulation->isConnected = true;
     };
 
     void onDisconnect(NimBLEServer* pServer) {
       LOGLINE("Device disconnected");
+      _lpf2HubEmulation->isConnected = false;
+      _lpf2HubEmulation->isPortInitialized = false;
+
     }
 };
 
 class Lpf2HubCharacteristicCallbacks: public NimBLECharacteristicCallbacks {
     
+
     Lpf2HubEmulation *_lpf2HubEmulation;
     
 public:    
@@ -98,8 +83,20 @@ public:
         //Reply to the App "Command excecuted"
         byte msgPortCommandFeedbackReply[]={0x05, 0x00, 0x82, 0x00, 0x0A}; //0x0A Command complete+buffer empty+idle
         msgPortCommandFeedbackReply[PORT_ID]=msgReceived[PORT_ID]; //set the port_id
-        _lpf2HubEmulation->_pCharacteristic->setValue(msgPortCommandFeedbackReply,sizeof(msgPortCommandFeedbackReply));
-        _lpf2HubEmulation->_pCharacteristic->notify();
+        _lpf2HubEmulation->pCharacteristic->setValue(msgPortCommandFeedbackReply,sizeof(msgPortCommandFeedbackReply));
+        _lpf2HubEmulation->pCharacteristic->notify();
+      }
+
+            if (msgReceived[MSG_TYPE]==HUB_ACTION_CMD && msgReceived[3]==ACTION_SWITCH_OFF){
+          LOGLINE("Disconnect");
+            delay(30);
+            byte msgDisconnectionReply[]={0x04, 0x00, 0x02, 0x31};
+            _lpf2HubEmulation->pCharacteristic->setValue(msgDisconnectionReply,sizeof(msgDisconnectionReply));
+            _lpf2HubEmulation->pCharacteristic->notify();
+            delay(100);
+          LOGLINE("Restart ESP");
+          delay(1000);
+          ESP.restart();
       }
     }
     }
@@ -107,13 +104,41 @@ public:
     void onRead(NimBLECharacteristic *pCharacteristic) {
       LOGLINE("Read request");
       uint8_t CharTemp[]={0x0F, 0x00, 0x04};
-      _lpf2HubEmulation->_pCharacteristic->setValue(CharTemp,3);
+      //_lpf2HubEmulation->_pCharacteristic->setValue(CharTemp,3);
     }
 
 
 };
 
 Lpf2HubEmulation::Lpf2HubEmulation(){};
+
+void Lpf2HubEmulation::initializePorts(){
+  if (isConnected == true) {
+    if (isPortInitialized == false) {
+          LOG("initializePorts");
+            
+            delay(1000);
+            isPortInitialized = true;
+            //Boost motor on Port_A
+            byte PORT_A_INFORMATION[]={0x0F, 0x00, 0x04, 0x00, 0x01, 0x26, 0x00,0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x10};
+            pCharacteristic->setValue(PORT_A_INFORMATION,15);
+            pCharacteristic->notify();
+            delay(100);
+            //Boost motor on Port_B
+            byte PORT_B_INFORMATION[]={0x0F, 0x00, 0x04, 0x01, 0x01, 0x26, 0x00,0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x10};
+            pCharacteristic->setValue(PORT_B_INFORMATION,15);
+            pCharacteristic->notify();
+            delay(100);
+
+            //Led
+            byte PORT_LIGHT_INFORMATION[]={0x0F, 0x00, 0x04, 0x32, 0x01, 0x17, 0x00,0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x10};
+            pCharacteristic->setValue(PORT_LIGHT_INFORMATION,15);
+            pCharacteristic->notify();
+
+            delay(50);
+    }
+  }
+}
 
 void Lpf2HubEmulation::start() {
     LOGLINE("Starting BLE work!");
@@ -130,15 +155,15 @@ void Lpf2HubEmulation::start() {
     _pService = _pServer->createService(SERVICE_UUID);
 
    // Create a BLE Characteristic
-  _pCharacteristic = _pService->createCharacteristic(
-                      CHARACTERISTIC_UUID,
+  pCharacteristic = _pService->createCharacteristic(
+                      NimBLEUUID(CHARACTERISTIC_UUID),
                       NIMBLE_PROPERTY::READ   |
                       NIMBLE_PROPERTY::WRITE  |
                       NIMBLE_PROPERTY::NOTIFY |
                       NIMBLE_PROPERTY::WRITE_NR
                     );
   // Create a BLE Descriptor and set the callback
-  _pCharacteristic->setCallbacks(new Lpf2HubCharacteristicCallbacks(this));
+  pCharacteristic->setCallbacks(new Lpf2HubCharacteristicCallbacks(this));
 
   LOGLINE("Service start");
 
@@ -152,7 +177,7 @@ void Lpf2HubEmulation::start() {
   //const char  ArrManufacturerData[8] = {0x97,0x03,0x00,0x80,0x06,0x00,0x41,0x00};
 
   //City HUB
-  const char  ArrManufacturerData[8] = {0x97,0x03,0x00,0x41,0x07,0x00,0x43,0x00};
+  const char  ArrManufacturerData[8] = {0x97,0x03,0x00,0x41,0x07,0xB2,0x43,0x00};
   std::string ManufacturerData(ArrManufacturerData , sizeof(ArrManufacturerData));
   //PoweredUp Hub
   // char advLEGO[] = {0x02,0x01,0x06,0x11,0x07,0x23,0xD1,0xBC,0xEA,0x5F,0x78,0x23,0x16,0xDE,0xEF,
@@ -162,11 +187,12 @@ void Lpf2HubEmulation::start() {
     //                       0x12,0x12,0x23,0x16,0x00,0x00,0x09,0xFF,0x97,0x03,0x00,0x80,0x06,0x00,0x41,0x00};
   
   NimBLEAdvertisementData advertisementData = NimBLEAdvertisementData();
-  advertisementData.setManufacturerData(ManufacturerData);
   // Not needed because the name is already part of the device
   // if it is added, the max length of 31 bytes is reached and the Service UUID or Manufacturer Data is then missing
   // because of a lenght check in addData to the payload structure
 //  advertisementData.setName("Fake Hub"); 
+
+  advertisementData.setManufacturerData(ManufacturerData);
   advertisementData.setCompleteServices(NimBLEUUID(SERVICE_UUID));
 
   std::string payload = advertisementData.getPayload();
@@ -181,7 +207,6 @@ void Lpf2HubEmulation::start() {
 
   // scan response data is not needed. It could be used to add some more data but it seems that it is not requested by
   // the Lego apps
-  //_pAdvertising->setScanResponseData(advertisementData);
   _pAdvertising->setAdvertisementData(advertisementData);
 
 
