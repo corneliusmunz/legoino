@@ -18,29 +18,15 @@ Lpf2HubEmulation myEmulatedHub("TrainHub", HubType::POWERED_UP_HUB);
 PowerFunctions pf(12, 0);
 
 void setPfSpeed(byte port, byte value) {
-    char speed = LegoinoCommon::MapSpeedReverse(value);
-    Serial.print("speed: ");
-    Serial.println(speed, DEC);
-    if (speed > 0)
-    {
-      char pfSpeed = (char)(speed / 14.0);
-      Serial.print("speed forward: ");
-      Serial.println(pfSpeed, DEC);
-      pf.single_pwm(port, pfSpeed);
+    char pfSpeed;
+    if (value == 0) {
+      pfSpeed = 0x08;
+    } else if (value <= 100) {
+      pfSpeed = (value >> 4) + 1;
+    } else {
+      pfSpeed = value >> 4;
     }
-    if (speed == 0)
-    {
-      Serial.println("stopp");
-      pf.single_pwm(port, PWM_BRK);
-    }
-
-    if (speed < 0)
-    {
-      char pfSpeed = 15 - (char)(-speed / 14.0);
-      Serial.print("speed reverse: ");
-      Serial.println(pfSpeed, DEC);
-      pf.single_pwm(port, pfSpeed);
-    }
+    pf.single_pwm(port, pfSpeed);
 }
 
 void writeValueCallback(byte port, byte value)

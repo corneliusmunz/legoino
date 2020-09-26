@@ -24,13 +24,13 @@
 #define PF_SINGLE_EXT 0x6
 #define PF_ESCAPE 0x4
 
-#define PF_IR_CYCLES(num) (uint16_t) ((1.0/38000.0) * 1000 * 1000 * num)
+#define PF_IR_CYCLES(num) (uint16_t)((1.0 / 38000.0) * 1000 * 1000 * num)
 
-#define PF_START_STOP IR_CYCLES(39)
-#define PF_HIGH_PAUSE IR_CYCLES(21)
-#define PF_LOW_PAUSE IR_CYCLES(10)
-#define PF_HALF_PERIOD IR_CYCLES(0.5)
-#define PF_MAX_MESSAGE_LENGTH IR_CYCLES(522) // 2 * 45 + 16 * 27
+#define PF_START_STOP PF_IR_CYCLES(39)
+#define PF_HIGH_PAUSE PF_IR_CYCLES(21)
+#define PF_LOW_PAUSE PF_IR_CYCLES(10)
+#define PF_HALF_PERIOD PF_IR_CYCLES(0.5)
+#define PF_MAX_MESSAGE_LENGTH PF_IR_CYCLES(522) // 2 * 45 + 16 * 27
 
 //PWM speed steps
 #define PF_PWM_FLT 0x0
@@ -68,28 +68,28 @@
 
 class PowerFunctions
 {
- public:
-   PowerFunctions(uint8_t pin, uint8_t channel, bool _debug = false);
-    void single_pwm(uint8_t, uint8_t);
-    void single_increment(uint8_t);
-    void single_decrement(uint8_t);
-    void red_pwm(uint8_t);
-    void blue_pwm(uint8_t);
-    void combo_pwm(uint8_t, uint8_t);
+public:
+  PowerFunctions(uint8_t pin, uint8_t channel, bool _debug = false);
+  void single_pwm(uint8_t, uint8_t);
+  void single_increment(uint8_t);
+  void single_decrement(uint8_t);
+  void red_pwm(uint8_t);
+  void blue_pwm(uint8_t);
+  void combo_pwm(uint8_t, uint8_t);
 
-  private:
-    void pause(uint8_t);
-    void send_bit();
-    void send();
-    void start_stop_bit();
+private:
+  void pause(uint8_t);
+  void send_bit();
+  void send();
+  void start_stop_bit();
 
-    void toggle();
-    
-    uint8_t _channel;
-    uint8_t _pin;
-    uint8_t _nib1, _nib2, _nib3;
-    uint8_t _toggle;
-    bool    _debug;
+  void toggle();
+
+  uint8_t _channel;
+  uint8_t _pin;
+  uint8_t _nib1, _nib2, _nib3;
+  uint8_t _toggle;
+  bool _debug;
 };
 
 #endif
