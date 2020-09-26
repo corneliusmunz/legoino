@@ -80,6 +80,16 @@ public:
       }
       LOGLINE("");
 
+      if (msgReceived[MSG_TYPE] == (char)MessageType::HUB_PROPERTIES)
+      {
+        if (msgReceived[0x03] == (char)HubPropertyReference::ADVERTISING_NAME)
+        {
+          //5..length
+          _lpf2HubEmulation->setHubName(msgReceived.substr(5, msgReceived.length() - 5), false);
+          LOGLINE(_lpf2HubEmulation->getHubName().c_str());
+        }
+      }
+
       //It's a port out command:
       //execute and send feedback to the App
       if (msgReceived[MSG_TYPE] == OUT_PORT_CMD)
@@ -93,14 +103,15 @@ public:
         _lpf2HubEmulation->pCharacteristic->setValue(msgPortCommandFeedbackReply, sizeof(msgPortCommandFeedbackReply));
         _lpf2HubEmulation->pCharacteristic->notify();
 
-        if (msgReceived[OUT_PORT_SUB_CMD_TYPE] == OUT_PORT_CMD_WRITE_DIRECT){
+        if (msgReceived[OUT_PORT_SUB_CMD_TYPE] == OUT_PORT_CMD_WRITE_DIRECT)
+        {
           Serial.print("Write Direct on port: ");
           // port_id_value=msgReceived[PORT_ID];
           // port_write_value=msgReceived[WRITE_DIRECT_VALUE];
-          if (_lpf2HubEmulation->writeCallback != nullptr) {
-            _lpf2HubEmulation->writeCallback(msgReceived[PORT_ID], msgReceived[WRITE_DIRECT_VALUE]);
+          if (_lpf2HubEmulation->writePortCallback != nullptr)
+          {
+            _lpf2HubEmulation->writePortCallback(msgReceived[PORT_ID], msgReceived[WRITE_DIRECT_VALUE]);
           }
-
         }
       }
 
@@ -129,8 +140,15 @@ public:
 
 Lpf2HubEmulation::Lpf2HubEmulation(){};
 
-void Lpf2HubEmulation::setWriteCallback(WriteCallback callback) {
-    writeCallback = callback;
+Lpf2HubEmulation::Lpf2HubEmulation(std::string hubName, HubType hubType)
+{
+  _hubName = hubName;
+  _hubType = hubType;
+}
+
+void Lpf2HubEmulation::setWritePortCallback(WritePortCallback callback)
+{
+  writePortCallback = callback;
 }
 
 void Lpf2HubEmulation::initializePorts()
@@ -164,13 +182,143 @@ void Lpf2HubEmulation::initializePorts()
   }
 }
 
+void Lpf2HubEmulation::attachDevice(byte port, DeviceType deviceType)
+{
+  std::string payload = "";
+  payload.push_back((char)port);
+  payload.push_back((char)Event::ATTACHED_IO);
+  payload.push_back((char)deviceType);
+  std::string versionInformation = {0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10};
+  payload.append(versionInformation); //version numbers
+  writeValue(MessageType::HUB_ATTACHED_IO, payload);
+}
+
+void Lpf2HubEmulation::detachDevice(byte port)
+{
+  std::string payload;
+  payload.push_back((char)port);
+  payload.push_back((char)Event::DETACHED_IO);
+  writeValue(MessageType::HUB_ATTACHED_IO, payload);
+}
+
+void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, bool notify)
+{
+  std::string message = "";
+  message.push_back((char)(payload.length() + 3)); // length of message
+  message.push_back(0x00);                         // hub id (not used)
+  message.push_back((char)messageType);            // message type
+  message.append(payload);
+  pCharacteristic->setValue(message);
+
+  if (notify)
+  {
+    pCharacteristic->notify();
+  }
+
+  LOG("write value to characteristic: ");
+  LOG(message.c_str());
+  LOG(" length:");
+  LOGLINE(message.length(), DEC);
+}
+
+void Lpf2HubEmulation::setHubButton(bool pressed)
+{
+  std::string payload;
+  payload.push_back((char)HubPropertyReference::BUTTON);
+  payload.push_back((char)(pressed ? ButtonState::PRESSED : ButtonState::RELEASED));
+  writeValue(MessageType::HUB_PROPERTIES, payload);
+}
+
+void Lpf2HubEmulation::setHubRssi(int8_t rssi)
+{
+  _rssi = rssi;
+  std::string payload;
+  payload.push_back((char)HubPropertyReference::RSSI);
+  payload.push_back((char)_rssi);
+  writeValue(MessageType::HUB_PROPERTIES, payload);
+}
+
+void Lpf2HubEmulation::setHubBatteryLevel(uint8_t batteryLevel)
+{
+  _batteryLevel = batteryLevel;
+  std::string payload;
+  payload.push_back((char)HubPropertyReference::BATTERY_VOLTAGE);
+  payload.push_back((char)_batteryLevel);
+  writeValue(MessageType::HUB_PROPERTIES, payload);
+}
+
+void Lpf2HubEmulation::setHubBatteryType(BatteryType batteryType)
+{
+  _batteryType = batteryType;
+  std::string payload;
+  payload.push_back((char)HubPropertyReference::BATTERY_TYPE);
+  payload.push_back((char)_batteryType);
+  writeValue(MessageType::HUB_PROPERTIES, payload);
+}
+
+void Lpf2HubEmulation::setHubName(std::string hubName, bool notify)
+{
+  if (hubName.length() > 14)
+  {
+    _hubName = hubName.substr(0, 14);
+  }
+  else
+  {
+    _hubName = hubName;
+  }
+  if (notify)
+  {
+    std::string payload;
+    payload.push_back((char)HubPropertyReference::ADVERTISING_NAME);
+    payload.append(_hubName);
+    writeValue(MessageType::HUB_PROPERTIES, payload);
+  }
+}
+
+std::string Lpf2HubEmulation::getHubName()
+{
+  return _hubName;
+}
+
+void Lpf2HubEmulation::setHubFirmwareVersion(int build, int bugfix, int major, int minor)
+{
+  _firmwareVersionBuild = build;
+  _firmwareVersionBugfix = bugfix;
+  _firmwareVersionMajor = major;
+  _firmwareVersionMinor = minor;
+}
+
+void Lpf2HubEmulation::setHubHardwareVersion(int build, int bugfix, int major, int minor)
+{
+  _hardwareVersionBuild = build;
+  _hardwareVersionBugfix = bugfix;
+  _hardwareVersionMajor = major;
+  _hardwareVersionMinor = minor;
+
+  //All version numbers are encoded into a 32 bit Signed Integer [Little Endianness]:
+  //0MMM mmmm
+  //BBBB BBBB
+  //bbbb bbbb
+  //bbbb bbbb
+  //std::bitset byte1;
+  //   _lpf2HubFirmwareVersionBuild = LegoinoCommon::ReadUInt16LE(pData, 5);
+  // uint16_t value = data[0 + offset] | (uint16_t)(data[1 + offset] << 8);
+  // _lpf2HubFirmwareVersionBugfix = LegoinoCommon::ReadUInt8(pData, 7);
+  // _lpf2HubFirmwareVersionMajor = LegoinoCommon::ReadUInt8(pData, 8) >> 4;
+  // _lpf2HubFirmwareVersionMinor = LegoinoCommon::ReadUInt8(pData, 8) & 0xf;
+
+  // std::string payload;
+  // payload.push_back((char)HubPropertyReference::HW_VERSION);
+  // payload.p
+}
+
 void Lpf2HubEmulation::start()
 {
   LOGLINE("Starting BLE work!");
 
-  uint8_t newMACAddress[] = {0x90, 0x84, 0x2B, 0x4A, 0x3A, 0x0A};
+  uint8_t newMACAddress[] = {0x91, 0x84, 0x2B, 0x4A, 0x3A, 0x0A};
   esp_base_mac_addr_set(&newMACAddress[0]);
-  NimBLEDevice::init("Fake Hub");
+  NimBLEDevice::init(_hubName);
 
   LOGLINE("Create server");
   _pServer = NimBLEDevice::createServer();
@@ -201,22 +349,26 @@ void Lpf2HubEmulation::start()
   //const char  ArrManufacturerData[8] = {0x97,0x03,0x00,0x80,0x06,0x00,0x41,0x00};
 
   //City HUB
-  const char ArrManufacturerData[8] = {0x97, 0x03, 0x00, 0x41, 0x07, 0xB2, 0x43, 0x00};
-  std::string ManufacturerData(ArrManufacturerData, sizeof(ArrManufacturerData));
-  //PoweredUp Hub
-  // char advLEGO[] = {0x02,0x01,0x06,0x11,0x07,0x23,0xD1,0xBC,0xEA,0x5F,0x78,0x23,0x16,0xDE,0xEF,
-  //                         0x12,0x12,0x23,0x16,0x00,0x00,0x09,0xFF,0x97,0x03,0x00,0x41,0x07,0xB2,0x43,0x00};
-  //Technic HUB
-  // char advLEGO[] = {0x02,0x01,0x06,0x11,0x07,0x23,0xD1,0xBC,0xEA,0x5F,0x78,0x23,0x16,0xDE,0xEF,
-  //                       0x12,0x12,0x23,0x16,0x00,0x00,0x09,0xFF,0x97,0x03,0x00,0x80,0x06,0x00,0x41,0x00};
-
+  std::string manufacturerData;
+  if (_hubType == HubType::POWERED_UP_HUB)
+  {
+    LOGLINE("PoweredUp Hub");
+    const char poweredUpHub[8] = {0x97, 0x03, 0x00, 0x41, 0x07, 0x00, 0x43, 0x00};
+    manufacturerData = std::string(poweredUpHub, sizeof(poweredUpHub));
+  }
+  else if (_hubType == HubType::CONTROL_PLUS_HUB)
+  {
+    LOGLINE("ControlPlus Hub");
+    const char controlPlusHub[8] = {0x97, 0x03, 0x00, 0x80, 0x06, 0x00, 0x41, 0x00};
+    manufacturerData = std::string(controlPlusHub, sizeof(controlPlusHub));
+  }
   NimBLEAdvertisementData advertisementData = NimBLEAdvertisementData();
+
   // Not needed because the name is already part of the device
   // if it is added, the max length of 31 bytes is reached and the Service UUID or Manufacturer Data is then missing
   // because of a lenght check in addData to the payload structure
   //  advertisementData.setName("Fake Hub");
-
-  advertisementData.setManufacturerData(ManufacturerData);
+  advertisementData.setManufacturerData(manufacturerData);
   advertisementData.setCompleteServices(NimBLEUUID(SERVICE_UUID));
 
   std::string payload = advertisementData.getPayload();

@@ -76,27 +76,27 @@ public:
                     switch (manufacturerData[3])
                     {
                     case DUPLO_TRAIN_HUB_ID:
-                        _lpf2Hub->_hubType = DUPLO_TRAIN_HUB;
+                        _lpf2Hub->_hubType = HubType::DUPLO_TRAIN_HUB;
                         LOGLINE("Hubtype: DUPLO_TRAIN_HUB");
                         break;
                     case BOOST_MOVE_HUB_ID:
-                        _lpf2Hub->_hubType = BOOST_MOVE_HUB;
+                        _lpf2Hub->_hubType = HubType::BOOST_MOVE_HUB;
                         LOGLINE("Hubtype: BOOST_MOVE_HUB");
                         break;
                     case POWERED_UP_HUB_ID:
-                        _lpf2Hub->_hubType = POWERED_UP_HUB;
+                        _lpf2Hub->_hubType = HubType::POWERED_UP_HUB;
                         LOGLINE("Hubtype: POWERED_UP_HUB");
                         break;
                     case POWERED_UP_REMOTE_ID:
-                        _lpf2Hub->_hubType = POWERED_UP_REMOTE;
+                        _lpf2Hub->_hubType = HubType::POWERED_UP_REMOTE;
                         LOGLINE("Hubtype: POWERED_UP_REMOTE");
                         break;
                     case CONTROL_PLUS_HUB_ID:
-                        _lpf2Hub->_hubType = CONTROL_PLUS_HUB;
+                        _lpf2Hub->_hubType = HubType::CONTROL_PLUS_HUB;
                         LOGLINE("Hubtype: CONTROL_PLUS_HUB");
                         break;
                     default:
-                        _lpf2Hub->_hubType = UNKNOWNHUB;
+                        _lpf2Hub->_hubType = HubType::UNKNOWNHUB;
                         LOGLINE("Hubtype: UNKNOWN");
                         break;
                     }
@@ -461,21 +461,21 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
 {
     switch (deviceType)
     {
-    case SIMPLE_MEDIUM_LINEAR_MOTOR:
+    case (byte)DeviceType::SIMPLE_MEDIUM_LINEAR_MOTOR:
         return 0x02;
-    case TRAIN_MOTOR:
+    case (byte)DeviceType::TRAIN_MOTOR:
         return 0x02;
-    case MEDIUM_LINEAR_MOTOR:
+    case (byte)DeviceType::MEDIUM_LINEAR_MOTOR:
         return 0x02;
-    case MOVE_HUB_MEDIUM_LINEAR_MOTOR:
+    case (byte)DeviceType::MOVE_HUB_MEDIUM_LINEAR_MOTOR:
         return 0x02;
-    case COLOR_DISTANCE_SENSOR:
+    case (byte)DeviceType::COLOR_DISTANCE_SENSOR:
         return 0x08;
-    case MOVE_HUB_TILT_SENSOR:
+    case (byte)DeviceType::MOVE_HUB_TILT_SENSOR:
         return 0x00;
-    case TECHNIC_MEDIUM_ANGULAR_MOTOR:
+    case (byte)DeviceType::TECHNIC_MEDIUM_ANGULAR_MOTOR:
         return 0x02;
-    case TECHNIC_LARGE_ANGULAR_MOTOR:
+    case (byte)DeviceType::TECHNIC_LARGE_ANGULAR_MOTOR:
         return 0x02;
     default:
         return 0x00;
@@ -508,23 +508,23 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
         LOGLINE();
         return;
     }
-    else if (deviceType == MEDIUM_LINEAR_MOTOR || deviceType == MOVE_HUB_MEDIUM_LINEAR_MOTOR)
+    else if (deviceType == (byte)DeviceType::MEDIUM_LINEAR_MOTOR || deviceType == (byte)DeviceType::MOVE_HUB_MEDIUM_LINEAR_MOTOR)
     {
         parseBoostTachoMotor(pData);
     }
-    else if (deviceType == COLOR_DISTANCE_SENSOR)
+    else if (deviceType == (byte)DeviceType::COLOR_DISTANCE_SENSOR)
     {
         parseBoostDistanceAndColor(pData);
     }
-    else if (deviceType == MOVE_HUB_TILT_SENSOR)
+    else if (deviceType == (byte)DeviceType::MOVE_HUB_TILT_SENSOR)
     {
         parseBoostTiltSensor(pData);
     }
-    else if (deviceType == TECHNIC_MEDIUM_HUB_TILT_SENSOR)
+    else if (deviceType == (byte)DeviceType::TECHNIC_MEDIUM_HUB_TILT_SENSOR)
     {
         parseControlPlusHubTiltSensor(pData);
     }
-    else if (deviceType == REMOTE_CONTROL_BUTTON)
+    else if (deviceType == (byte)DeviceType::REMOTE_CONTROL_BUTTON)
     {
         parsePoweredUpRemote(pData);
     }
@@ -599,7 +599,7 @@ void Lpf2Hub::init()
     _isConnecting = false;
     _bleUuid = BLEUUID(LPF2_UUID);
     _charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
-    _hubType = UNKNOWNHUB;
+    _hubType = HubType::UNKNOWNHUB;
 
     BLEDevice::init("");
     BLEScan *pBLEScan = BLEDevice::getScan();
@@ -669,7 +669,7 @@ byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
         }
     }
 
-    return UNKNOWNDEVICE;
+    return (byte)DeviceType::UNKNOWNDEVICE;
 }
 
 /**

@@ -44,7 +44,7 @@
 #define CHARACTERISTIC_UUID "00001624-1212-EFDE-1623-785FEABCD123"
 
 
-typedef void (*WriteCallback)(byte port, byte value);
+typedef void (*WritePortCallback)(byte port, byte value);
 
 class Lpf2HubEmulation
 {
@@ -58,15 +58,49 @@ private:
   BLEAddress *_hubAddress = nullptr;
   BLEAdvertising *_pAdvertising;
 
+  
+  // Hub information values
+  int8_t _rssi;
+  uint8_t _batteryLevel;
+  BatteryType _batteryType;
+  std::string _hubName = "myEmuatedHub";
+  HubType _hubType;
+
+  int _firmwareVersionBuild;
+  int _firmwareVersionBugfix;
+  int _firmwareVersionMajor;
+  int _firmwareVersionMinor;
+
+  int _hardwareVersionBuild;
+  int _hardwareVersionBugfix;
+  int _hardwareVersionMajor;
+  int _hardwareVersionMinor;  
+
+  void writeValue(MessageType messageType, std::string payload, bool notify = true);
+
 public:
   Lpf2HubEmulation();
+  Lpf2HubEmulation(std::string hubName, HubType hubType);
   void start();
   void initializePorts();
-  void setWriteCallback(WriteCallback callback);
+  void setWritePortCallback(WritePortCallback callback);
+  void setHubRssi(int8_t rssi);
+  void setHubBatteryLevel(uint8_t batteryLevel);
+  void setHubBatteryType(BatteryType batteryType);
+  void setHubName(std::string hubName, bool notify = true);
+  std::string getHubName();
+  void setHubFirmwareVersion(int build, int bugfix, int major, int minor);
+  void setHubHardwareVersion(int build, int bugfix, int major, int minor);
+  void setHubButton(bool pressed);
+
+  void attachDevice(byte port, DeviceType deviceType);
+  void detachDevice(byte port);
+
   bool isConnected = false;
   bool isPortInitialized = false;
   BLECharacteristic *pCharacteristic;
-  WriteCallback writeCallback = nullptr;
+  WritePortCallback writePortCallback = nullptr;
+
 
 
   // int setBatteryLevel(int batteryLevel);

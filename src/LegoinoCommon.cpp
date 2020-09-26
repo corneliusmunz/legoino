@@ -12,6 +12,28 @@
  * @brief Map speed from -100..100 to the 8bit internal value
  * @param [in] speed -100..100
  */
+char LegoinoCommon::MapSpeedReverse(char speed)
+{
+    byte rawSpeed;
+    if (speed == 0)
+    {
+        rawSpeed = 0; // stop motor
+    }
+    else if (speed > 155)
+    {
+        rawSpeed = map(speed, 156, 255, -100, -1);
+    }
+    else
+    {
+        rawSpeed = speed;
+    }
+    return rawSpeed;
+}
+
+/**
+ * @brief Map speed from -100..100 to the 8bit internal value
+ * @param [in] speed -100..100
+ */
 byte LegoinoCommon::MapSpeed(int speed)
 {
     byte rawSpeed;

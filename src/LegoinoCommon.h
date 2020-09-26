@@ -16,6 +16,7 @@ class LegoinoCommon
 public:
 
   static byte MapSpeed(int speed);
+  static char MapSpeedReverse(char speed);
 
   static byte *Int16ToByteArray(int16_t x);
   static byte *Int32ToByteArray(int32_t x);
