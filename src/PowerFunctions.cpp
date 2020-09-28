@@ -4,9 +4,7 @@
 *
 * see http://www.philohome.com/pf/LEGO_Power_Functions_RC_v120.pdf for more info
 * Based on SuperCow's code (http://forum.arduino.cc/index.php?topic=38142.0)
-*
-* Added some speed mapping functions
-*
+**
 *  Released under MIT License
 *
 */

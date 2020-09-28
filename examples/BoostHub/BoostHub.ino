@@ -2,7 +2,7 @@
  * A BoostHub basic example to connect a boost hub, set the led color and the name of the hub and
  * do some basic movements on the boost map grid
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
  */
@@ -59,8 +59,6 @@ void loop() {
     myBoostHub.moveArcRight(90);
     delay(2000);
     myBoostHub.setMotorSpeedForDegrees(_portC, 50, 1*360*2);
-    delay(2000);
-    myBoostHub.setMotorSpeedForDegrees(_portD, 50, 1*360*2);
     delay(2000);
     myBoostHub.shutDownHub();
 

@@ -9,7 +9,7 @@
 #ifndef Lpf2HubConst_h
 #define Lpf2HubConst_h
 
-#define LOGGING_ENABLED
+//#define LOGGING_ENABLED
 
 #ifdef LOGGING_ENABLED
 #define LOGLINE(...) Serial.println(__VA_ARGS__)

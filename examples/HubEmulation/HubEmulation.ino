@@ -1,22 +1,31 @@
 /**
- * A Legoino example to control a train which has a motor connected
- * to the Port A of the Hub
+ * A Legoino example to emulate a train hub which directly sends
+ * out the motor commands as IR signals to a power function IR receiver. 
+ * With this setup you can upgrade your power function systems to powerup systems
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * For the setup the IR LED has to be connected on the OUTPUT PIN 12 of the 
+ * ESP controller. This will work out of the Box with the M5 Atom matrix/light
+ * esp32 board which has a build in IR LED on Port 12
+ * 
+ * Port A of the powered up hub is mapped to the RED power function port
+ * Port B of the powered up hub is mapped to the BLUE power function port
+ * 
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
  */
 
 #include "Lpf2HubEmulation.h"
-#include <M5Atom.h>
 #include <PowerFunctions.h>
 #include "LegoinoCommon.h"
 
 // create a hub instance
 Lpf2HubEmulation myEmulatedHub("TrainHub", HubType::POWERED_UP_HUB);
-// create a power functions instance
+
+// create a power functions instance (IR LED on Pin 12, IR Channel 0)
 PowerFunctions pf(12, 0);
 
+// method to map a speed value to a power function speed value
 void setPfSpeed(byte port, byte value) {
     char pfSpeed;
     if (value == 0) {
@@ -37,66 +46,26 @@ void writeValueCallback(byte port, byte value)
 
   if (port == 0x00)
   {
-    setPfSpeed(0x00, value);
+    setPfSpeed(PF_RED, value);
   }
 
   if (port == 0x01)
   {
-    setPfSpeed(0x01, value);
+    setPfSpeed(PF_BLUE, value);
   }
 
   if (port == 0x32)
   {
-    CRGB color = 0x000000;
-    switch (value)
-    {
-    case 0: 
-      color = 0x000000;
-      break;
-    case 1: 
-      color = 0x000000;
-      break;
-    case 2: 
-      color = 0xFF00FF;
-      break;
-    case 3: 
-      color = 0x0000FF;
-      break;
-    case 4: 
-      color = 0x00ffff;
-      break;
-    case 5: 
-      color = 0x00cc99;
-      break;
-    case 6: 
-      color = 0x00cc00;
-      break;
-    case 7: 
-      color = 0xffff00;
-      break;
-    case 8: 
-      color = 0xff6600;
-      break;
-    case 9: 
-      color = 0xFF0000;
-      break;
-    case 10: 
-      color = 0xFFFFFF;
-      break;
-    }
-    M5.dis.fillpix(color);
+    Serial.print("Hub LED command received with color: ");
+    Serial.println(COLOR_STRING[value]);
   }
 }
 
 void setup()
 {
   Serial.begin(115200);
-
-  M5.begin(true, false, true);
-  delay(50);
-  M5.dis.clear();
-
-  myEmulatedHub.setWritePortCallback(&writeValueCallback);
+  // define the callback function if a write message event on the characteristic occurs
+  myEmulatedHub.setWritePortCallback(&writeValueCallback); 
   myEmulatedHub.start();
 }
 
@@ -104,6 +73,8 @@ void setup()
 void loop()
 {
 
+  // if an app is connected, attach some devices on the ports to signalize 
+  // the app that values could be received/written to that ports
   if (myEmulatedHub.isConnected && !myEmulatedHub.isPortInitialized)
   {
     delay(1000);
@@ -114,9 +85,6 @@ void loop()
     delay(1000);
     myEmulatedHub.attachDevice(0x01, DeviceType::MEDIUM_LINEAR_MOTOR);
     delay(1000);
-    myEmulatedHub.attachDevice(0x03, DeviceType::COLOR_DISTANCE_SENSOR);
-    delay(1000);
-    //M5.dis.fillpix(CRGB::Green);
   }
 
 } // End of loop

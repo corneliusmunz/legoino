@@ -791,6 +791,9 @@ void Lpf2Hub::activateHubUpdates()
     byte setBatteryLevelCommand[3] = {0x01, 0x06, 0x02};
     WriteValue(setBatteryLevelCommand, 3);
 
+    byte setBatteryTypeCommand[3] = {0x01, 0x07, 0x02};
+    WriteValue(setBatteryTypeCommand, 3);
+
     byte setRSSICommand[3] = {0x01, 0x05, 0x02};
     WriteValue(setRSSICommand, 3);
 
