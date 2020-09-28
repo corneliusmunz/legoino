@@ -3,7 +3,7 @@
  * motor dependent on the detected color. If the train is stopped, you can start the train by
  * pressing the hub button.
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
  */
@@ -50,7 +50,7 @@ void loop() {
     // read color value of sensor
     int color = myHub.getColor();
     Serial.print("Color: ");
-    Serial.println(color, DEC);
+    Serial.println(COLOR_STRING[color]);
 
     // set hub LED color to detected color of sensor
     if (color == 9) { 

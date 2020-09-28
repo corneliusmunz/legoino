@@ -46,7 +46,7 @@ void loop() {
 
   if (myRemote.isConnecting())
   {
-    if (myRemote.getHubType() == POWERED_UP_REMOTE)
+    if (myRemote.getHubType() == HubType::POWERED_UP_REMOTE)
     {
       //This is the right device 
       if (!myRemote.connectHub())
@@ -64,7 +64,7 @@ void loop() {
 
   if (myTrainHub1.isConnecting())
   {
-    if (myTrainHub1.getHubType() == POWERED_UP_HUB)
+    if (myTrainHub1.getHubType() == HubType::POWERED_UP_HUB)
     {
       myTrainHub1.connectHub();
       myTrainHub1.setLedColor(BLUE);
@@ -74,7 +74,7 @@ void loop() {
 
   if (myTrainHub2.isConnecting())
   {
-    if (myTrainHub2.getHubType() == POWERED_UP_HUB)
+    if (myTrainHub2.getHubType() == HubType::POWERED_UP_HUB)
     {
       myTrainHub2.connectHub();
       myTrainHub2.setLedColor(YELLOW);

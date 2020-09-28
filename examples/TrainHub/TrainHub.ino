@@ -2,7 +2,7 @@
  * A Legoino example to control a train which has a motor connected
  * to the Port A of the Hub
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
  */

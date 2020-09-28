@@ -14,7 +14,7 @@
  * Right Button DOWN  -> Vernie will rotate to the left
  * Right Stop Button  -> Vernie will fire the arrow
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
  */

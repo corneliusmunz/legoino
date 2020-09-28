@@ -8,7 +8,7 @@
  * 
  * You can change the motor speed with the left (A) remote buttons
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
  */

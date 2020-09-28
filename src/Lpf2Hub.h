@@ -115,7 +115,7 @@ private:
   int numberOfConnectedDevices = 0;
 
   //BLE settings
-  uint32_t _scanDuration = 1;
+  uint32_t _scanDuration = 5;
   // Hub information values
   int _lpf2HubRssi;
   uint8_t _lpf2HubBatteryLevel;

@@ -6,7 +6,7 @@
  * 
  * You can change the motor speed with the left (A) remote buttons
  * 
- * (c) Copyright 2019 - Nicolas HILAIRE
+ * (c) Copyright 2020 - Nicolas HILAIRE
  * Released under MIT License
  * 
  */
@@ -40,7 +40,7 @@ void loop() {
 
   if (myRemote.isConnecting())
   {
-    if (myRemote.getHubType() == POWERED_UP_REMOTE)
+    if (myRemote.getHubType() == HubType::POWERED_UP_REMOTE)
     {
       //This is the right device 
       if (!myRemote.connectHub())
@@ -58,7 +58,7 @@ void loop() {
 
   if (myHub.isConnecting())
   {
-    if (myHub.getHubType() == POWERED_UP_HUB)
+    if (myHub.getHubType() == HubType::POWERED_UP_HUB)
     {
       myHub.connectHub();
       myHub.setLedColor(GREEN);
