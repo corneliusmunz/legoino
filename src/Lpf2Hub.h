@@ -27,25 +27,40 @@ typedef struct Device
 
 class Lpf2Hub
 {
-private:
-  // Notification callbacks
-  ButtonCallback _buttonCallback = nullptr;
 
 public:
+
+  // constructor
   Lpf2Hub();
+
+  // initializer methods
   void init();
   void init(uint32_t scanDuration);
   void init(std::string deviceAddress);
   void init(std::string deviceAddress, uint32_t scanDuration);
+
+  // hub related methods
   bool connectHub();
   bool isConnected();
   bool isConnecting();
   NimBLEAddress getHubAddress();
-
   void setHubName(char name[]);
   void shutDownHub();
+  void activateHubUpdates();
+  HubType getHubType();
+
+
   int  getDeviceIndexForPortNumber(byte portNumber);
   byte getDeviceTypeForPortNumber(byte portNumber);
+  byte getModeForDeviceType(byte deviceType);
+  void registerPortDevice(byte portNumber, byte deviceType);
+  void deregisterPortDevice(byte portNumber);
+  void activatePortDevice(byte portNumber, byte deviceType, SensorMessageCallback sensorMessageCallback = nullptr);
+  void activatePortDevice(byte portNumber, SensorMessageCallback sensorMessageCallback = nullptr);
+  void deactivatePortDevice(byte portNumber, byte deviceType);
+  void deactivatePortDevice(byte portNumber);
+
+
   void setLedColor(Color color);
   void setLedRGBColor(char red, char green, char blue);
   void setLedHSVColor(int hue, double saturation, double value);
@@ -53,6 +68,7 @@ public:
   void registerButtonCallback(ButtonCallback buttonCallback);
   void WriteValue(byte command[], int size);
 
+  // parse methods to read in the content of the charachteristic value
   void parseDeviceInfo(uint8_t *pData);
   void parsePortMessage(uint8_t *pData);
   void parseSensorMessage(uint8_t *pData);
@@ -66,19 +82,15 @@ public:
   int parseControlPlusHubTiltSensorX(uint8_t *pData);
   int parseControlPlusHubTiltSensorY(uint8_t *pData);
   int parseControlPlusHubTiltSensorZ(uint8_t *pData);
-  void parseControlPlusHubTiltSensor(uint8_t *pData);
   ButtonState parseButton(uint8_t *pData);
   void parsePortAction(uint8_t *pData);
-  byte getModeForDeviceType(byte deviceType);
-  void registerPortDevice(byte portNumber, byte deviceType);
-  void deregisterPortDevice(byte portNumber);
-  void activatePortDevice(byte portNumber, byte deviceType, SensorMessageCallback sensorMessageCallback = nullptr);
-  void activatePortDevice(byte portNumber, SensorMessageCallback sensorMessageCallback = nullptr);
-  void deactivatePortDevice(byte portNumber, byte deviceType);
-  void deactivatePortDevice(byte portNumber);
+
+
   void activateButtonReports();
+
+  // BLE specific stuff
   void notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
-  void activateHubUpdates();
+
   int getTachoMotorRotation();
   double getDistance();
   int getColor();
@@ -98,7 +110,7 @@ public:
   int getHardwareVersionBugfix();
   int getHardwareVersionMajor();
   int getHardwareVersionMinor();
-  HubType getHubType();
+  
   bool isButtonPressed();
   bool isLeftRemoteUpButtonPressed();
   bool isLeftRemoteDownButtonPressed();
@@ -119,12 +131,19 @@ public:
   HubType _hubType;
 
 private:
+
+  // Notification callbacks
+  ButtonCallback _buttonCallback = nullptr;
+
+  // List of connected devices
   Device connectedDevices[13];
   int numberOfConnectedDevices = 0;
 
   //BLE settings
   uint32_t _scanDuration = 5;
-  // Hub information values
+
+  // Hub information values 
+  //(could be removed in future version because the information will be directly send to a callback function)
   int _lpf2HubRssi;
   uint8_t _lpf2HubBatteryLevel;
   int _lpf2HubHubMotorRotation;

@@ -1,17 +1,16 @@
 /*
  * Lpf2Hub.cpp - Arduino base class for controlling Powered UP and Boost controllers
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
 */
 
 #include "Lpf2Hub.h"
 
-// Boost tacho motor
+// Global variables to store sensor values. Was needed while member function callbacks was 
+// not possible with the "old" BLE library. Will be removed in the future
 int Lpf2HubTachoMotorRotation;
-
-// Distance/Color sensor
 double Lpf2HubDistance;
 int Lpf2HubColor;
 
@@ -119,6 +118,14 @@ void Lpf2Hub::WriteValue(byte command[], int size)
     _pRemoteCharacteristic->writeValue(commandWithCommonHeader, sizeof(commandWithCommonHeader), false);
 }
 
+/**
+ * @brief Register a device on a defined port. This will store the device
+ * in the connectedDevices array. This method will be called if a port connection
+ * event is triggered by the hub
+ * 
+ * @param [in] port number where the device is connected
+ * @param [in] device type of the connected device
+ */
 void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType)
 {
     LOG("registerPortDevice Port:");
@@ -131,6 +138,12 @@ void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType)
     numberOfConnectedDevices++;
 }
 
+/**
+ * @brief Remove a device from the connectedDevices array. This method
+ * will be called if a port disconnection event is triggered by the hub
+ * 
+ * @param [in] port number where the device is connected
+ */
 void Lpf2Hub::deregisterPortDevice(byte portNumber)
 {
     LOG("deregisterPortDevice Port:");
@@ -151,6 +164,14 @@ void Lpf2Hub::deregisterPortDevice(byte portNumber)
     numberOfConnectedDevices--;
 }
 
+/**
+ * @brief Activate device for receiving updates. E.g. activate a color/distance sensor to
+ * write updates on the characteristic if a value has changed. An optional callback could be
+ * regeistered here. This function will be called if the update event will occur. 
+ * 
+ * @param [in] port number where the device is connected
+ * @param [in] callback function which will be called on an update event
+ */
 void Lpf2Hub::activatePortDevice(byte portNumber, SensorMessageCallback sensorMessageCallback)
 {
     LOGLINE("activatePortDevice(portNumber)");
@@ -158,6 +179,16 @@ void Lpf2Hub::activatePortDevice(byte portNumber, SensorMessageCallback sensorMe
     activatePortDevice(portNumber, deviceType, sensorMessageCallback);
 }
 
+/**
+ * @brief Activate device for receiving updates. E.g. activate a color/distance sensor to
+ * write updates on the characteristic if a value has changed. An optional callback could be
+ * regeistered here. This function will be called if the update event will occur. The Update mode 
+ * is currently fixed based on the device type
+ * 
+ * @param [in] port number where the device is connected
+ * @param [in] deviceType of the connected port
+ * @param [in] callback function which will be called on an update event
+ */
 void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, SensorMessageCallback sensorMessageCallback)
 {
     LOGLINE("activatePortDevice");
@@ -170,12 +201,23 @@ void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, SensorMessage
     WriteValue(activatePortDeviceMessage, 8);
 }
 
+/**
+ * @brief Deactivate device for receiving updates. 
+ * 
+ * @param [in] port number where the device is connected
+ */
 void Lpf2Hub::deactivatePortDevice(byte portNumber)
 {
     byte deviceType = getDeviceTypeForPortNumber(portNumber);
     deactivatePortDevice(portNumber, deviceType);
 }
 
+/**
+ * @brief Deactivate device for receiving updates. 
+ * 
+ * @param [in] port number where the device is connected
+ * @param [in] device type 
+ */
 void Lpf2Hub::deactivatePortDevice(byte portNumber, byte deviceType)
 {
     byte mode = getModeForDeviceType(deviceType);
@@ -183,6 +225,10 @@ void Lpf2Hub::deactivatePortDevice(byte portNumber, byte deviceType)
     WriteValue(deactivatePortDeviceMessage, 8);
 }
 
+/**
+ * @brief Activate updates of hub button events. 
+ * 
+ */
 void Lpf2Hub::activateButtonReports()
 {
     LOGLINE("Activate Button Reports");
@@ -958,8 +1004,6 @@ bool Lpf2Hub::connectHub()
 
     // add callback instance to get notified if a disconnect event appears
     pClient->setClientCallbacks(new Lpf2HubClientCallback(this));
-
-    activateHubUpdates();
 
     // Set states
     _isConnected = true;
