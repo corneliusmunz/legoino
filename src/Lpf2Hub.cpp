@@ -127,7 +127,7 @@ void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType)
     LOG(" DeviceType:");
     LOGLINE(deviceType, HEX);
 
-    Device newDevice = {portNumber, deviceType};
+    Device newDevice = {portNumber, deviceType, nullptr};
     connectedDevices[numberOfConnectedDevices] = newDevice;
     numberOfConnectedDevices++;
 }
@@ -152,19 +152,21 @@ void Lpf2Hub::deregisterPortDevice(byte portNumber)
     numberOfConnectedDevices--;
 }
 
-void Lpf2Hub::activatePortDevice(byte portNumber)
+void Lpf2Hub::activatePortDevice(byte portNumber, SensorMessageCallback sensorMessageCallback)
 {
     LOGLINE("activatePortDevice(portNumber)");
     byte deviceType = getDeviceTypeForPortNumber(portNumber);
-    activatePortDevice(portNumber, deviceType);
+    activatePortDevice(portNumber, deviceType, sensorMessageCallback);
 }
 
-void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType)
+void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, SensorMessageCallback sensorMessageCallback)
 {
     LOGLINE("activatePortDevice");
     byte mode = getModeForDeviceType(deviceType);
     LOG("mode for device: ");
     LOGLINE(mode, HEX);
+    int deviceIndex = getDeviceIndexForPortNumber(portNumber);
+    connectedDevices[deviceIndex].callback = sensorMessageCallback;
     byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(activatePortDeviceMessage, 8);
 }
@@ -489,8 +491,15 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
 void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 {
     LOGLINE("parseSensorMessage");
-    byte deviceType = getDeviceTypeForPortNumber(pData[3]);
-    if (pData[3] == 0x3b)
+    int deviceIndex = getDeviceIndexForPortNumber(pData[3]);
+
+    byte deviceType = connectedDevices[deviceIndex].DeviceType;
+
+    if (connectedDevices[deviceIndex].callback != nullptr) {
+        connectedDevices[deviceIndex].callback(pData[3], (DeviceType)deviceType, pData);
+    }
+
+    if (deviceType == (byte)DeviceType::CURRENT_SENSOR)
     {
         int currentRaw = LegoinoCommon::ReadUInt16LE(pData, 4);
         _lpf2HubCurrent = (double)currentRaw * LPF2_CURRENT_MAX / LPF2_CURRENT_MAX_RAW;
@@ -499,7 +508,7 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
         LOGLINE();
         return;
     }
-    else if (pData[3] == 0x3c)
+    else if (deviceType == (byte)DeviceType::VOLTAGE_SENSOR)
     {
         int voltageRaw = LegoinoCommon::ReadUInt16LE(pData, 4);
         _lpf2HubVoltage = (double)voltageRaw * LPF2_VOLTAGE_MAX / LPF2_VOLTAGE_MAX_RAW;
@@ -633,22 +642,27 @@ void Lpf2Hub::init(std::string deviceAddress, uint32_t scanDuration)
     init();
 }
 
-/**
- * @brief Register the connected devices to map the ports to the device types
- * @param [in] connectedDevices[] Array to a device struct of all connected devices
- */
-void Lpf2Hub::initConnectedDevices(Device devices[], byte deviceNumbers)
-{
-    numberOfConnectedDevices = deviceNumbers;
-    for (int idx = 0; idx < numberOfConnectedDevices; idx++)
-    {
-        connectedDevices[idx] = devices[idx];
-    }
-}
-
 NimBLEAddress Lpf2Hub::getHubAddress() {
     NimBLEAddress pAddress = *_pServerAddress;
     return pAddress;
+}
+
+int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber) {
+    LOGLINE("getDeviceIndexForPortNumber");
+    LOGLINE(numberOfConnectedDevices, DEC);
+    for (int idx = 0; idx < numberOfConnectedDevices; idx++)
+    {
+        LOGLINE(idx, DEC);
+        LOGLINE(connectedDevices[idx].PortNumber, HEX);
+        LOGLINE(connectedDevices[idx].DeviceType, HEX);
+        LOGLINE((long)(connectedDevices[idx].callback), HEX);
+        if (connectedDevices[idx].PortNumber == portNumber)
+        {
+            return idx;
+        }
+    }
+
+    //ToDo: What happens if the device could not be found
 }
 
 

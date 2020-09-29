@@ -16,11 +16,13 @@ using namespace std::placeholders;
 #include "LegoinoCommon.h"
 
 typedef void (*ButtonCallback)(bool isPressed);
+typedef void (*SensorMessageCallback)(byte portNumber, DeviceType deviceType, uint8_t *pData);
 
 typedef struct Device
 {
   byte PortNumber;
   byte DeviceType;
+  SensorMessageCallback callback;
 };
 
 class Lpf2Hub
@@ -35,7 +37,6 @@ public:
   void init(uint32_t scanDuration);
   void init(std::string deviceAddress);
   void init(std::string deviceAddress, uint32_t scanDuration);
-  void initConnectedDevices(Device devices[], byte deviceNumbers);
   bool connectHub();
   bool isConnected();
   bool isConnecting();
@@ -43,6 +44,7 @@ public:
 
   void setHubName(char name[]);
   void shutDownHub();
+  int  getDeviceIndexForPortNumber(byte portNumber);
   byte getDeviceTypeForPortNumber(byte portNumber);
   void setLedColor(Color color);
   void setLedRGBColor(char red, char green, char blue);
@@ -64,8 +66,8 @@ public:
   byte getModeForDeviceType(byte deviceType);
   void registerPortDevice(byte portNumber, byte deviceType);
   void deregisterPortDevice(byte portNumber);
-  void activatePortDevice(byte portNumber, byte deviceType);
-  void activatePortDevice(byte portNumber);
+  void activatePortDevice(byte portNumber, byte deviceType, SensorMessageCallback sensorMessageCallback = nullptr);
+  void activatePortDevice(byte portNumber, SensorMessageCallback sensorMessageCallback = nullptr);
   void deactivatePortDevice(byte portNumber, byte deviceType);
   void deactivatePortDevice(byte portNumber);
   void activateButtonReports();
