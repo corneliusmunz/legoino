@@ -14,27 +14,33 @@ BoostHub myBoostHub;
 BoostHub::Port _portC = BoostHub::Port::C;
 BoostHub::Port _portD = BoostHub::Port::D;
 
-void setup() {
-    Serial.begin(115200);
-    myBoostHub.init(); // initalize the BoostHub instance
-} 
-
+void setup()
+{
+  Serial.begin(115200);
+  myBoostHub.init(); // initalize the BoostHub instance
+}
 
 // main loop
-void loop() {
+void loop()
+{
 
   // connect flow. Search for BLE services and try to connect if the uuid of the hub is found
-  if (myBoostHub.isConnecting()) {
+  if (myBoostHub.isConnecting())
+  {
     myBoostHub.connectHub();
-    if (myBoostHub.isConnected()) {
+    if (myBoostHub.isConnected())
+    {
       Serial.println("Connected to HUB");
-    } else {
+    }
+    else
+    {
       Serial.println("Failed to connect to HUB");
     }
   }
 
   // if connected, you can set the name of the hub, the led color and shut it down
-  if (myBoostHub.isConnected()) {
+  if (myBoostHub.isConnected())
+  {
 
     char hubName[] = "myBoostHub";
     myBoostHub.setHubName(hubName);
@@ -58,10 +64,9 @@ void loop() {
     delay(2000);
     myBoostHub.moveArcRight(90);
     delay(2000);
-    myBoostHub.setMotorSpeedForDegrees(_portC, 50, 1*360*2);
+    myBoostHub.setMotorSpeedForDegrees(_portC, 50, 1 * 360 * 2);
     delay(2000);
     myBoostHub.shutDownHub();
-
   }
-  
+
 } // End of loop

@@ -1,7 +1,7 @@
 /*
  * Lpf2Hub.h - Arduino base class for controlling Powered UP and Boost controllers
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
 */
@@ -25,11 +25,18 @@ typedef struct Device
   SensorMessageCallback callback;
 };
 
+typedef struct Version
+{
+  int Build;
+  int Major;
+  int Minor;
+  int Bugfix;
+};
+
 class Lpf2Hub
 {
 
 public:
-
   // constructor
   Lpf2Hub();
 
@@ -49,8 +56,7 @@ public:
   void activateHubUpdates();
   HubType getHubType();
 
-
-  int  getDeviceIndexForPortNumber(byte portNumber);
+  int getDeviceIndexForPortNumber(byte portNumber);
   byte getDeviceTypeForPortNumber(byte portNumber);
   byte getModeForDeviceType(byte deviceType);
   void registerPortDevice(byte portNumber, byte deviceType);
@@ -59,7 +65,6 @@ public:
   void activatePortDevice(byte portNumber, SensorMessageCallback sensorMessageCallback = nullptr);
   void deactivatePortDevice(byte portNumber, byte deviceType);
   void deactivatePortDevice(byte portNumber);
-
 
   void setLedColor(Color color);
   void setLedRGBColor(char red, char green, char blue);
@@ -82,9 +87,15 @@ public:
   int parseControlPlusHubTiltSensorX(uint8_t *pData);
   int parseControlPlusHubTiltSensorY(uint8_t *pData);
   int parseControlPlusHubTiltSensorZ(uint8_t *pData);
-  ButtonState parseButton(uint8_t *pData);
+  ButtonState parseRemoteButton(uint8_t *pData);
   void parsePortAction(uint8_t *pData);
-
+  uint8_t parseSystemTypeId(uint8_t *pData);
+  byte parseBatteryType(uint8_t *pData);
+  uint8_t parseBatteryLevel(uint8_t *pData);
+  int parseRssi(uint8_t *pData);
+  Version parseVersion(uint8_t *pData);
+  ButtonState parseHubButton(uint8_t *pData);
+  std::string parseHubAdvertisingName(uint8_t *pData);
 
   void activateButtonReports();
 
@@ -110,7 +121,7 @@ public:
   int getHardwareVersionBugfix();
   int getHardwareVersionMajor();
   int getHardwareVersionMinor();
-  
+
   bool isButtonPressed();
   bool isLeftRemoteUpButtonPressed();
   bool isLeftRemoteDownButtonPressed();
@@ -131,7 +142,6 @@ public:
   HubType _hubType;
 
 private:
-
   // Notification callbacks
   ButtonCallback _buttonCallback = nullptr;
 
@@ -142,7 +152,7 @@ private:
   //BLE settings
   uint32_t _scanDuration = 5;
 
-  // Hub information values 
+  // Hub information values
   //(could be removed in future version because the information will be directly send to a callback function)
   int _lpf2HubRssi;
   uint8_t _lpf2HubBatteryLevel;

@@ -142,7 +142,7 @@ enum struct ButtonState {
     STOP = 0x7f
 };
 
-typedef enum HubPropertyOperation {
+enum struct HubPropertyOperation {
     SET_DOWNSTREAM = 0x01,
     ENABLE_UPDATES_DOWNSTREAM = 0x02,
     DISABLE_UPDATES_DOWNSTREAM = 0x03,
