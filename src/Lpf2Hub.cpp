@@ -119,7 +119,6 @@ void Lpf2Hub::WriteValue(byte command[], int size)
     _pRemoteCharacteristic->writeValue(commandWithCommonHeader, sizeof(commandWithCommonHeader), false);
 }
 
-
 void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType)
 {
     LOG("registerPortDevice Port:");
@@ -330,61 +329,99 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
     }
 }
 
-void Lpf2Hub::parseBoostTiltSensor(uint8_t *pData)
+int Lpf2Hub::parseBoostTiltSensorX(uint8_t *pData)
 {
-    LOGLINE("parseBoostTiltSensor");
-    _lpf2HubTiltX = LegoinoCommon::ReadInt8(pData, 4);
-    _lpf2HubTiltY = LegoinoCommon::ReadInt8(pData, 5);
-    LOG("x:");
-    LOG(_lpf2HubTiltX, DEC);
-    LOG(" y:");
-    LOGLINE(_lpf2HubTiltY, DEC);
+    LOGLINE("parseBoostTiltSensorX");
+    int value = LegoinoCommon::ReadInt8(pData, 4);
+    LOG("x: ");
+    LOG(value, DEC);
+    return value;
 }
 
-void Lpf2Hub::parseControlPlusHubTiltSensor(uint8_t *pData)
+int Lpf2Hub::parseBoostTiltSensorY(uint8_t *pData)
 {
-    LOGLINE("parseControlPlusTiltSensor");
-    _lpf2HubTiltX = LegoinoCommon::ReadInt16LE(pData, 4);
-    _lpf2HubTiltY = LegoinoCommon::ReadInt16LE(pData, 6);
-    _lpf2HubTiltZ = LegoinoCommon::ReadInt16LE(pData, 8);
-    LOG("x:");
-    LOG(_lpf2HubTiltX, DEC);
-    LOG(" y:");
-    LOG(_lpf2HubTiltY, DEC);
-    LOG(" z:");
-    LOGLINE(_lpf2HubTiltZ, DEC);
+    LOGLINE("parseBoostTiltSensorY");
+    int value = LegoinoCommon::ReadInt8(pData, 5);
+    LOG("y: ");
+    LOG(value, DEC);
+    return value;
 }
 
-void Lpf2Hub::parseBoostTachoMotor(uint8_t *pData)
+int Lpf2Hub::parseControlPlusHubTiltSensorX(uint8_t *pData)
+{
+    LOGLINE("parseControlPlusTiltSensorX");
+    int value = LegoinoCommon::ReadInt16LE(pData, 4);
+    LOG("x: ");
+    LOG(value, DEC);
+    return value;
+}
+
+int Lpf2Hub::parseControlPlusHubTiltSensorY(uint8_t *pData)
+{
+    LOGLINE("parseControlPlusTiltSensorY");
+    int value = LegoinoCommon::ReadInt16LE(pData, 6);
+    LOG("y: ");
+    LOG(value, DEC);
+    return value;
+}
+
+int Lpf2Hub::parseControlPlusHubTiltSensorZ(uint8_t *pData)
+{
+    LOGLINE("parseControlPlusTiltSensorZ");
+    int value = LegoinoCommon::ReadInt16LE(pData, 8);
+    LOG("z: ");
+    LOG(value, DEC);
+    return value;
+}
+
+double Lpf2Hub::parseCurrentSensor(uint8_t *pData)
+{
+    int currentRaw = LegoinoCommon::ReadUInt16LE(pData, 4);
+    double current = (double)currentRaw * LPF2_CURRENT_MAX / LPF2_CURRENT_MAX_RAW;
+    LOG("Current value [mA]: ");
+    LOGLINE(current);
+    return current;
+}
+
+double Lpf2Hub::parseVoltageSensor(uint8_t *pData)
+{
+    int voltageRaw = LegoinoCommon::ReadUInt16LE(pData, 4);
+    double voltage = (double)voltageRaw * LPF2_VOLTAGE_MAX / LPF2_VOLTAGE_MAX_RAW;
+    LOG("Hub Voltage : ");
+    LOGLINE(voltage);
+    LOGLINE();
+    return voltage;
+}
+
+int Lpf2Hub::parseTachoMotor(uint8_t *pData)
 {
     LOGLINE("parseBoostTachoMotor");
-    Lpf2HubTachoMotorRotation = LegoinoCommon::ReadInt32LE(pData, 4);
+    int value = LegoinoCommon::ReadInt32LE(pData, 4);
     LOG("Tacho motor rotation: ");
-    LOGLINE(Lpf2HubTachoMotorRotation, DEC);
+    LOGLINE(value, DEC);
+    return value;
 }
 
-void Lpf2Hub::parseBoostHubMotor(uint8_t *pData)
+double Lpf2Hub::parseDistance(uint8_t *pData)
 {
-    LOGLINE("parseBoostHubMotor");
-    _lpf2HubHubMotorRotation = LegoinoCommon::ReadInt32LE(pData, 4);
-    LOG("BoostHub motor rotation: ");
-    LOGLINE(_lpf2HubHubMotorRotation, DEC);
-}
-
-void Lpf2Hub::parseBoostDistanceAndColor(uint8_t *pData)
-{
-    LOGLINE("parseBoostDistanceAndColor");
+    LOGLINE("parseDistance");
     int partial = pData[7];
-    Lpf2HubColor = pData[4];
-    Lpf2HubDistance = (double)pData[5];
+    double distance = (double)pData[5];
     if (partial > 0)
     {
-        Lpf2HubDistance += 1.0 / partial;
+        distance += 1.0 / partial;
     }
-    Lpf2HubDistance = floor(Lpf2HubDistance * 25.4) - 20.0;
+    distance = floor(distance * 25.4) - 20.0;
 
     LOG("Distance: ");
-    LOG(Lpf2HubDistance, DEC);
+    LOG(distance, DEC);
+    return distance;
+}
+
+int Lpf2Hub::parseColor(uint8_t *pData)
+{
+    LOGLINE("parseColor");
+    int color = pData[4];
     LOG(" Color: ");
     if (Lpf2HubColor > 10)
     {
@@ -394,69 +431,16 @@ void Lpf2Hub::parseBoostDistanceAndColor(uint8_t *pData)
     {
         LOGLINE(COLOR_STRING[Lpf2HubColor]);
     }
+    return color;
 }
 
-void Lpf2Hub::parsePoweredUpRemote(uint8_t *pData)
+ButtonState Lpf2Hub::parseButton(uint8_t *pData)
 {
-    LOGLINE("parsePoweredUp Remote Button");
-    int port = pData[3];
-    LOG("Port: ");
-    LOG(port, DEC);
+    LOGLINE("parse Remote Button");
     int buttonState = pData[4];
-    if (buttonState == 0x01)
-    {
-        LOGLINE(" ButtonState: UP");
-        if (port == 0x00)
-        {
-            _lpf2HubRemoteLeftUpButtonPressed = true;
-        }
-        else if (port == 0x01)
-        {
-            _lpf2HubRemoteRightUpButtonPressed = true;
-        }
-    }
-    else if (buttonState == 0xff)
-    {
-        LOGLINE(" ButtonState: DOWN");
-        if (port == 0x00)
-        {
-            _lpf2HubRemoteLeftDownButtonPressed = true;
-        }
-        else if (port == 0x01)
-        {
-            _lpf2HubRemoteRightDownButtonPressed = true;
-        }
-    }
-    else if (buttonState == 0x7f)
-    {
-        LOGLINE(" ButtonState: STOP");
-        if (port == 0x00)
-        {
-            _lpf2HubRemoteLeftStopButtonPressed = true;
-        }
-        else if (port == 0x01)
-        {
-            _lpf2HubRemoteRightStopButtonPressed = true;
-        }
-    }
-    else if (buttonState == 0x00)
-    {
-        LOGLINE(" ButtonState: RELEASED");
-        if (port == 0x00)
-        {
-            _lpf2HubRemoteLeftUpButtonPressed = false;
-            _lpf2HubRemoteLeftDownButtonPressed = false;
-            _lpf2HubRemoteLeftStopButtonPressed = false;
-            _lpf2HubRemoteLeftButtonReleased = true;
-        }
-        else if (port == 0x01)
-        {
-            _lpf2HubRemoteRightUpButtonPressed = false;
-            _lpf2HubRemoteRightDownButtonPressed = false;
-            _lpf2HubRemoteRightStopButtonPressed = false;
-            _lpf2HubRemoteRightButtonReleased = true;
-        }
-    }
+    LOG("ButtonState: ");
+    LOGLINE(buttonState, HEX);
+    return (ButtonState)buttonState;
 }
 
 byte Lpf2Hub::getModeForDeviceType(byte deviceType)
@@ -495,47 +479,106 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 
     byte deviceType = connectedDevices[deviceIndex].DeviceType;
 
-    if (connectedDevices[deviceIndex].callback != nullptr) {
+    if (connectedDevices[deviceIndex].callback != nullptr)
+    {
         connectedDevices[deviceIndex].callback(pData[3], (DeviceType)deviceType, pData);
     }
 
     if (deviceType == (byte)DeviceType::CURRENT_SENSOR)
     {
-        int currentRaw = LegoinoCommon::ReadUInt16LE(pData, 4);
-        _lpf2HubCurrent = (double)currentRaw * LPF2_CURRENT_MAX / LPF2_CURRENT_MAX_RAW;
-        LOG("Current value [mA]: ");
-        LOG(_lpf2HubCurrent);
-        LOGLINE();
+        _lpf2HubCurrent = parseCurrentSensor(pData);
         return;
     }
     else if (deviceType == (byte)DeviceType::VOLTAGE_SENSOR)
     {
-        int voltageRaw = LegoinoCommon::ReadUInt16LE(pData, 4);
-        _lpf2HubVoltage = (double)voltageRaw * LPF2_VOLTAGE_MAX / LPF2_VOLTAGE_MAX_RAW;
-        LOG("Hub Voltage : ");
-        LOG(_lpf2HubVoltage);
-        LOGLINE();
+        _lpf2HubVoltage = parseVoltageSensor(pData);
         return;
     }
     else if (deviceType == (byte)DeviceType::MEDIUM_LINEAR_MOTOR || deviceType == (byte)DeviceType::MOVE_HUB_MEDIUM_LINEAR_MOTOR)
     {
-        parseBoostTachoMotor(pData);
+        Lpf2HubTachoMotorRotation = parseTachoMotor(pData);
+        return;
     }
     else if (deviceType == (byte)DeviceType::COLOR_DISTANCE_SENSOR)
     {
-        parseBoostDistanceAndColor(pData);
+        Lpf2HubDistance = parseDistance(pData);
+        Lpf2HubColor = parseColor(pData);
+        return;
     }
     else if (deviceType == (byte)DeviceType::MOVE_HUB_TILT_SENSOR)
     {
-        parseBoostTiltSensor(pData);
+        _lpf2HubTiltX = parseBoostTiltSensorX(pData);
+        _lpf2HubTiltY = parseBoostTiltSensorY(pData);
+        return;
     }
     else if (deviceType == (byte)DeviceType::TECHNIC_MEDIUM_HUB_TILT_SENSOR)
     {
-        parseControlPlusHubTiltSensor(pData);
+        _lpf2HubTiltX = parseControlPlusHubTiltSensorX(pData);
+        _lpf2HubTiltY = parseControlPlusHubTiltSensorY(pData);
+        _lpf2HubTiltZ = parseControlPlusHubTiltSensorZ(pData);
+        return;
     }
     else if (deviceType == (byte)DeviceType::REMOTE_CONTROL_BUTTON)
     {
-        parsePoweredUpRemote(pData);
+        int port = pData[3];
+        LOG("Port: ");
+        LOG(port, DEC);
+        int buttonState = (int)parseButton(pData);
+        if (buttonState == 0x01)
+        {
+            LOGLINE(" ButtonState: UP");
+            if (port == 0x00)
+            {
+                _lpf2HubRemoteLeftUpButtonPressed = true;
+            }
+            else if (port == 0x01)
+            {
+                _lpf2HubRemoteRightUpButtonPressed = true;
+            }
+        }
+        else if (buttonState == 0xff)
+        {
+            LOGLINE(" ButtonState: DOWN");
+            if (port == 0x00)
+            {
+                _lpf2HubRemoteLeftDownButtonPressed = true;
+            }
+            else if (port == 0x01)
+            {
+                _lpf2HubRemoteRightDownButtonPressed = true;
+            }
+        }
+        else if (buttonState == 0x7f)
+        {
+            LOGLINE(" ButtonState: STOP");
+            if (port == 0x00)
+            {
+                _lpf2HubRemoteLeftStopButtonPressed = true;
+            }
+            else if (port == 0x01)
+            {
+                _lpf2HubRemoteRightStopButtonPressed = true;
+            }
+        }
+        else if (buttonState == 0x00)
+        {
+            LOGLINE(" ButtonState: RELEASED");
+            if (port == 0x00)
+            {
+                _lpf2HubRemoteLeftUpButtonPressed = false;
+                _lpf2HubRemoteLeftDownButtonPressed = false;
+                _lpf2HubRemoteLeftStopButtonPressed = false;
+                _lpf2HubRemoteLeftButtonReleased = true;
+            }
+            else if (port == 0x01)
+            {
+                _lpf2HubRemoteRightUpButtonPressed = false;
+                _lpf2HubRemoteRightDownButtonPressed = false;
+                _lpf2HubRemoteRightStopButtonPressed = false;
+                _lpf2HubRemoteRightButtonReleased = true;
+            }
+        }
+        return;
     }
 }
 
@@ -642,12 +685,14 @@ void Lpf2Hub::init(std::string deviceAddress, uint32_t scanDuration)
     init();
 }
 
-NimBLEAddress Lpf2Hub::getHubAddress() {
+NimBLEAddress Lpf2Hub::getHubAddress()
+{
     NimBLEAddress pAddress = *_pServerAddress;
     return pAddress;
 }
 
-int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber) {
+int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber)
+{
     LOGLINE("getDeviceIndexForPortNumber");
     LOGLINE(numberOfConnectedDevices, DEC);
     for (int idx = 0; idx < numberOfConnectedDevices; idx++)
@@ -664,7 +709,6 @@ int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber) {
 
     //ToDo: What happens if the device could not be found
 }
-
 
 byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
 {
