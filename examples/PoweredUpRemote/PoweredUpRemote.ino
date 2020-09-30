@@ -28,72 +28,88 @@ int currentSpeed = 0;
 int updatedSpeed = 0;
 bool isInitialized = false;
 
-void setup() {
-    Serial.begin(115200);
-    myRemote.init(); // initalize the remote instance and try to connect
-} 
+// callback function to handle updates of remote buttons
+void remoteCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+{
+  Serial.print("sensorMessage callback for port: ");
+  Serial.println(portNumber, DEC);
+  if (deviceType == DeviceType::REMOTE_CONTROL_BUTTON)
+  {
+    ButtonState buttonState = myRemote.parseRemoteButton(pData);
+    Serial.print("Buttonstate: ");
+    Serial.println((byte)buttonState, HEX);
 
-
-// main loop
-void loop() {
-
-  // connect flow
-  if (myRemote.isConnecting()) {
-    myRemote.connectHub();
-    if (myRemote.isConnected()) {
-      Serial.println("Connected to Remote");
-      myRemote.setLedColor(GREEN);
-      myHub.init(); // after connecting the remote, try to connect the hub
-    } else {
-      Serial.println("Failed to connect to Remote");
+    if (buttonState == ButtonState::UP)
+    {
+      updatedSpeed = min(100, currentSpeed + 10);
     }
-  }
-
-  if (myHub.isConnecting()) {
-    myHub.connectHub();
-    if (myHub.isConnected()) {
-      Serial.println("Connected to Hub");
-    } else {
-      Serial.println("Failed to connect to Hub");
+    else if (buttonState == ButtonState::DOWN)
+    {
+      updatedSpeed = max(-100, currentSpeed - 10);
     }
-  }
-
-  if (myRemote.isConnected() && myHub.isConnected() && !isInitialized) {
-     Serial.println("System is initialized");
-      isInitialized = true;
-      // both activations are needed to get status updates
-      myRemote.activateButtonReports(); 
-      myRemote.activatePortDevice(_portLeft, 55);
-      myRemote.activatePortDevice(_portRight, 55);
-      myRemote.setLedColor(WHITE);
-      myHub.setLedColor(WHITE);
-  }
-
-  // if connected we can control the train motor on Port A with the remote
-  if (isInitialized) {
-
-    if (myRemote.isLeftRemoteUpButtonPressed() || myRemote.isRightRemoteUpButtonPressed()) {
-      myRemote.setLedColor(GREEN);
-      updatedSpeed = min(100, currentSpeed+10);
-    } else if (myRemote.isLeftRemoteDownButtonPressed() || myRemote.isRightRemoteDownButtonPressed()) {
-      myRemote.setLedColor(BLUE);
-      updatedSpeed = max(-100, currentSpeed-10);
-    } else if (myRemote.isLeftRemoteStopButtonPressed() || myRemote.isRightRemoteStopButtonPressed()) {
-      myRemote.setLedColor(RED);
+    else if (buttonState == ButtonState::STOP)
+    {
       updatedSpeed = 0;
-    } else if (myRemote.isLeftRemoteButtonReleased() || myRemote.isRightRemoteButtonReleased()) {
-      myRemote.setLedColor(WHITE);      
     }
 
-    if (currentSpeed != updatedSpeed) {
+    if (currentSpeed != updatedSpeed)
+    {
       myHub.setMotorSpeed(_portA, updatedSpeed);
       currentSpeed = updatedSpeed;
     }
 
     Serial.print("Current speed:");
     Serial.println(currentSpeed, DEC);
-    delay(100);
-
   }
-  
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  myRemote.init(); // initalize the remote instance and try to connect
+}
+
+// main loop
+void loop()
+{
+
+  // connect flow
+  if (myRemote.isConnecting())
+  {
+    myRemote.connectHub();
+    if (myRemote.isConnected())
+    {
+      Serial.println("Connected to Remote");
+      myRemote.setLedColor(GREEN);
+      myHub.init(); // after connecting the remote, try to connect the hub
+    }
+    else
+    {
+      Serial.println("Failed to connect to Remote");
+    }
+  }
+
+  if (myHub.isConnecting())
+  {
+    myHub.connectHub();
+    if (myHub.isConnected())
+    {
+      Serial.println("Connected to Hub");
+    }
+    else
+    {
+      Serial.println("Failed to connect to Hub");
+    }
+  }
+
+  if (myRemote.isConnected() && myHub.isConnected() && !isInitialized)
+  {
+    Serial.println("System is initialized");
+    isInitialized = true;
+    delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
+    // both activations are needed to get status updates
+    myRemote.activatePortDevice(_portLeft, (byte)DeviceType::REMOTE_CONTROL_BUTTON, remoteCallback);
+    myRemote.activatePortDevice(_portRight, (byte)DeviceType::REMOTE_CONTROL_BUTTON, remoteCallback);
+  }
+
 } // End of loop

@@ -31,16 +31,76 @@ int updatedSpeedTrain2 = 0;
 
 bool isInitialized = false;
 
-void setup() {
-    Serial.begin(115200);
-    myRemote.init(); // initialize the remote control hub
-    myTrainHub1.init("90:84:2b:03:19:7f"); // initialize the listening train hub 1 // here you have to use your own device ids
-    myTrainHub2.init("90:84:2b:06:76:a6"); // initialize the listening train hub 2 // here you have to use your own device ids
-} 
+// callback function to handle updates of remote buttons
+void remoteCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+{
+  Serial.print("sensorMessage callback for port: ");
+  Serial.println(portNumber, DEC);
+  if (deviceType == DeviceType::REMOTE_CONTROL_BUTTON)
+  {
+    ButtonState buttonState = myRemote.parseRemoteButton(pData);
+    Serial.print("Buttonstate: ");
+    Serial.println((byte)buttonState, HEX);
 
+    // Do the logic for left buttons of remote control and Train Hub 1
+    if (portNumber == (byte)_portLeft && buttonState == ButtonState::UP)
+    {
+      updatedSpeedTrain1 = min(100, currentSpeedTrain1 + 10);
+    }
+    else if (portNumber == (byte)_portLeft && buttonState == ButtonState::DOWN)
+    {
+      updatedSpeedTrain1 = min(100, currentSpeedTrain1 - 10);
+    }
+    else if (portNumber == (byte)_portLeft && buttonState == ButtonState::STOP)
+    {
+      updatedSpeedTrain1 = 0;
+    }
+
+    if (currentSpeedTrain1 != updatedSpeedTrain1)
+    {
+      myTrainHub1.setMotorSpeed(_portA, updatedSpeedTrain1);
+      currentSpeedTrain1 = updatedSpeedTrain1;
+    }
+
+    Serial.print("Current speed train 1:");
+    Serial.println(currentSpeedTrain1, DEC);
+
+    // Do the logic for right buttons of remote control and Train Hub 2
+    if (portNumber == (byte)_portRight && buttonState == ButtonState::UP)
+    {
+      updatedSpeedTrain2 = min(100, currentSpeedTrain2 + 10);
+    }
+    else if (portNumber == (byte)_portRight && buttonState == ButtonState::DOWN)
+    {
+      updatedSpeedTrain2 = min(100, currentSpeedTrain2 - 10);
+    }
+    else if (portNumber == (byte)_portRight && buttonState == ButtonState::STOP)
+    {
+      updatedSpeedTrain2 = 0;
+    }
+
+    if (currentSpeedTrain2 != updatedSpeedTrain2)
+    {
+      myTrainHub2.setMotorSpeed(_portA, updatedSpeedTrain2);
+      currentSpeedTrain2 = updatedSpeedTrain2;
+    }
+
+    Serial.print("Current speed train 2:");
+    Serial.println(currentSpeedTrain2, DEC);
+  }
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  myRemote.init();                       // initialize the remote control hub
+  myTrainHub1.init("90:84:2b:03:19:7f"); // initialize the listening train hub 1 // here you have to use your own device ids
+  myTrainHub2.init("90:84:2b:06:76:a6"); // initialize the listening train hub 2 // here you have to use your own device ids
+}
 
 // main loop
-void loop() {
+void loop()
+{
 
   //wait for three elements
 
@@ -48,7 +108,7 @@ void loop() {
   {
     if (myRemote.getHubType() == HubType::POWERED_UP_REMOTE)
     {
-      //This is the right device 
+      //This is the right device
       if (!myRemote.connectHub())
       {
         Serial.println("Unable to connect to hub");
@@ -58,7 +118,6 @@ void loop() {
         myRemote.setLedColor(GREEN);
         Serial.println("Remote connected.");
       }
-      
     }
   }
 
@@ -96,57 +155,16 @@ void loop() {
   {
     myTrainHub2.init();
   }
-  
-  if (myRemote.isConnected() && myTrainHub1.isConnected() && myTrainHub2.isConnected() && !isInitialized) {
-     Serial.println("System is initialized");
-      isInitialized = true;
-      // both activations are needed to get status updates
-      myRemote.activateButtonReports(); 
-      myRemote.activatePortDevice(_portLeft, 55);
-      myRemote.activatePortDevice(_portRight, 55);
-      myRemote.setLedColor(WHITE);
+
+  if (myRemote.isConnected() && myTrainHub1.isConnected() && myTrainHub2.isConnected() && !isInitialized)
+  {
+    Serial.println("System is initialized");
+    isInitialized = true;
+    delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
+    // both activations are needed to get status updates
+    myRemote.activatePortDevice(_portLeft, (byte)DeviceType::REMOTE_CONTROL_BUTTON, remoteCallback);
+    myRemote.activatePortDevice(_portRight, (byte)DeviceType::REMOTE_CONTROL_BUTTON, remoteCallback);
+    myRemote.setLedColor(WHITE);
   }
 
-  // if connected we can control the train motor of hub 1 with the left buttons and the train motor of hub 2 with the right buttons. Both motors should be connected on Port Ae
-  if (isInitialized) {
-
-    // Do the logic for left buttons of remote control and Train Hub 1
-    if (myRemote.isLeftRemoteUpButtonPressed()) {
-      updatedSpeedTrain1 = min(100, currentSpeedTrain1+10);
-    } else if (myRemote.isLeftRemoteDownButtonPressed()) {
-      updatedSpeedTrain1 = min(100, currentSpeedTrain1-10);
-    } else if (myRemote.isLeftRemoteStopButtonPressed()) {
-      updatedSpeedTrain1 = 0;
-    } 
-
-    if (currentSpeedTrain1 != updatedSpeedTrain1) {
-      myTrainHub1.setMotorSpeed(_portA, updatedSpeedTrain1);
-      currentSpeedTrain1 = updatedSpeedTrain1;
-    }
-
-    Serial.print("Current speed train 1:");
-    Serial.println(currentSpeedTrain1, DEC);
-
-    // Do the logic for right buttons of remote control and Train Hub 2
-    if (myRemote.isRightRemoteUpButtonPressed()) {
-      updatedSpeedTrain2 = min(100, currentSpeedTrain2+10);
-    } else if (myRemote.isRightRemoteDownButtonPressed()) {
-      updatedSpeedTrain2 = min(100, currentSpeedTrain2-10);
-    } else if (myRemote.isRightRemoteStopButtonPressed()) {
-      updatedSpeedTrain2 = 0;
-    } 
-
-    if (currentSpeedTrain2 != updatedSpeedTrain2) {
-      myTrainHub2.setMotorSpeed(_portA, updatedSpeedTrain2);
-      currentSpeedTrain2 = updatedSpeedTrain2;
-    }
-
-    Serial.print("Current speed train 2:");
-    Serial.println(currentSpeedTrain2, DEC);
-
-    
-    delay(100);
-
-  }
-  
 } // End of loop

@@ -26,15 +26,51 @@ int currentSpeed = 0;
 int updatedSpeed = 0;
 bool isInitialized = false;
 
-void setup() {
-    Serial.begin(115200);
-    myRemote.init(); // initialize the remote hub
-    myHub.init(); // initialize the listening hub
-} 
+// callback function to handle updates of remote buttons
+void remoteCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+{
+  Serial.print("sensorMessage callback for port: ");
+  Serial.println(portNumber, DEC);
+  if (deviceType == DeviceType::REMOTE_CONTROL_BUTTON)
+  {
+    ButtonState buttonState = myRemote.parseRemoteButton(pData);
+    Serial.print("Buttonstate: ");
+    Serial.println((byte)buttonState, HEX);
 
+    if (buttonState == ButtonState::UP)
+    {
+      updatedSpeed = min(100, currentSpeed + 10);
+    }
+    else if (buttonState == ButtonState::DOWN)
+    {
+      updatedSpeed = max(-100, currentSpeed - 10);
+    }
+    else if (buttonState == ButtonState::STOP)
+    {
+      updatedSpeed = 0;
+    }
+
+    if (currentSpeed != updatedSpeed)
+    {
+      myHub.setMotorSpeed(_portA, updatedSpeed);
+      currentSpeed = updatedSpeed;
+    }
+
+    Serial.print("Current speed:");
+    Serial.println(currentSpeed, DEC);
+  }
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  myRemote.init(); // initialize the remote hub
+  myHub.init();    // initialize the listening hub
+}
 
 // main loop
-void loop() {
+void loop()
+{
 
   //wait for two elements
 
@@ -42,7 +78,7 @@ void loop() {
   {
     if (myRemote.getHubType() == HubType::POWERED_UP_REMOTE)
     {
-      //This is the right device 
+      //This is the right device
       if (!myRemote.connectHub())
       {
         Serial.println("Unable to connect to hub");
@@ -52,7 +88,6 @@ void loop() {
         myRemote.setLedColor(GREEN);
         Serial.println("Remote connected.");
       }
-      
     }
   }
 
@@ -71,47 +106,22 @@ void loop() {
     myRemote.init();
   }
 
-  if (! myHub.isConnected())
+  if (!myHub.isConnected())
   {
     myHub.init();
   }
-  
-  if (myRemote.isConnected() && myHub.isConnected() && !isInitialized) {
-     Serial.println("System is initialized");
-      isInitialized = true;
-      // both activations are needed to get status updates
-      myRemote.activateButtonReports(); 
-      myRemote.activatePortDevice(_portLeft, 55);
-      myRemote.activatePortDevice(_portRight, 55);
-      myRemote.setLedColor(WHITE);
-      myHub.setLedColor(WHITE);
+
+  if (myRemote.isConnected() && myHub.isConnected() && !isInitialized)
+  {
+    Serial.println("System is initialized");
+    isInitialized = true;
+    delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
+    // both activations are needed to get status updates
+    myRemote.activatePortDevice(_portLeft, (byte)DeviceType::REMOTE_CONTROL_BUTTON, remoteCallback);
+    myRemote.activatePortDevice(_portRight, (byte)DeviceType::REMOTE_CONTROL_BUTTON, remoteCallback);
+    myRemote.setLedColor(WHITE);
+    myHub.setLedColor(WHITE);
   }
 
-  // if connected we can control the train motor on Port A with the remote
-  if (isInitialized) {
 
-    if (myRemote.isLeftRemoteUpButtonPressed() || myRemote.isRightRemoteUpButtonPressed()) {
-      myRemote.setLedColor(GREEN);
-      updatedSpeed = min(100, currentSpeed+10);
-    } else if (myRemote.isLeftRemoteDownButtonPressed() || myRemote.isRightRemoteDownButtonPressed()) {
-      myRemote.setLedColor(BLUE);
-      updatedSpeed = min(100, currentSpeed-10);
-    } else if (myRemote.isLeftRemoteStopButtonPressed() || myRemote.isRightRemoteStopButtonPressed()) {
-      myRemote.setLedColor(RED);
-      updatedSpeed = 0;
-    } else if (myRemote.isLeftRemoteButtonReleased() || myRemote.isRightRemoteButtonReleased()) {
-      myRemote.setLedColor(WHITE);      
-    }
-
-    if (currentSpeed != updatedSpeed) {
-      myHub.setMotorSpeed(_portA, updatedSpeed);
-      currentSpeed = updatedSpeed;
-    }
-
-    Serial.print("Current speed:");
-    Serial.println(currentSpeed, DEC);
-    delay(100);
-
-  }
-  
 } // End of loop
