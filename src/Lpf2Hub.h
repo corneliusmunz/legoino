@@ -13,16 +13,16 @@
 #include "NimBLEDevice.h"
 using namespace std::placeholders;
 #include "Lpf2HubConst.h"
-#include "LegoinoCommon.h"
+#include "LegoinoCommon.h" 
 
-typedef void (*ButtonCallback)(bool isPressed);
-typedef void (*SensorMessageCallback)(byte portNumber, DeviceType deviceType, uint8_t *pData);
+typedef void (*HubPropertyChangeCallback)(HubPropertyReference hubProperty, uint8_t *pData);
+typedef void (*PortValueChangeCallback)(byte portNumber, DeviceType deviceType, uint8_t *pData);
 
 typedef struct Device
 {
   byte PortNumber;
   byte DeviceType;
-  SensorMessageCallback callback;
+  PortValueChangeCallback callback;
 };
 
 typedef struct Version
@@ -53,7 +53,9 @@ public:
   NimBLEAddress getHubAddress();
   void setHubName(char name[]);
   void shutDownHub();
-  void activateHubUpdates();
+  void activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);
+  void deactivateHubPropertyUpdate(HubPropertyReference hubProperty);
+
   HubType getHubType();
 
   int getDeviceIndexForPortNumber(byte portNumber);
@@ -61,8 +63,8 @@ public:
   byte getModeForDeviceType(byte deviceType);
   void registerPortDevice(byte portNumber, byte deviceType);
   void deregisterPortDevice(byte portNumber);
-  void activatePortDevice(byte portNumber, byte deviceType, SensorMessageCallback sensorMessageCallback = nullptr);
-  void activatePortDevice(byte portNumber, SensorMessageCallback sensorMessageCallback = nullptr);
+  void activatePortDevice(byte portNumber, byte deviceType, PortValueChangeCallback portValueChangeCallback = nullptr);
+  void activatePortDevice(byte portNumber, PortValueChangeCallback portValueChangeCallback = nullptr);
   void deactivatePortDevice(byte portNumber, byte deviceType);
   void deactivatePortDevice(byte portNumber);
 
@@ -70,7 +72,6 @@ public:
   void setLedRGBColor(char red, char green, char blue);
   void setLedHSVColor(int hue, double saturation, double value);
 
-  void registerButtonCallback(ButtonCallback buttonCallback);
   void WriteValue(byte command[], int size);
 
   // parse methods to read in the content of the charachteristic value
@@ -96,8 +97,6 @@ public:
   Version parseVersion(uint8_t *pData);
   ButtonState parseHubButton(uint8_t *pData);
   std::string parseHubAdvertisingName(uint8_t *pData);
-
-  void activateButtonReports();
 
   // BLE specific stuff
   void notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
@@ -144,6 +143,7 @@ public:
 private:
   // Notification callbacks
   ButtonCallback _buttonCallback = nullptr;
+  HubPropertyChangeCallback _hubPropertyChangeCallback = nullptr;
 
   // List of connected devices
   Device connectedDevices[13];

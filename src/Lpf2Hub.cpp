@@ -172,11 +172,11 @@ void Lpf2Hub::deregisterPortDevice(byte portNumber)
  * @param [in] port number where the device is connected
  * @param [in] callback function which will be called on an update event
  */
-void Lpf2Hub::activatePortDevice(byte portNumber, SensorMessageCallback sensorMessageCallback)
+void Lpf2Hub::activatePortDevice(byte portNumber, PortValueChangeCallback portValueChangeCallback)
 {
     LOGLINE("activatePortDevice(portNumber)");
     byte deviceType = getDeviceTypeForPortNumber(portNumber);
-    activatePortDevice(portNumber, deviceType, sensorMessageCallback);
+    activatePortDevice(portNumber, deviceType, portValueChangeCallback);
 }
 
 /**
@@ -189,16 +189,17 @@ void Lpf2Hub::activatePortDevice(byte portNumber, SensorMessageCallback sensorMe
  * @param [in] deviceType of the connected port
  * @param [in] callback function which will be called on an update event
  */
-void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, SensorMessageCallback sensorMessageCallback)
+void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, PortValueChangeCallback portValueChangeCallback)
 {
     LOGLINE("activatePortDevice");
     byte mode = getModeForDeviceType(deviceType);
     LOG("mode for device: ");
     LOGLINE(mode, HEX);
     int deviceIndex = getDeviceIndexForPortNumber(portNumber);
-    connectedDevices[deviceIndex].callback = sensorMessageCallback;
+    connectedDevices[deviceIndex].callback = portValueChangeCallback;
     byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(activatePortDeviceMessage, 8);
+
 }
 
 /**
@@ -242,6 +243,10 @@ void Lpf2Hub::activateButtonReports()
 void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
 {
     LOGLINE("parseDeviceInfo");
+
+    if (_hubPropertyChangeCallback != nullptr) {
+        _hubPropertyChangeCallback((HubPropertyReference)pData[3], pData);
+    }
 
     if (pData[3] == (byte)HubPropertyReference::ADVERTISING_NAME)
     {
@@ -1028,33 +1033,36 @@ void Lpf2Hub::setHubName(char name[])
 
 /**
  * @brief Activate the update/notification of hub specific property changes (battery level, rssi, ...)
+ * @param [in] hubProperty for which updates should be activated
+ * @param [in] optional callback function which will be called if a value has changed
  */
-void Lpf2Hub::activateHubUpdates()
+void Lpf2Hub::activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback)
 {
+    if (propertyChangeCallback != nullptr) {
+        _hubPropertyChangeCallback = hubPropertyChangeCallback;
+    }
+
     // Activate reports
-    byte setButtonCommand[3] = {0x01, 0x02, 0x02};
-    WriteValue(setButtonCommand, 3);
-
-    byte setBatteryLevelCommand[3] = {0x01, 0x06, 0x02};
-    WriteValue(setBatteryLevelCommand, 3);
-
-    byte setBatteryTypeCommand[3] = {0x01, 0x07, 0x02};
-    WriteValue(setBatteryTypeCommand, 3);
-
-    byte setRSSICommand[3] = {0x01, 0x05, 0x02};
-    WriteValue(setRSSICommand, 3);
+    byte notifyPropertyCommand[3] = {0x01, (byte)hubProperty, HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM};
+    WriteValue(notifyPropertyCommand, 3);
 
     byte setCurrentReport[8] = {0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(setCurrentReport, 8);
 
     byte setVoltageReport[8] = {0x41, 0x3c, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(setVoltageReport, 8);
+}
 
-    byte setFWCommand[3] = {0x01, 0x03, 0x05};
-    WriteValue(setFWCommand, 3);
+/**
+ * @brief Deactivate the update/notification of hub specific property changes (battery level, rssi, ...)
+ * @param [in] hubProperty for which updates should be activated
+ */
+void Lpf2Hub::deactivateHubPropertyUpdate(HubPropertyReference hubProperty)
+{
 
-    byte setHWCommand[3] = {0x01, 0x04, 0x05};
-    WriteValue(setHWCommand, 3);
+    // Activate reports
+    byte notifyPropertyCommand[3] = {0x01, (byte)hubProperty, HubPropertyOperation::DISABLE_UPDATES_DOWNSTREAM};
+    WriteValue(notifyPropertyCommand, 3);
 }
 
 /**
