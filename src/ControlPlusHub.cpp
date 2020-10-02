@@ -88,3 +88,32 @@ void ControlPlusHub::setMotorSpeedForDegrees(Port port, int speed, int32_t degre
     WriteValue(setMotorCommand, 12);
 }
 
+/**
+ * @brief Set the motor absolute position on a defined port.
+ * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
+ * @param [in] speed Speed of the Motor 0..100 positive values only
+ * @param [in] position Position in degrees (relative to zero point on power up, or encoder reset) -2,147,483,648..0..2,147,483,647
+ */
+void ControlPlusHub::setMotorAbsolutePosition(Port port, int speed, int32_t position)
+{
+    byte *positionBytes = Int32ToByteArray(position);
+    //max power 100 (0x64)
+    //End state Brake (127)
+    //Use acc and dec profile (0x03 last two bits set)
+    byte setMotorCommand[12] = {0x81, port, 0x11, 0x0D, positionBytes[0], positionBytes[1], positionBytes[2], positionBytes[3], MapSpeed(speed), 0x64, 0x7F, 0x03};
+    WriteValue(setMotorCommand, 12);
+}
+
+/**
+ * @brief Set the motor encoded position on a defined port.
+ * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
+ * @param [in] position Position in degrees to encode (0 = Reset) -2,147,483,648..0..2,147,483,647
+ */
+void ControlPlusHub::setMotorEncoderPosition(Port port, int32_t position)
+{
+    byte *positionBytes = Int32ToByteArray(position);
+    //WriteModeData (0x51)
+	//PresetEncoder mode (0x02)
+    byte setMotorCommand[9] = {0x81, port, 0x11, 0x51, 0x02, positionBytes[0], positionBytes[1], positionBytes[2], positionBytes[3]};
+    WriteValue(setMotorCommand, 9);
+}

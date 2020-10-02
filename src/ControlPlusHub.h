@@ -41,6 +41,8 @@ public:
   void setMotorSpeed(Port port, int speed);
   void setMotorSpeedForTime(Port port, int speed, int16_t time);
   void setMotorSpeedForDegrees(Port port, int speed, int32_t degrees);
+  void setMotorAbsolutePosition(Port port, int speed, int32_t position);
+  void setMotorEncoderPosition(Port port, int32_t position);
 };
 
 #endif
