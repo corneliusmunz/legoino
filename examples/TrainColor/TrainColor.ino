@@ -12,10 +12,10 @@
 
 // create a hub instance
 PoweredUpHub myHub;
-PoweredUpHub::Port _portA = PoweredUpHub::Port::A;
-PoweredUpHub::Port _portB = PoweredUpHub::Port::B;
+PoweredUpHub::Port portA = PoweredUpHub::Port::A;
+PoweredUpHub::Port portB = PoweredUpHub::Port::B;
 
-oid hubButtonCallback(HubPropertyReference hubProperty, uint8_t *pData)
+void hubButtonCallback(HubPropertyReference hubProperty, uint8_t *pData)
 {
   if (hubProperty == HubPropertyReference::BUTTON)
   {
@@ -25,7 +25,7 @@ oid hubButtonCallback(HubPropertyReference hubProperty, uint8_t *pData)
 
     if (buttonState == ButtonState::PRESSED)
     {
-      myHub.setMotorSpeed(_portA, 15);
+      myHub.setBasicMotorSpeed(portA, 15);
     }
   }
 }
@@ -44,18 +44,18 @@ void colorDistanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t
     // set hub LED color to detected color of sensor and set motor speed dependent on color
     if (color == (byte)Color::RED)
     {
-      myHub.setLedColor(color);
-      myHub.stopMotor(_portA);
+      myHub.setLedColor((Color)color);
+      myHub.stopBasicMotor(portA);
     }
     else if (color == (byte)Color::YELLOW)
     {
-      myHub.setLedColor(color);
-      myHub.setMotorSpeed(_portA, 25);
+      myHub.setLedColor((Color)color);
+      myHub.setBasicMotorSpeed(portA, 25);
     }
     else if (color == (byte)Color::BLUE)
     {
-      myHub.setLedColor(color);
-      myHub.setMotorSpeed(_portA, 35);
+      myHub.setLedColor((Color)color);
+      myHub.setBasicMotorSpeed(portA, 35);
     }
   }
 }
@@ -77,9 +77,10 @@ void loop()
     if (myHub.isConnected())
     {
       Serial.println("Connected to HUB");
-      delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
+      delay(1000); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
       // connect color/distance sensor to port c, activate sensor for updates
-      myHub.activatePortDevice(_portB, colorDistanceSensorCallback);
+      myHub.activatePortDevice(portB, (byte)DeviceType::COLOR_DISTANCE_SENSOR, colorDistanceSensorCallback);
+      delay(50);
       // activate hub button to receive updates
       myHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, hubButtonCallback);
       myHub.setLedColor(GREEN);

@@ -8,11 +8,6 @@
 
 #include "Lpf2Hub.h"
 
-// Global variables to store sensor values. Was needed while member function callbacks was
-// not possible with the "old" BLE library. Will be removed in the future
-int Lpf2HubTachoMotorRotation;
-double Lpf2HubDistance;
-int Lpf2HubColor;
 
 /**
  * Derived class which could be added as an instance to the BLEClient for callback handling
@@ -31,7 +26,8 @@ public:
     }
 
     void onConnect(BLEClient *bleClient)
-    {}
+    {
+    }
 
     void onDisconnect(BLEClient *bleClient)
     {
@@ -217,63 +213,53 @@ void Lpf2Hub::deactivatePortDevice(byte portNumber, byte deviceType)
  */
 void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
 {
-    if (_hubPropertyChangeCallback != nullptr) {
+    if (_hubPropertyChangeCallback != nullptr)
+    {
         _hubPropertyChangeCallback((HubPropertyReference)pData[3], pData);
+        return;
     }
 
     if (pData[3] == (byte)HubPropertyReference::ADVERTISING_NAME)
     {
         log_d("advertising name: %s", parseHubAdvertisingName(pData).c_str());
+        return;
     }
     else if (pData[3] == (byte)HubPropertyReference::BUTTON)
     {
-        ButtonState buttonState = parseHubButton(pData);
-        if (buttonState == ButtonState::PRESSED)
-        {
-            _lpf2HubHubButtonPressed = true;
-            return;
-        }
-        else if (buttonState == ButtonState::RELEASED)
-        {
-            _lpf2HubHubButtonPressed = false;
-            return;
-        }
+        log_d("hub button state: %x", parseHubButton(pData));
+        return;
     }
     else if (pData[3] == (byte)HubPropertyReference::FW_VERSION)
     {
         Version version = parseVersion(pData);
-        _lpf2HubFirmwareVersionBuild = version.Build;
-        _lpf2HubFirmwareVersionBugfix = version.Build;
-        _lpf2HubFirmwareVersionMajor = version.Major;
-        _lpf2HubFirmwareVersionMinor = version.Minor;
         log_d("version: %d-%d-%d (%d)", version.Major, version.Minor, version.Bugfix, version.Build);
+        return;
     }
     else if (pData[3] == (byte)HubPropertyReference::HW_VERSION)
     {
         Version version = parseVersion(pData);
-        _lpf2HubHardwareVersionBuild = version.Build;
-        _lpf2HubHardwareVersionBugfix = version.Build;
-        _lpf2HubHardwareVersionMajor = version.Major;
-        _lpf2HubHardwareVersionMinor = version.Minor;
         log_d("version: %d-%d-%d (%d)", version.Major, version.Minor, version.Bugfix, version.Build);
+        return;
     }
     else if (pData[3] == (byte)HubPropertyReference::RSSI)
     {
-        _lpf2HubRssi = parseRssi(pData);
-        log_d("rssi: ", _lpf2HubRssi);
+        log_d("rssi: ", parseRssi(pData));
+        return;
     }
     else if (pData[3] == (byte)HubPropertyReference::BATTERY_VOLTAGE)
     {
-        _lpf2HubBatteryLevel = parseBatteryLevel(pData);
-        log_d("battery level: %d %", _lpf2HubBatteryLevel);
+        log_d("battery level: %d %", parseBatteryLevel(pData));
+        return;
     }
     else if (pData[3] == (byte)HubPropertyReference::BATTERY_TYPE)
     {
         log_d("battery type: %d", parseBatteryType(pData));
+        return;
     }
     else if (pData[3] == (byte)HubPropertyReference::SYSTEM_TYPE_ID)
     {
         log_d("system type id: %x", parseSystemTypeId(pData));
+        return;
     }
 }
 
@@ -444,6 +430,11 @@ ButtonState Lpf2Hub::parseRemoteButton(uint8_t *pData)
     return (ButtonState)buttonState;
 }
 
+/**
+ * @brief Parse advertising name of hub
+ * @param [in] pData The pointer to the received data
+ * @return advertising name
+ */
 std::string Lpf2Hub::parseHubAdvertisingName(uint8_t *pData)
 {
     int charArrayLength = min(pData[0] - 5, 14);
@@ -457,6 +448,11 @@ std::string Lpf2Hub::parseHubAdvertisingName(uint8_t *pData)
     return std::string(name);
 }
 
+/**
+ * @brief Parse button state of hub button
+ * @param [in] pData The pointer to the received data
+ * @return button state
+ */
 ButtonState Lpf2Hub::parseHubButton(uint8_t *pData)
 {
     int buttonState = pData[5];
@@ -464,6 +460,11 @@ ButtonState Lpf2Hub::parseHubButton(uint8_t *pData)
     return (ButtonState)buttonState;
 }
 
+/**
+ * @brief Parse sw or hw version
+ * @param [in] pData The pointer to the received data
+ * @return version structure (Major-Minor-Bugfix, Build)
+ */
 Version Lpf2Hub::parseVersion(uint8_t *pData)
 {
     Version version;
@@ -475,6 +476,11 @@ Version Lpf2Hub::parseVersion(uint8_t *pData)
     return version;
 }
 
+/**
+ * @brief Parse RSSI value
+ * @param [in] pData The pointer to the received data
+ * @return RSSI value in dB
+ */
 int Lpf2Hub::parseRssi(uint8_t *pData)
 {
     int rssi = LegoinoCommon::ReadInt8(pData, 5);
@@ -482,6 +488,11 @@ int Lpf2Hub::parseRssi(uint8_t *pData)
     return rssi;
 }
 
+/**
+ * @brief Parse battery level of hub
+ * @param [in] pData The pointer to the received data
+ * @return battery level in [%]
+ */
 uint8_t Lpf2Hub::parseBatteryLevel(uint8_t *pData)
 {
     uint8_t batteryLevel = LegoinoCommon::ReadUInt8(pData, 5);
@@ -489,6 +500,11 @@ uint8_t Lpf2Hub::parseBatteryLevel(uint8_t *pData)
     return batteryLevel;
 }
 
+/**
+ * @brief Parse battery type of hub
+ * @param [in] pData The pointer to the received data
+ * @return battery type (0=normal, 1=recharchable)
+ */
 byte Lpf2Hub::parseBatteryType(uint8_t *pData)
 {
     byte batteryType = pData[5];
@@ -496,6 +512,11 @@ byte Lpf2Hub::parseBatteryType(uint8_t *pData)
     return batteryType;
 }
 
+/**
+ * @brief Parse system type id of hub
+ * @param [in] pData The pointer to the received data
+ * @return system type id
+ */
 uint8_t Lpf2Hub::parseSystemTypeId(uint8_t *pData)
 {
     uint8_t systemTypeId = LegoinoCommon::ReadUInt8(pData, 5);
@@ -533,7 +554,8 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
 }
 
 /**
- * @brief Parse the incoming characteristic notification for a Sensor Message
+ * @brief Parse the incoming characteristic notification for a Sensor Message if a callback 
+ * is registered, the callback of that connected device is called with the received data
  * @param [in] pData The pointer to the received data
  */
 void Lpf2Hub::parseSensorMessage(uint8_t *pData)
@@ -545,96 +567,47 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     if (connectedDevices[deviceIndex].Callback != nullptr)
     {
         connectedDevices[deviceIndex].Callback(pData[3], (DeviceType)deviceType, pData);
+        return;
     }
 
     if (deviceType == (byte)DeviceType::CURRENT_SENSOR)
     {
-        _lpf2HubCurrent = parseCurrentSensor(pData);
+        parseCurrentSensor(pData);
         return;
     }
     else if (deviceType == (byte)DeviceType::VOLTAGE_SENSOR)
     {
-        _lpf2HubVoltage = parseVoltageSensor(pData);
+        parseVoltageSensor(pData);
         return;
     }
     else if (deviceType == (byte)DeviceType::MEDIUM_LINEAR_MOTOR || deviceType == (byte)DeviceType::MOVE_HUB_MEDIUM_LINEAR_MOTOR)
     {
-        Lpf2HubTachoMotorRotation = parseTachoMotor(pData);
+        parseTachoMotor(pData);
         return;
     }
     else if (deviceType == (byte)DeviceType::COLOR_DISTANCE_SENSOR)
     {
-        Lpf2HubDistance = parseDistance(pData);
-        Lpf2HubColor = parseColor(pData);
+        parseDistance(pData);
+        parseColor(pData);
         return;
     }
     else if (deviceType == (byte)DeviceType::MOVE_HUB_TILT_SENSOR)
     {
-        _lpf2HubTiltX = parseBoostTiltSensorX(pData);
-        _lpf2HubTiltY = parseBoostTiltSensorY(pData);
+        parseBoostTiltSensorX(pData);
+        parseBoostTiltSensorY(pData);
         return;
     }
     else if (deviceType == (byte)DeviceType::TECHNIC_MEDIUM_HUB_TILT_SENSOR)
     {
-        _lpf2HubTiltX = parseControlPlusHubTiltSensorX(pData);
-        _lpf2HubTiltY = parseControlPlusHubTiltSensorY(pData);
-        _lpf2HubTiltZ = parseControlPlusHubTiltSensorZ(pData);
+        parseControlPlusHubTiltSensorX(pData);
+        parseControlPlusHubTiltSensorY(pData);
+        parseControlPlusHubTiltSensorZ(pData);
         return;
     }
     else if (deviceType == (byte)DeviceType::REMOTE_CONTROL_BUTTON)
     {
         int port = pData[3];
-        int buttonState = (int)parseRemoteButton(pData);
-        if (buttonState == 0x01)
-        {
-            if (port == 0x00)
-            {
-                _lpf2HubRemoteLeftUpButtonPressed = true;
-            }
-            else if (port == 0x01)
-            {
-                _lpf2HubRemoteRightUpButtonPressed = true;
-            }
-        }
-        else if (buttonState == 0xff)
-        {
-            if (port == 0x00)
-            {
-                _lpf2HubRemoteLeftDownButtonPressed = true;
-            }
-            else if (port == 0x01)
-            {
-                _lpf2HubRemoteRightDownButtonPressed = true;
-            }
-        }
-        else if (buttonState == 0x7f)
-        {
-            if (port == 0x00)
-            {
-                _lpf2HubRemoteLeftStopButtonPressed = true;
-            }
-            else if (port == 0x01)
-            {
-                _lpf2HubRemoteRightStopButtonPressed = true;
-            }
-        }
-        else if (buttonState == 0x00)
-        {
-            if (port == 0x00)
-            {
-                _lpf2HubRemoteLeftUpButtonPressed = false;
-                _lpf2HubRemoteLeftDownButtonPressed = false;
-                _lpf2HubRemoteLeftStopButtonPressed = false;
-                _lpf2HubRemoteLeftButtonReleased = true;
-            }
-            else if (port == 0x01)
-            {
-                _lpf2HubRemoteRightUpButtonPressed = false;
-                _lpf2HubRemoteRightDownButtonPressed = false;
-                _lpf2HubRemoteRightStopButtonPressed = false;
-                _lpf2HubRemoteRightButtonReleased = true;
-            }
-        }
+        parseRemoteButton(pData);
         return;
     }
 }
@@ -665,22 +638,22 @@ void Lpf2Hub::notifyCallback(
 
     switch (pData[2])
     {
-    case 0x01:
+    case (byte)MessageType::HUB_PROPERTIES:
     {
         parseDeviceInfo(pData);
         break;
     }
-    case 0x04:
+    case (byte)MessageType::HUB_ATTACHED_IO:
     {
         parsePortMessage(pData);
         break;
     }
-    case 0x45:
+    case (byte)MessageType::PORT_VALUE_SINGLE:
     {
         parseSensorMessage(pData);
         break;
     }
-    case 0x82:
+    case (byte)MessageType::PORT_OUTPUT_COMMAND_FEEDBACK:
     {
         parsePortAction(pData);
         break;
@@ -765,7 +738,7 @@ int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber)
     log_d("Number of connected devices: %d", numberOfConnectedDevices);
     for (int idx = 0; idx < numberOfConnectedDevices; idx++)
     {
-        log_v("device %d, port number: %x, device type: %x, callback address: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType, connectedDevices[idx].Callback );
+        log_v("device %d, port number: %x, device type: %x, callback address: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType, connectedDevices[idx].Callback);
         if (connectedDevices[idx].PortNumber == portNumber)
         {
             log_d("device on port %x has index %d", portNumber, idx);
@@ -786,7 +759,7 @@ byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
     log_d("Number of connected devices: %d", numberOfConnectedDevices);
     for (int idx = 0; idx < numberOfConnectedDevices; idx++)
     {
-        log_v("device %d, port number: %x, device type: %x, callback address: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType, connectedDevices[idx].Callback );
+        log_v("device %d, port number: %x, device type: %x, callback address: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType, connectedDevices[idx].Callback);
         if (connectedDevices[idx].PortNumber == portNumber)
         {
             log_d("device on port %x has type %x", portNumber, connectedDevices[idx].DeviceType);
@@ -796,7 +769,6 @@ byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
     log_w("no device found for port number %x", portNumber);
     return (byte)DeviceType::UNKNOWNDEVICE;
 }
-
 
 /**
  * @brief Set the color of the HUB LED with predefined colors
@@ -906,7 +878,8 @@ void Lpf2Hub::setHubName(char name[])
  */
 void Lpf2Hub::activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback)
 {
-    if (hubPropertyChangeCallback != nullptr) {
+    if (hubPropertyChangeCallback != nullptr)
+    {
         _hubPropertyChangeCallback = hubPropertyChangeCallback;
     }
 
@@ -1031,147 +1004,139 @@ bool Lpf2Hub::isConnected()
     return _isConnected;
 }
 
-int Lpf2Hub::getColor()
-{
-    return Lpf2HubColor;
-}
-
-double Lpf2Hub::getDistance()
-{
-    return Lpf2HubDistance;
-}
-
-int Lpf2Hub::getTachoMotorRotation()
-{
-    return Lpf2HubTachoMotorRotation;
-}
-
-int Lpf2Hub::getBoostHubMotorRotation()
-{
-    return _lpf2HubHubMotorRotation;
-}
-
-int Lpf2Hub::getRssi()
-{
-    return _lpf2HubRssi;
-}
-
-int Lpf2Hub::getBatteryLevel()
-{
-    return _lpf2HubBatteryLevel;
-}
-
-double Lpf2Hub::getHubVoltage()
-{
-    return _lpf2HubVoltage;
-}
-
-double Lpf2Hub::getHubCurrent()
-{
-    return _lpf2HubCurrent;
-}
-
-int Lpf2Hub::getTiltX()
-{
-    return _lpf2HubTiltX;
-}
-
-int Lpf2Hub::getTiltY()
-{
-    return _lpf2HubTiltY;
-}
-
-int Lpf2Hub::getTiltZ()
-{
-    return _lpf2HubTiltZ;
-}
-
-int Lpf2Hub::getFirmwareVersionBuild()
-{
-    return _lpf2HubFirmwareVersionBuild;
-}
-
-int Lpf2Hub::getFirmwareVersionBugfix()
-{
-    return _lpf2HubFirmwareVersionBugfix;
-}
-
-int Lpf2Hub::getFirmwareVersionMajor()
-{
-    return _lpf2HubFirmwareVersionMajor;
-}
-
-int Lpf2Hub::getFirmwareVersionMinor()
-{
-    return _lpf2HubFirmwareVersionMinor;
-}
-
-int Lpf2Hub::getHardwareVersionBuild()
-{
-    return _lpf2HubHardwareVersionBuild;
-}
-
-int Lpf2Hub::getHardwareVersionBugfix()
-{
-    return _lpf2HubHardwareVersionBugfix;
-}
-
-int Lpf2Hub::getHardwareVersionMajor()
-{
-    return _lpf2HubHardwareVersionMajor;
-}
-
-int Lpf2Hub::getHardwareVersionMinor()
-{
-    return _lpf2HubHardwareVersionMinor;
-}
-
+/**
+ * @brief Retrieve the hub type
+ * @return hub type 
+ */
 HubType Lpf2Hub::getHubType()
 {
     return _hubType;
 }
 
-bool Lpf2Hub::isButtonPressed()
+/**
+ * @brief Set the motor speed on a defined port. 
+ * @param [in] port Port of the Hub on which the speed of the motor will set (A, B)
+ * @param [in] speed Speed of the Motor -100..0..100 negative values will reverse the rotation
+ */
+void Lpf2Hub::setBasicMotorSpeed(byte port, int speed = 0)
 {
-    return _lpf2HubHubButtonPressed;
+    byte setMotorCommand[8] = {0x81, port, 0x11, 0x51, 0x00, LegoinoCommon::MapSpeed(speed)}; //train, batmobil
+    WriteValue(setMotorCommand, 6);
 }
 
-bool Lpf2Hub::isLeftRemoteUpButtonPressed()
+/**
+ * @brief Stop the motor on a defined port.
+ * @param [in] port Port of the Hub on which the motor will be stopped (A, B)
+ */
+void Lpf2Hub::stopBasicMotor(byte port)
 {
-    return _lpf2HubRemoteLeftUpButtonPressed;
+    setBasicMotorSpeed(port, 0);
 }
 
-bool Lpf2Hub::isLeftRemoteDownButtonPressed()
+/**
+ * @brief Set the motor speed on a defined port. 
+ * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
+ * @param [in] speed Speed of the Motor -100..0..100 negative values will reverse the rotation
+ */
+void Lpf2Hub::setTachoMotorSpeed(byte port, int speed)
 {
-    return _lpf2HubRemoteLeftDownButtonPressed;
+    byte setMotorCommand[8] = {0x81, port, 0x11, 0x01, LegoinoCommon::MapSpeed(speed), 0x64, 0x7f, 0x03}; 
+    WriteValue(setMotorCommand, 8);
 }
 
-bool Lpf2Hub::isLeftRemoteStopButtonPressed()
+/**
+ * @brief Stop the motor on a defined port.
+ * @param [in] port Port of the Hub on which the motor will be stopped (A, B, AB, C, D)
+ */
+void Lpf2Hub::stopTachoMotor(byte port)
 {
-    return _lpf2HubRemoteLeftStopButtonPressed;
+    setTachoMotorSpeed(port, 0);
 }
 
-bool Lpf2Hub::isLeftRemoteButtonReleased()
+/**
+ * @brief Set the acceleration profile 
+ * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
+ * @param [in] time Time value in ms of the acceleration from 0-100% speed/Power
+ * @param [in] profileNumber Number for which the acceleration profile is stored
+ */
+void Lpf2Hub::setAccelerationProfile(byte port, int16_t time, int8_t profileNumber)
 {
-    return _lpf2HubRemoteLeftButtonReleased;
+    byte *timeBytes = LegoinoCommon::Int16ToByteArray(time);
+    byte setMotorCommand[7] = {0x81, port, 0x10, 0x05, timeBytes[0], timeBytes[1], profileNumber};
+    WriteValue(setMotorCommand, 7);
 }
 
-bool Lpf2Hub::isRightRemoteUpButtonPressed()
+/**
+ * @brief Set the deceleration profile 
+ * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
+ * @param [in] time Time value in ms of the deceleration from 100-0% speed/Power
+ * @param [in] profileNumber Number for which the deceleration profile is stored
+ */
+void Lpf2Hub::setDecelerationProfile(byte port, int16_t time, int8_t profileNumber)
 {
-    return _lpf2HubRemoteRightUpButtonPressed;
+    byte *timeBytes = LegoinoCommon::Int16ToByteArray(time);
+    byte setMotorCommand[7] = {0x81, port, 0x10, 0x06, timeBytes[0], timeBytes[1], profileNumber};
+    WriteValue(setMotorCommand, 7);
 }
 
-bool Lpf2Hub::isRightRemoteDownButtonPressed()
+/**
+ * @brief Set the motor speed on a defined port. 
+ * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
+ * @param [in] speed Speed of the Motor -100..0..100 negative values will reverse the rotation
+ * @param [in] time Time in miliseconds for running the motor on the desired speed
+ */
+void Lpf2Hub::setTachoMotorSpeedForTime(byte port, int speed, int16_t time = 0)
 {
-    return _lpf2HubRemoteRightDownButtonPressed;
+    //max power 100 (0x64)
+    //End state Brake (127)
+    //Use acc and dec profile (0x03 last two bits set)
+    byte *timeBytes = LegoinoCommon::Int16ToByteArray(time);
+    byte setMotorCommand[10] = {0x81, port, 0x11, 0x09, timeBytes[0], timeBytes[1], LegoinoCommon::MapSpeed(speed), 0x64, 0x7F, 0x03}; //boost with time
+    WriteValue(setMotorCommand, 10);
 }
 
-bool Lpf2Hub::isRightRemoteStopButtonPressed()
+/**
+ * @brief Set the motor speed on a defined port. 
+ * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
+ * @param [in] speed Speed of the Motor -100..0..100 negative values will reverse the rotation
+ * @param [in] time Time in miliseconds for running the motor on the desired speed
+ */
+void Lpf2Hub::setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees)
 {
-    return _lpf2HubRemoteRightStopButtonPressed;
+    byte *degreeBytes = LegoinoCommon::Int32ToByteArray(degrees);
+    //max power 100 (0x64)
+    //End state Brake (127)
+    //Use acc and dec profile (0x03 last two bits set)
+    byte setMotorCommand[12] = {0x81, port, 0x11, 0x0B, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], LegoinoCommon::MapSpeed(speed), 0x64, 0x7F, 0x03}; //boost with time
+    WriteValue(setMotorCommand, 12);
 }
 
-bool Lpf2Hub::isRightRemoteButtonReleased()
+/**
+ * @brief Set the motor absolute position on a defined port.
+ * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
+ * @param [in] speed Speed of the Motor 0..100 positive values only
+ * @param [in] position Position in degrees (relative to zero point on power up, or encoder reset) -2,147,483,648..0..2,147,483,647
+ */
+void Lpf2Hub::setTachoMotorAbsolutePosition(byte port, int speed, int32_t position)
 {
-    return _lpf2HubRemoteRightButtonReleased;
+    byte *positionBytes = LegoinoCommon::Int32ToByteArray(position);
+    //max power 100 (0x64)
+    //End state Brake (127)
+    //Use acc and dec profile (0x03 last two bits set)
+    byte setMotorCommand[12] = {0x81, port, 0x11, 0x0D, positionBytes[0], positionBytes[1], positionBytes[2], positionBytes[3], LegoinoCommon::MapSpeed(speed), 0x64, 0x7F, 0x03};
+    WriteValue(setMotorCommand, 12);
+}
+
+/**
+ * @brief Set the motor encoded position on a defined port.
+ * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
+ * @param [in] position Position in degrees to encode (0 = Reset) -2,147,483,648..0..2,147,483,647
+ */
+void Lpf2Hub::setTachoMotorEncoderPosition(byte port, int32_t position)
+{
+    byte *positionBytes = LegoinoCommon::Int32ToByteArray(position);
+    //WriteModeData (0x51)
+	//PresetEncoder mode (0x02)
+    byte setMotorCommand[9] = {0x81, port, 0x11, 0x51, 0x02, positionBytes[0], positionBytes[1], positionBytes[2], positionBytes[3]};
+    WriteValue(setMotorCommand, 9);
 }

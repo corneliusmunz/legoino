@@ -11,7 +11,7 @@
 
 // create a hub instance
 PoweredUpHub myTrainHub;
-PoweredUpHub::Port _port = PoweredUpHub::Port::A;
+PoweredUpHub::Port port = PoweredUpHub::Port::A;
 
 void setup() {
     Serial.begin(115200);
@@ -49,13 +49,13 @@ void loop() {
     delay(1000);
     myTrainHub.setLedColor(RED);
     delay(1000);
-    myTrainHub.setMotorSpeed(_port, 35);
+    myTrainHub.setBasicMotorSpeed(port, 35);
     delay(1000);
-    myTrainHub.stopMotor(_port);
+    myTrainHub.stopBasicMotor(port);
     delay(1000);
-    myTrainHub.setMotorSpeed(_port, -35);
+    myTrainHub.setBasicMotorSpeed(port, -35);
     delay(1000);
-    myTrainHub.stopMotor(_port);
+    myTrainHub.stopBasicMotor(port);
     delay(1000);
 
   } else {

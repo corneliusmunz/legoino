@@ -11,7 +11,7 @@
 
 // create a hub instance
 BoostHub myBoostHub;
-BoostHub::Port _portC = BoostHub::Port::C;
+BoostHub::Port portC = BoostHub::Port::C;
 
 // callback function to handle updates of sensor values
 void distanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
@@ -61,7 +61,7 @@ void loop()
       Serial.println("Connected to HUB");
       delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
       // connect color/distance sensor to port c, activate sensor for updates, set callback function if distance value changes
-      myBoostHub.activatePortDevice(_portC, distanceSensorCallback);
+      myBoostHub.activatePortDevice(portC, distanceSensorCallback);
       myBoostHub.setLedColor(GREEN);
     }
     else

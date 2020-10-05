@@ -11,7 +11,7 @@
 
 // create a hub instance
 ControlPlusHub myHub;
-ControlPlusHub::Port _port = ControlPlusHub::Port::D;
+ControlPlusHub::Port portD = ControlPlusHub::Port::D;
 
 void setup() {
     Serial.begin(115200);
@@ -46,13 +46,13 @@ void loop() {
     delay(1000);
     myHub.setLedColor(RED);
     delay(1000);
-    myHub.setMotorSpeed(_port, 35);
+    myHub.setTachoMotorSpeed(portD, 35);
     delay(1000);
-    myHub.stopMotor(_port);
+    myHub.stopTachoMotor(portD);
     delay(1000);
-    myHub.setMotorSpeed(_port, -35);
+    myHub.setTachoMotorSpeed(portD, -35);
     delay(1000);
-    myHub.stopMotor(_port);
+    myHub.stopTachoMotor(portD);
     delay(1000);
 
   } else {

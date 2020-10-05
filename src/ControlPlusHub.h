@@ -33,14 +33,6 @@ public:
 
   //Constructor
   ControlPlusHub();
-
-  //Basic Motor methods
-  void setAccelerationProfile(Port port, int16_t time, int8_t profileNumber);
-  void setDecelerationProfile(Port port, int16_t time, int8_t profileNumber);
-  void stopMotor(Port port);
-  void setMotorSpeed(Port port, int speed);
-  void setMotorSpeedForTime(Port port, int speed, int16_t time);
-  void setMotorSpeedForDegrees(Port port, int speed, int32_t degrees);
 };
 
 #endif

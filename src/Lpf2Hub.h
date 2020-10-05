@@ -52,11 +52,13 @@ public:
   bool isConnecting();
   NimBLEAddress getHubAddress();
   HubType getHubType();
+  void setHubType(HubType hubType);
   void setHubName(char name[]);
   void shutDownHub();
   void activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);
   void deactivateHubPropertyUpdate(HubPropertyReference hubProperty);
 
+  // port and device related methods
   int getDeviceIndexForPortNumber(byte portNumber);
   byte getDeviceTypeForPortNumber(byte portNumber);
   byte getModeForDeviceType(byte deviceType);
@@ -67,13 +69,26 @@ public:
   void deactivatePortDevice(byte portNumber, byte deviceType);
   void deactivatePortDevice(byte portNumber);
 
+  // write (set) operations on devices
+  void WriteValue(byte command[], int size);
+
   void setLedColor(Color color);
   void setLedRGBColor(char red, char green, char blue);
   void setLedHSVColor(int hue, double saturation, double value);
 
-  void WriteValue(byte command[], int size);
+  void stopBasicMotor(byte port);
+  void setBasicMotorSpeed(byte port, int speed);
 
-  // parse methods to read in the content of the charachteristic value
+  void setAccelerationProfile(byte port, int16_t time, int8_t profileNumber);
+  void setDecelerationProfile(byte port, int16_t time, int8_t profileNumber);
+  void stopTachoMotor(byte port);
+  void setTachoMotorSpeed(byte port, int speed);
+  void setTachoMotorSpeedForTime(byte port, int speed, int16_t time);
+  void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees);
+  void setTachoMotorAbsolutePosition(byte port, int speed, int32_t position);
+  void setTachoMotorEncoderPosition(byte port, int32_t position);
+
+  // parse methods to read in the message content of the charachteristic value
   void parseDeviceInfo(uint8_t *pData);
   void parsePortMessage(uint8_t *pData);
   void parseSensorMessage(uint8_t *pData);
@@ -99,45 +114,14 @@ public:
 
   // BLE specific stuff
   void notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
-
-  int getTachoMotorRotation();
-  double getDistance();
-  int getColor();
-  int getRssi();
-  int getBatteryLevel();
-  double getHubVoltage();
-  double getHubCurrent();
-  int getBoostHubMotorRotation();
-  int getTiltX();
-  int getTiltY();
-  int getTiltZ();
-  int getFirmwareVersionBuild();
-  int getFirmwareVersionBugfix();
-  int getFirmwareVersionMajor();
-  int getFirmwareVersionMinor();
-  int getHardwareVersionBuild();
-  int getHardwareVersionBugfix();
-  int getHardwareVersionMajor();
-  int getHardwareVersionMinor();
-
-  bool isButtonPressed();
-  bool isLeftRemoteUpButtonPressed();
-  bool isLeftRemoteDownButtonPressed();
-  bool isLeftRemoteStopButtonPressed();
-  bool isLeftRemoteButtonReleased();
-  bool isRightRemoteUpButtonPressed();
-  bool isRightRemoteDownButtonPressed();
-  bool isRightRemoteStopButtonPressed();
-  bool isRightRemoteButtonReleased();
-
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;
   BLEAddress *_pServerAddress;
   BLEAddress *_requestedDeviceAddress = nullptr;
   BLERemoteCharacteristic *_pRemoteCharacteristic;
+  HubType _hubType;
   boolean _isConnecting;
   boolean _isConnected;
-  HubType _hubType;
 
 private:
   // Notification callbacks
@@ -150,40 +134,6 @@ private:
   //BLE settings
   uint32_t _scanDuration = 5;
 
-  // Hub information values
-  //(could be removed in future version because the information will be directly send to a callback function)
-  int _lpf2HubRssi;
-  uint8_t _lpf2HubBatteryLevel;
-  int _lpf2HubHubMotorRotation;
-  bool _lpf2HubHubButtonPressed;
-  double _lpf2HubVoltage; //V
-  double _lpf2HubCurrent; //mA
-
-  int _lpf2HubFirmwareVersionBuild;
-  int _lpf2HubFirmwareVersionBugfix;
-  int _lpf2HubFirmwareVersionMajor;
-  int _lpf2HubFirmwareVersionMinor;
-
-  int _lpf2HubHardwareVersionBuild;
-  int _lpf2HubHardwareVersionBugfix;
-  int _lpf2HubHardwareVersionMajor;
-  int _lpf2HubHardwareVersionMinor;
-
-  // PoweredUp Remote
-  bool _lpf2HubRemoteLeftUpButtonPressed;
-  bool _lpf2HubRemoteLeftDownButtonPressed;
-  bool _lpf2HubRemoteLeftStopButtonPressed;
-  bool _lpf2HubRemoteLeftButtonReleased;
-
-  bool _lpf2HubRemoteRightUpButtonPressed;
-  bool _lpf2HubRemoteRightDownButtonPressed;
-  bool _lpf2HubRemoteRightStopButtonPressed;
-  bool _lpf2HubRemoteRightButtonReleased;
-
-  // Hub orientation
-  int _lpf2HubTiltX;
-  int _lpf2HubTiltY;
-  int _lpf2HubTiltZ;
 };
 
 #endif

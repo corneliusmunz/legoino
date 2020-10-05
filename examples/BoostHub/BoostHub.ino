@@ -11,8 +11,8 @@
 
 // create a hub instance
 BoostHub myBoostHub;
-BoostHub::Port _portC = BoostHub::Port::C;
-BoostHub::Port _portD = BoostHub::Port::D;
+byte portC = BoostHub::Port::C;
+byte portD = BoostHub::Port::D;
 
 void setup()
 {
@@ -64,7 +64,7 @@ void loop()
     delay(2000);
     myBoostHub.moveArcRight(90);
     delay(2000);
-    myBoostHub.setMotorSpeedForDegrees(_portC, 50, 1 * 360 * 2);
+    myBoostHub.setTachoMotorSpeedForDegrees(portC, 50, 1 * 360 * 2);
     delay(2000);
     myBoostHub.shutDownHub();
   }

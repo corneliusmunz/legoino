@@ -17,9 +17,6 @@ PoweredUpRemote myRemote1;
 PoweredUpRemote myRemote2;
 
 
-PoweredUpHub::Port _port = PoweredUpHub::Port::A;
-
-
 void setup() {
     Serial.begin(115200);
 } 

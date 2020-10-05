@@ -12,7 +12,18 @@
 
 // create a hub instance
 BoostHub myBoostHub;
-BoostHub::Port _portD = BoostHub::Port::D;
+BoostHub::Port portD = BoostHub::Port::D;
+
+
+void buttonCallback(HubPropertyReference hubProperty, uint8_t *pData)
+{
+  if (hubProperty == HubPropertyReference::BUTTON)
+  {
+    if (myBoostHub.parseHubButton(pData) == ButtonState::PRESSED) {
+      myBoostHub.setTachoMotorEncoderPosition(portD, 0);
+    }
+  }
+}
 
 // callback function to handle updates of sensor values
 void tachoMotorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
@@ -48,7 +59,10 @@ void loop()
       Serial.println("Connected to HUB");
       delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
       // connect boost tacho motor  to port d, activate sensor for updates, set callback function for rotation changes
-      myBoostHub.activatePortDevice(_portD, tachoMotorCallback);
+      myBoostHub.activatePortDevice(portD, tachoMotorCallback);
+      delay(50);
+      myBoostHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, buttonCallback);
+
       myBoostHub.setLedColor(GREEN);
     }
     else

@@ -9,6 +9,15 @@
 #ifndef Lpf2HubConst_h
 #define Lpf2HubConst_h
 
+//#define LOGGING_ENABLED
+#ifdef LOGGING_ENABLED
+#define LOGLINE(...) Serial.println(__VA_ARGS__)
+#define LOG(...) Serial.print(__VA_ARGS__)
+#else
+#define LOGLINE(...)
+#define LOG(...)
+#endif
+
 #define LPF2_UUID "00001623-1212-efde-1623-785feabcd123"
 #define LPF2_CHARACHTERISTIC "00001624-1212-efde-1623-785feabcd123"
 

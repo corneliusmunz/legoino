@@ -15,6 +15,9 @@ BoostHub myBoostHub;
 
 void hubPropertyChangeCallback(HubPropertyReference hubProperty, uint8_t *pData)
 {
+  Serial.print("HubProperty: ");
+  Serial.println((byte)hubProperty, HEX);
+
   if (hubProperty == HubPropertyReference::RSSI)
   {
     Serial.print("RSSI: ");
@@ -129,20 +132,27 @@ void loop()
     if (myBoostHub.isConnected())
     {
       Serial.println("Connected to HUB");
-      delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
+      delay(50); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
       myBoostHub.activateHubPropertyUpdate(HubPropertyReference::FW_VERSION, hubPropertyChangeCallback);
+      delay(50);
       myBoostHub.activateHubPropertyUpdate(HubPropertyReference::HW_VERSION, hubPropertyChangeCallback);
+      delay(50);
       myBoostHub.activateHubPropertyUpdate(HubPropertyReference::ADVERTISING_NAME, hubPropertyChangeCallback);
+      delay(50);
       myBoostHub.activateHubPropertyUpdate(HubPropertyReference::BATTERY_TYPE, hubPropertyChangeCallback);
+      delay(50);
       myBoostHub.activateHubPropertyUpdate(HubPropertyReference::BATTERY_VOLTAGE, hubPropertyChangeCallback);
+      delay(50);
       myBoostHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, hubPropertyChangeCallback);
+      delay(50);
       myBoostHub.activateHubPropertyUpdate(HubPropertyReference::RSSI, hubPropertyChangeCallback);
 
-      delay(200);
-
+      delay(50);
       myBoostHub.activatePortDevice(BoostHub::Port::TILT, portValueChangeCallback);
-      //myBoostHub.activatePortDevice(BoostHub::Port::CURRENT, portValueChangeCallback);
-      //myBoostHub.activatePortDevice(BoostHub::Port::VOLTAGE, portValueChangeCallback);
+      delay(50);
+      myBoostHub.activatePortDevice(BoostHub::Port::CURRENT, portValueChangeCallback);
+      delay(50);
+      myBoostHub.activatePortDevice(BoostHub::Port::VOLTAGE, portValueChangeCallback);
     }
     else
     {

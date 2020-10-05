@@ -26,9 +26,9 @@
 PoweredUpRemote myRemote;
 BoostHub myHub;
 
-PoweredUpRemote::Port _portLeft = PoweredUpRemote::Port::LEFT;
-PoweredUpRemote::Port _portRight = PoweredUpRemote::Port::RIGHT;
-BoostHub::Port _portD = BoostHub::Port::D;
+PoweredUpRemote::Port portLeft = PoweredUpRemote::Port::LEFT;
+PoweredUpRemote::Port portRight = PoweredUpRemote::Port::RIGHT;
+BoostHub::Port portD = BoostHub::Port::D;
 
 bool isInitialized = false;
 
@@ -43,34 +43,34 @@ void remoteCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
     Serial.print("Buttonstate: ");
     Serial.println((byte)buttonState, HEX);
 
-    if (portNumber == (byte)_portLeft && buttonState == ButtonState::UP)
+    if (portNumber == (byte)portLeft && buttonState == ButtonState::UP)
     {
       myHub.moveForward(1);
       Serial.println("MoveForward");
     }
-    else if (portNumber == (byte)_portLeft && buttonState == ButtonState::DOWN)
+    else if (portNumber == (byte)portLeft && buttonState == ButtonState::DOWN)
     {
       myHub.moveBack(1);
       Serial.println("MoveBack");
     }
-    else if (portNumber == (byte)_portRight && buttonState == ButtonState::UP)
+    else if (portNumber == (byte)portRight && buttonState == ButtonState::UP)
     {
       myHub.rotateRight(30);
       Serial.println("RotateRight");
     }
-    else if (portNumber == (byte)_portRight && buttonState == ButtonState::DOWN)
+    else if (portNumber == (byte)portRight && buttonState == ButtonState::DOWN)
     {
       myHub.rotateLeft(30);
       Serial.println("RotateLeft");
     }
-    else if (portNumber == (byte)_portRight && buttonState == ButtonState::STOP)
+    else if (portNumber == (byte)portRight && buttonState == ButtonState::STOP)
     {
       Serial.println("Fire...");
-      myHub.setMotorSpeedForDegrees(_portD, -80, 20);
+      myHub.setTachoMotorSpeedForDegrees(portD, -80, 20);
       delay(500);
-      myHub.setMotorSpeedForDegrees(_portD, 100, 180);
+      myHub.setTachoMotorSpeedForDegrees(portD, 100, 180);
       delay(800);
-      myHub.setMotorSpeedForDegrees(_portD, -80, 120);
+      myHub.setTachoMotorSpeedForDegrees(portD, -80, 120);
     }
   }
 }
@@ -120,8 +120,8 @@ void loop()
     isInitialized = true;
     delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
     // both activations are needed to get status updates
-    myRemote.activatePortDevice(_portLeft, remoteCallback);
-    myRemote.activatePortDevice(_portRight, remoteCallback);
+    myRemote.activatePortDevice(portLeft, remoteCallback);
+    myRemote.activatePortDevice(portRight, remoteCallback);
     myRemote.setLedColor(WHITE);
     myHub.setLedColor(WHITE);
   }

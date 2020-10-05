@@ -29,9 +29,6 @@ public:
   //Constructor
   PoweredUpHub();
 
-  //Methods
-  void stopMotor(Port port);
-  void setMotorSpeed(Port port, int speed);
 };
 
 #endif

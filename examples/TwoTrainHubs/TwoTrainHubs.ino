@@ -20,9 +20,9 @@ PoweredUpRemote myRemote;
 PoweredUpHub myTrainHub1;
 PoweredUpHub myTrainHub2;
 
-PoweredUpRemote::Port _portLeft = PoweredUpRemote::Port::LEFT;
-PoweredUpRemote::Port _portRight = PoweredUpRemote::Port::RIGHT;
-PoweredUpHub::Port _portA = PoweredUpHub::Port::A;
+PoweredUpRemote::Port portLeft = PoweredUpRemote::Port::LEFT;
+PoweredUpRemote::Port portRight = PoweredUpRemote::Port::RIGHT;
+PoweredUpHub::Port portA = PoweredUpHub::Port::A;
 
 int currentSpeedTrain1 = 0;
 int currentSpeedTrain2 = 0;
@@ -43,22 +43,22 @@ void remoteCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
     Serial.println((byte)buttonState, HEX);
 
     // Do the logic for left buttons of remote control and Train Hub 1
-    if (portNumber == (byte)_portLeft && buttonState == ButtonState::UP)
+    if (portNumber == (byte)portLeft && buttonState == ButtonState::UP)
     {
       updatedSpeedTrain1 = min(100, currentSpeedTrain1 + 10);
     }
-    else if (portNumber == (byte)_portLeft && buttonState == ButtonState::DOWN)
+    else if (portNumber == (byte)portLeft && buttonState == ButtonState::DOWN)
     {
       updatedSpeedTrain1 = min(100, currentSpeedTrain1 - 10);
     }
-    else if (portNumber == (byte)_portLeft && buttonState == ButtonState::STOP)
+    else if (portNumber == (byte)portLeft && buttonState == ButtonState::STOP)
     {
       updatedSpeedTrain1 = 0;
     }
 
     if (currentSpeedTrain1 != updatedSpeedTrain1)
     {
-      myTrainHub1.setMotorSpeed(_portA, updatedSpeedTrain1);
+      myTrainHub1.setBasicMotorSpeed(portA, updatedSpeedTrain1);
       currentSpeedTrain1 = updatedSpeedTrain1;
     }
 
@@ -66,22 +66,22 @@ void remoteCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
     Serial.println(currentSpeedTrain1, DEC);
 
     // Do the logic for right buttons of remote control and Train Hub 2
-    if (portNumber == (byte)_portRight && buttonState == ButtonState::UP)
+    if (portNumber == (byte)portRight && buttonState == ButtonState::UP)
     {
       updatedSpeedTrain2 = min(100, currentSpeedTrain2 + 10);
     }
-    else if (portNumber == (byte)_portRight && buttonState == ButtonState::DOWN)
+    else if (portNumber == (byte)portRight && buttonState == ButtonState::DOWN)
     {
       updatedSpeedTrain2 = min(100, currentSpeedTrain2 - 10);
     }
-    else if (portNumber == (byte)_portRight && buttonState == ButtonState::STOP)
+    else if (portNumber == (byte)portRight && buttonState == ButtonState::STOP)
     {
       updatedSpeedTrain2 = 0;
     }
 
     if (currentSpeedTrain2 != updatedSpeedTrain2)
     {
-      myTrainHub2.setMotorSpeed(_portA, updatedSpeedTrain2);
+      myTrainHub2.setBasicMotorSpeed(portA, updatedSpeedTrain2);
       currentSpeedTrain2 = updatedSpeedTrain2;
     }
 
@@ -162,8 +162,8 @@ void loop()
     isInitialized = true;
     delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
     // both activations are needed to get status updates
-    myRemote.activatePortDevice(_portLeft, remoteCallback);
-    myRemote.activatePortDevice(_portRight, remoteCallback);
+    myRemote.activatePortDevice(portLeft, remoteCallback);
+    myRemote.activatePortDevice(portRight, remoteCallback);
     myRemote.setLedColor(WHITE);
   }
 
