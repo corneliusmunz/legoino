@@ -108,8 +108,8 @@ void loop()
     isInitialized = true;
     delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
     // both activations are needed to get status updates
-    myRemote.activatePortDevice(_portLeft, (byte)DeviceType::REMOTE_CONTROL_BUTTON, remoteCallback);
-    myRemote.activatePortDevice(_portRight, (byte)DeviceType::REMOTE_CONTROL_BUTTON, remoteCallback);
+    myRemote.activatePortDevice(_portLeft, remoteCallback);
+    myRemote.activatePortDevice(_portRight, remoteCallback);
   }
 
 } // End of loop

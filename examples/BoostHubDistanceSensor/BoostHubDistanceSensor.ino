@@ -2,7 +2,7 @@
  * A BoostHub basic example to connect a boost hub, set the led color of the hub 
  * dependent on the detected distance of the distance/color sensor
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
  */
@@ -61,7 +61,7 @@ void loop()
       Serial.println("Connected to HUB");
       delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
       // connect color/distance sensor to port c, activate sensor for updates, set callback function if distance value changes
-      myBoostHub.activatePortDevice(_portC, (byte)DeviceType::COLOR_DISTANCE_SENSOR, distanceSensorCallback);
+      myBoostHub.activatePortDevice(_portC, distanceSensorCallback);
       myBoostHub.setLedColor(GREEN);
     }
     else

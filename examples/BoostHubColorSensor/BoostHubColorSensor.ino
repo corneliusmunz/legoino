@@ -49,7 +49,7 @@ void loop()
       Serial.println("Connected to HUB");
       delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
       // connect color/distance sensor to port c, activate sensor for updates
-      myBoostHub.activatePortDevice(_portC, (byte)DeviceType::COLOR_DISTANCE_SENSOR, colorDistanceSensorCallback);
+      myBoostHub.activatePortDevice(_portC, colorDistanceSensorCallback);
       myBoostHub.setLedColor(GREEN);
     }
     else

@@ -27,13 +27,13 @@ public:
 
   void onConnect(NimBLEServer *pServer)
   {
-    LOGLINE("Device connected");
+    log_d("Device connected");
     _lpf2HubEmulation->isConnected = true;
   };
 
   void onDisconnect(NimBLEServer *pServer)
   {
-    LOGLINE("Device disconnected");
+    log_d("Device disconnected");
     _lpf2HubEmulation->isConnected = false;
     _lpf2HubEmulation->isPortInitialized = false;
   }
@@ -57,36 +57,15 @@ public:
 
     if (msgReceived.length() > 0)
     {
-      LOG("Message received ");
-      LOG(msgReceived.length());
-      LOG(" bytes :");
-      for (int i = 2; i < msgReceived.length(); i++)
-      {
-        if (i == MSG_TYPE)
-        {
-          LOG(" MSG_TYPE > ");
-        }
-        else if (i == (MSG_TYPE + 1))
-        {
-          LOG(" PAYLOAD > ");
-        }
-
-        LOG("0x");
-        LOG(msgReceived[i], HEX);
-        LOG("(");
-        LOG(msgReceived[i], DEC);
-        LOG(")");
-        LOG(" ");
-      }
-      LOGLINE("");
-
+      log_d("message received: %s", msgReceived);
+    
       if (msgReceived[MSG_TYPE] == (char)MessageType::HUB_PROPERTIES)
       {
         if (msgReceived[0x03] == (char)HubPropertyReference::ADVERTISING_NAME)
         {
           //5..length
           _lpf2HubEmulation->setHubName(msgReceived.substr(5, msgReceived.length() - 5), false);
-          LOGLINE(_lpf2HubEmulation->getHubName().c_str());
+          log_d("hub name: %s", _lpf2HubEmulation->getHubName().c_str());
         }
       }
 
@@ -94,7 +73,6 @@ public:
       //execute and send feedback to the App
       if (msgReceived[MSG_TYPE] == OUT_PORT_CMD)
       {
-        LOGLINE("Port command received");
         delay(30);
 
         //Reply to the App "Command excecuted"
@@ -105,7 +83,7 @@ public:
 
         if (msgReceived[OUT_PORT_SUB_CMD_TYPE] == OUT_PORT_CMD_WRITE_DIRECT)
         {
-          Serial.print("Write Direct on port: ");
+          //Serial.print("Write Direct on port: ");
           // port_id_value=msgReceived[PORT_ID];
           // port_write_value=msgReceived[WRITE_DIRECT_VALUE];
           if (_lpf2HubEmulation->writePortCallback != nullptr)
@@ -117,13 +95,13 @@ public:
 
       if (msgReceived[MSG_TYPE] == HUB_ACTION_CMD && msgReceived[3] == ACTION_SWITCH_OFF)
       {
-        LOGLINE("Disconnect");
+        log_d("disconnect");
         delay(30);
         byte msgDisconnectionReply[] = {0x04, 0x00, 0x02, 0x31};
         _lpf2HubEmulation->pCharacteristic->setValue(msgDisconnectionReply, sizeof(msgDisconnectionReply));
         _lpf2HubEmulation->pCharacteristic->notify();
         delay(100);
-        LOGLINE("Restart ESP");
+        log_d("restart ESP");
         delay(1000);
         ESP.restart();
       }
@@ -132,7 +110,7 @@ public:
 
   void onRead(NimBLECharacteristic *pCharacteristic)
   {
-    LOGLINE("Read request");
+    log_d("read request");
     uint8_t CharTemp[] = {0x0F, 0x00, 0x04};
     //_lpf2HubEmulation->_pCharacteristic->setValue(CharTemp,3);
   }
@@ -157,7 +135,7 @@ void Lpf2HubEmulation::initializePorts()
   {
     if (isPortInitialized == false)
     {
-      LOG("initializePorts");
+      log_d("initializePorts");
 
       delay(1000);
       isPortInitialized = true;
@@ -214,11 +192,7 @@ void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, 
   {
     pCharacteristic->notify();
   }
-
-  LOG("write value to characteristic: ");
-  LOG(message.c_str());
-  LOG(" length:");
-  LOGLINE(message.length(), DEC);
+  log_d("write message (%d): %s", message.length(), message);
 }
 
 void Lpf2HubEmulation::setHubButton(bool pressed)
@@ -314,17 +288,17 @@ void Lpf2HubEmulation::setHubHardwareVersion(int build, int bugfix, int major, i
 
 void Lpf2HubEmulation::start()
 {
-  LOGLINE("Starting BLE work!");
+  log_d("Starting BLE work!");
 
   uint8_t newMACAddress[] = {0x91, 0x84, 0x2B, 0x4A, 0x3A, 0x0A};
   esp_base_mac_addr_set(&newMACAddress[0]);
   NimBLEDevice::init(_hubName);
 
-  LOGLINE("Create server");
+  log_d("Create server");
   _pServer = NimBLEDevice::createServer();
   _pServer->setCallbacks(new Lpf2HubServerCallbacks(this));
 
-  LOGLINE("Create service");
+  log_d("Create service");
   _pService = _pServer->createService(SERVICE_UUID);
 
   // Create a BLE Characteristic
@@ -337,7 +311,7 @@ void Lpf2HubEmulation::start()
   // Create a BLE Descriptor and set the callback
   pCharacteristic->setCallbacks(new Lpf2HubCharacteristicCallbacks(this));
 
-  LOGLINE("Service start");
+  log_d("Service start");
 
   _pService->start();
   _pAdvertising = NimBLEDevice::getAdvertising();
@@ -352,13 +326,13 @@ void Lpf2HubEmulation::start()
   std::string manufacturerData;
   if (_hubType == HubType::POWERED_UP_HUB)
   {
-    LOGLINE("PoweredUp Hub");
+    log_d("PoweredUp Hub");
     const char poweredUpHub[8] = {0x97, 0x03, 0x00, 0x41, 0x07, 0x00, 0x43, 0x00};
     manufacturerData = std::string(poweredUpHub, sizeof(poweredUpHub));
   }
   else if (_hubType == HubType::CONTROL_PLUS_HUB)
   {
-    LOGLINE("ControlPlus Hub");
+    log_d("ControlPlus Hub");
     const char controlPlusHub[8] = {0x97, 0x03, 0x00, 0x80, 0x06, 0x00, 0x41, 0x00};
     manufacturerData = std::string(controlPlusHub, sizeof(controlPlusHub));
   }
@@ -372,21 +346,13 @@ void Lpf2HubEmulation::start()
   advertisementData.setCompleteServices(NimBLEUUID(SERVICE_UUID));
 
   std::string payload = advertisementData.getPayload();
-  LOG("AdvertisementData payload (");
-  LOG(payload.length(), DEC);
-  LOG("): ");
-  for (int i = 0; i < payload.length(); i++)
-  {
-    LOG(" ");
-    LOG(payload[i], HEX);
-  }
-  LOGLINE("");
+  log_d("advertisment data payload: %s", payload);
 
   // scan response data is not needed. It could be used to add some more data but it seems that it is not requested by
   // the Lego apps
   _pAdvertising->setAdvertisementData(advertisementData);
 
-  LOGLINE("Start adv");
+  log_d("start advertising");
   NimBLEDevice::startAdvertising();
-  LOGLINE("Characteristic defined! Now you can read it in your phone!");
+  log_d("characteristic defined! Now you can read it in your phone!");
 }

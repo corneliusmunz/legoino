@@ -13,7 +13,7 @@
 #include "NimBLEDevice.h"
 using namespace std::placeholders;
 #include "Lpf2HubConst.h"
-#include "LegoinoCommon.h" 
+#include "LegoinoCommon.h"
 
 typedef void (*HubPropertyChangeCallback)(HubPropertyReference hubProperty, uint8_t *pData);
 typedef void (*PortValueChangeCallback)(byte portNumber, DeviceType deviceType, uint8_t *pData);
@@ -22,7 +22,7 @@ typedef struct Device
 {
   byte PortNumber;
   byte DeviceType;
-  PortValueChangeCallback callback;
+  PortValueChangeCallback Callback;
 };
 
 typedef struct Version
@@ -51,12 +51,11 @@ public:
   bool isConnected();
   bool isConnecting();
   NimBLEAddress getHubAddress();
+  HubType getHubType();
   void setHubName(char name[]);
   void shutDownHub();
   void activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);
   void deactivateHubPropertyUpdate(HubPropertyReference hubProperty);
-
-  HubType getHubType();
 
   int getDeviceIndexForPortNumber(byte portNumber);
   byte getDeviceTypeForPortNumber(byte portNumber);
@@ -142,7 +141,6 @@ public:
 
 private:
   // Notification callbacks
-  ButtonCallback _buttonCallback = nullptr;
   HubPropertyChangeCallback _hubPropertyChangeCallback = nullptr;
 
   // List of connected devices

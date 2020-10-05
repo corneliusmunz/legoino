@@ -31,14 +31,13 @@ public:
     }
 
     void onConnect(BLEClient *bleClient)
-    {
-    }
+    {}
 
     void onDisconnect(BLEClient *bleClient)
     {
         _lpf2Hub->_isConnecting = false;
         _lpf2Hub->_isConnected = false;
-        LOGLINE("onDisconnect BLECLient event");
+        log_d("disconnected client");
     }
 };
 
@@ -58,7 +57,7 @@ public:
     void onResult(NimBLEAdvertisedDevice *advertisedDevice)
     {
         //Found a device, check if the service is contained and optional if address fits requested address
-        LOGLINE(advertisedDevice->toString().c_str());
+        log_d("advertised device: %s", advertisedDevice->toString().c_str());
 
         if (advertisedDevice->haveServiceUUID() && advertisedDevice->getServiceUUID().equals(_lpf2Hub->_bleUuid) && (_lpf2Hub->_requestedDeviceAddress == nullptr || (_lpf2Hub->_requestedDeviceAddress && advertisedDevice->getAddress().equals(*_lpf2Hub->_requestedDeviceAddress))))
         {
@@ -71,32 +70,27 @@ public:
                 uint8_t manufacturerDataLength = advertisedDevice->getManufacturerData().length();
                 if (manufacturerDataLength >= 3)
                 {
+                    log_d("manufacturer data hub type: %x", manufacturerData[3]);
                     //check device type ID
                     switch (manufacturerData[3])
                     {
                     case DUPLO_TRAIN_HUB_ID:
                         _lpf2Hub->_hubType = HubType::DUPLO_TRAIN_HUB;
-                        LOGLINE("Hubtype: DUPLO_TRAIN_HUB");
                         break;
                     case BOOST_MOVE_HUB_ID:
                         _lpf2Hub->_hubType = HubType::BOOST_MOVE_HUB;
-                        LOGLINE("Hubtype: BOOST_MOVE_HUB");
                         break;
                     case POWERED_UP_HUB_ID:
                         _lpf2Hub->_hubType = HubType::POWERED_UP_HUB;
-                        LOGLINE("Hubtype: POWERED_UP_HUB");
                         break;
                     case POWERED_UP_REMOTE_ID:
                         _lpf2Hub->_hubType = HubType::POWERED_UP_REMOTE;
-                        LOGLINE("Hubtype: POWERED_UP_REMOTE");
                         break;
                     case CONTROL_PLUS_HUB_ID:
                         _lpf2Hub->_hubType = HubType::CONTROL_PLUS_HUB;
-                        LOGLINE("Hubtype: CONTROL_PLUS_HUB");
                         break;
                     default:
                         _lpf2Hub->_hubType = HubType::UNKNOWNHUB;
-                        LOGLINE("Hubtype: UNKNOWN");
                         break;
                     }
                 }
@@ -128,11 +122,7 @@ void Lpf2Hub::WriteValue(byte command[], int size)
  */
 void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType)
 {
-    LOG("registerPortDevice Port:");
-    LOG(portNumber, HEX);
-    LOG(" DeviceType:");
-    LOGLINE(deviceType, HEX);
-
+    log_d("port: %x, device type: %x", portNumber, deviceType);
     Device newDevice = {portNumber, deviceType, nullptr};
     connectedDevices[numberOfConnectedDevices] = newDevice;
     numberOfConnectedDevices++;
@@ -146,8 +136,7 @@ void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType)
  */
 void Lpf2Hub::deregisterPortDevice(byte portNumber)
 {
-    LOG("deregisterPortDevice Port:");
-    LOGLINE(portNumber, HEX);
+    log_d("port: %x", portNumber);
 
     bool hasReachedRemovedIndex = false;
     for (int i = 0; i < numberOfConnectedDevices; i++)
@@ -174,7 +163,6 @@ void Lpf2Hub::deregisterPortDevice(byte portNumber)
  */
 void Lpf2Hub::activatePortDevice(byte portNumber, PortValueChangeCallback portValueChangeCallback)
 {
-    LOGLINE("activatePortDevice(portNumber)");
     byte deviceType = getDeviceTypeForPortNumber(portNumber);
     activatePortDevice(portNumber, deviceType, portValueChangeCallback);
 }
@@ -191,15 +179,12 @@ void Lpf2Hub::activatePortDevice(byte portNumber, PortValueChangeCallback portVa
  */
 void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, PortValueChangeCallback portValueChangeCallback)
 {
-    LOGLINE("activatePortDevice");
     byte mode = getModeForDeviceType(deviceType);
-    LOG("mode for device: ");
-    LOGLINE(mode, HEX);
+    log_d("port: %x, device type: %x, callback: %x, mode: %x", portNumber, deviceType, portValueChangeCallback, mode);
     int deviceIndex = getDeviceIndexForPortNumber(portNumber);
-    connectedDevices[deviceIndex].callback = portValueChangeCallback;
+    connectedDevices[deviceIndex].Callback = portValueChangeCallback;
     byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(activatePortDeviceMessage, 8);
-
 }
 
 /**
@@ -227,51 +212,29 @@ void Lpf2Hub::deactivatePortDevice(byte portNumber, byte deviceType)
 }
 
 /**
- * @brief Activate updates of hub button events. 
- */
-void Lpf2Hub::activateButtonReports()
-{
-    LOGLINE("Activate Button Reports");
-    byte activateButtonReportsMessage[3] = {0x01, 0x02, 0x02};
-    WriteValue(activateButtonReportsMessage, 3);
-}
-
-/**
  * @brief Parse the incoming characteristic notification for a Device Info Message
  * @param [in] pData The pointer to the received data
  */
 void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
 {
-    LOGLINE("parseDeviceInfo");
-
     if (_hubPropertyChangeCallback != nullptr) {
         _hubPropertyChangeCallback((HubPropertyReference)pData[3], pData);
     }
 
     if (pData[3] == (byte)HubPropertyReference::ADVERTISING_NAME)
     {
-        LOGLINE(parseHubAdvertisingName(pData).c_str());
+        log_d("advertising name: %s", parseHubAdvertisingName(pData).c_str());
     }
     else if (pData[3] == (byte)HubPropertyReference::BUTTON)
     {
         ButtonState buttonState = parseHubButton(pData);
         if (buttonState == ButtonState::PRESSED)
         {
-            LOGLINE("button PRESSED");
-            if (_buttonCallback != nullptr)
-            {
-                _buttonCallback(true);
-            }
             _lpf2HubHubButtonPressed = true;
             return;
         }
         else if (buttonState == ButtonState::RELEASED)
         {
-            LOGLINE("button RELEASED");
-            if (_buttonCallback != nullptr)
-            {
-                _buttonCallback(false);
-            }
             _lpf2HubHubButtonPressed = false;
             return;
         }
@@ -283,16 +246,7 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
         _lpf2HubFirmwareVersionBugfix = version.Build;
         _lpf2HubFirmwareVersionMajor = version.Major;
         _lpf2HubFirmwareVersionMinor = version.Minor;
-
-        LOG("Firmware version major:");
-        LOG(_lpf2HubFirmwareVersionMajor);
-        LOG(" minor:");
-        LOG(_lpf2HubFirmwareVersionMinor);
-        LOG(" bugfix:");
-        LOG(_lpf2HubFirmwareVersionBugfix);
-        LOG(" build:");
-        LOG(_lpf2HubFirmwareVersionBuild);
-        LOGLINE();
+        log_d("version: %d-%d-%d (%d)", version.Major, version.Minor, version.Bugfix, version.Build);
     }
     else if (pData[3] == (byte)HubPropertyReference::HW_VERSION)
     {
@@ -301,51 +255,25 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
         _lpf2HubHardwareVersionBugfix = version.Build;
         _lpf2HubHardwareVersionMajor = version.Major;
         _lpf2HubHardwareVersionMinor = version.Minor;
-
-        LOG("Hardware version major:");
-        LOG(_lpf2HubHardwareVersionMajor);
-        LOG(" minor:");
-        LOG(_lpf2HubHardwareVersionMinor);
-        LOG(" bugfix:");
-        LOG(_lpf2HubHardwareVersionBugfix);
-        LOG(" build:");
-        LOG(_lpf2HubHardwareVersionBuild);
-        LOGLINE();
+        log_d("version: %d-%d-%d (%d)", version.Major, version.Minor, version.Bugfix, version.Build);
     }
     else if (pData[3] == (byte)HubPropertyReference::RSSI)
     {
-        LOG("RSSI update: ");
         _lpf2HubRssi = parseRssi(pData);
-        LOG(_lpf2HubRssi);
-        LOGLINE();
+        log_d("rssi: ", _lpf2HubRssi);
     }
     else if (pData[3] == (byte)HubPropertyReference::BATTERY_VOLTAGE)
     {
         _lpf2HubBatteryLevel = parseBatteryLevel(pData);
-        LOG("Battery level: ");
-        LOG(_lpf2HubBatteryLevel);
-        LOG("%");
-        LOGLINE();
+        log_d("battery level: %d %", _lpf2HubBatteryLevel);
     }
     else if (pData[3] == (byte)HubPropertyReference::BATTERY_TYPE)
     {
-        LOG("Battery type: ");
-        uint8_t batteryType = parseBatteryType(pData);
-        if (batteryType == (byte)BatteryType::NORMAL)
-        {
-            LOG("Normal");
-        }
-        else if (batteryType == (byte)BatteryType::RECHARGEABLE)
-        {
-            LOG("Recharchable");
-        }
-        LOGLINE();
+        log_d("battery type: %d", parseBatteryType(pData));
     }
     else if (pData[3] == (byte)HubPropertyReference::SYSTEM_TYPE_ID)
     {
-        LOG("System type ID: ");
-        uint8_t typeId = parseSystemTypeId(pData);
-        LOG(typeId);
+        log_d("system type id: %x", parseSystemTypeId(pData));
     }
 }
 
@@ -355,20 +283,16 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
  */
 void Lpf2Hub::parsePortMessage(uint8_t *pData)
 {
-    LOGLINE("parsePortMessage");
     byte port = pData[3];
     bool isConnected = (pData[4] == 1 || pData[4] == 2) ? true : false;
-    LOG("Port ");
-    LOG(port, HEX);
     if (isConnected)
     {
-        LOG(" is connected with device ");
-        LOGLINE(pData[5], DEC);
+        log_d("port %x is connected with device %x", port, pData[5]);
         registerPortDevice(port, pData[5]);
     }
     else
     {
-        LOGLINE(" is disconnected");
+        log_d("port %x is disconnected", port);
         deregisterPortDevice(port);
     }
 }
@@ -380,10 +304,8 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
  */
 int Lpf2Hub::parseBoostTiltSensorX(uint8_t *pData)
 {
-    LOGLINE("parseBoostTiltSensorX");
     int value = LegoinoCommon::ReadInt8(pData, 4);
-    LOG("x: ");
-    LOG(value, DEC);
+    log_d("tilt x: %d", value);
     return value;
 }
 
@@ -394,10 +316,8 @@ int Lpf2Hub::parseBoostTiltSensorX(uint8_t *pData)
  */
 int Lpf2Hub::parseBoostTiltSensorY(uint8_t *pData)
 {
-    LOGLINE("parseBoostTiltSensorY");
     int value = LegoinoCommon::ReadInt8(pData, 5);
-    LOG("y: ");
-    LOG(value, DEC);
+    log_d("tilt y: %d", value);
     return value;
 }
 
@@ -408,10 +328,8 @@ int Lpf2Hub::parseBoostTiltSensorY(uint8_t *pData)
  */
 int Lpf2Hub::parseControlPlusHubTiltSensorX(uint8_t *pData)
 {
-    LOGLINE("parseControlPlusTiltSensorX");
     int value = LegoinoCommon::ReadInt16LE(pData, 4);
-    LOG("x: ");
-    LOG(value, DEC);
+    log_d("tilt x: %d", value);
     return value;
 }
 
@@ -422,10 +340,8 @@ int Lpf2Hub::parseControlPlusHubTiltSensorX(uint8_t *pData)
  */
 int Lpf2Hub::parseControlPlusHubTiltSensorY(uint8_t *pData)
 {
-    LOGLINE("parseControlPlusTiltSensorY");
     int value = LegoinoCommon::ReadInt16LE(pData, 6);
-    LOG("y: ");
-    LOG(value, DEC);
+    log_d("tilt y: %d", value);
     return value;
 }
 
@@ -436,10 +352,8 @@ int Lpf2Hub::parseControlPlusHubTiltSensorY(uint8_t *pData)
  */
 int Lpf2Hub::parseControlPlusHubTiltSensorZ(uint8_t *pData)
 {
-    LOGLINE("parseControlPlusTiltSensorZ");
     int value = LegoinoCommon::ReadInt16LE(pData, 8);
-    LOG("z: ");
-    LOG(value, DEC);
+    log_d("tilt z: %d", value);
     return value;
 }
 
@@ -452,8 +366,7 @@ double Lpf2Hub::parseCurrentSensor(uint8_t *pData)
 {
     int currentRaw = LegoinoCommon::ReadUInt16LE(pData, 4);
     double current = (double)currentRaw * LPF2_CURRENT_MAX / LPF2_CURRENT_MAX_RAW;
-    LOG("Current value [mA]: ");
-    LOGLINE(current);
+    log_d("current value: %.2f [mA]", current);
     return current;
 }
 
@@ -466,8 +379,7 @@ double Lpf2Hub::parseVoltageSensor(uint8_t *pData)
 {
     int voltageRaw = LegoinoCommon::ReadUInt16LE(pData, 4);
     double voltage = (double)voltageRaw * LPF2_VOLTAGE_MAX / LPF2_VOLTAGE_MAX_RAW;
-    LOG("Hub Voltage : ");
-    LOGLINE(voltage);
+    log_d("voltage value: %.2f [V]", voltage);
     return voltage;
 }
 
@@ -478,10 +390,8 @@ double Lpf2Hub::parseVoltageSensor(uint8_t *pData)
  */
 int Lpf2Hub::parseTachoMotor(uint8_t *pData)
 {
-    LOGLINE("parseBoostTachoMotor");
     int value = LegoinoCommon::ReadInt32LE(pData, 4);
-    LOG("Tacho motor rotation: ");
-    LOGLINE(value, DEC);
+    log_d("rotation value: %d [degrees]", value);
     return value;
 }
 
@@ -492,7 +402,6 @@ int Lpf2Hub::parseTachoMotor(uint8_t *pData)
  */
 double Lpf2Hub::parseDistance(uint8_t *pData)
 {
-    LOGLINE("parseDistance");
     int partial = pData[7];
     double distance = (double)pData[5];
     if (partial > 0)
@@ -500,9 +409,7 @@ double Lpf2Hub::parseDistance(uint8_t *pData)
         distance += 1.0 / partial;
     }
     distance = floor(distance * 25.4) - 20.0;
-
-    LOG("Distance: ");
-    LOGLINE(distance, DEC);
+    log_d("distance : %d", distance);
     return distance;
 }
 
@@ -513,16 +420,14 @@ double Lpf2Hub::parseDistance(uint8_t *pData)
  */
 int Lpf2Hub::parseColor(uint8_t *pData)
 {
-    LOGLINE("parseColor");
     int color = pData[4];
-    LOG(" Color: ");
-    if (Lpf2HubColor > 10)
+    if (color > 10)
     {
-        LOGLINE("undefined");
+        log_e("undefined color (%d)", color);
     }
     else
     {
-        LOGLINE(COLOR_STRING[Lpf2HubColor]);
+        log_d("color: %s (%d)", COLOR_STRING[color], color);
     }
     return color;
 }
@@ -534,10 +439,8 @@ int Lpf2Hub::parseColor(uint8_t *pData)
  */
 ButtonState Lpf2Hub::parseRemoteButton(uint8_t *pData)
 {
-    LOGLINE("parse Remote Button");
     int buttonState = pData[4];
-    LOG("ButtonState: ");
-    LOGLINE(buttonState, HEX);
+    log_d("remote button state: %x", buttonState);
     return (ButtonState)buttonState;
 }
 
@@ -550,17 +453,14 @@ std::string Lpf2Hub::parseHubAdvertisingName(uint8_t *pData)
         name[i] = pData[5 + i];
     }
     name[charArrayLength + 1] = 0;
-    LOG("device name: ");
-    LOGLINE(name);
+    log_d("advertising name: %s", name);
     return std::string(name);
 }
 
 ButtonState Lpf2Hub::parseHubButton(uint8_t *pData)
 {
-    LOGLINE("parse Hub Button");
     int buttonState = pData[5];
-    LOG("ButtonState: ");
-    LOGLINE(buttonState, HEX);
+    log_d("hub button state: %x", buttonState);
     return (ButtonState)buttonState;
 }
 
@@ -577,25 +477,22 @@ Version Lpf2Hub::parseVersion(uint8_t *pData)
 
 int Lpf2Hub::parseRssi(uint8_t *pData)
 {
-    LOG("parse RSSI");
     int rssi = LegoinoCommon::ReadInt8(pData, 5);
-    LOGLINE(rssi);
+    log_d("rssi: %d", rssi);
     return rssi;
 }
 
 uint8_t Lpf2Hub::parseBatteryLevel(uint8_t *pData)
 {
     uint8_t batteryLevel = LegoinoCommon::ReadUInt8(pData, 5);
-    LOG("Battery level: ");
-    LOG(batteryLevel);
-    LOGLINE("%");
+    log_d("battery level: %d", batteryLevel);
     return batteryLevel;
 }
 
 byte Lpf2Hub::parseBatteryType(uint8_t *pData)
 {
-    LOG("parse Battery type");
     byte batteryType = pData[5];
+    log_d("battery type: %x", batteryType);
     return batteryType;
 }
 
@@ -641,14 +538,13 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
  */
 void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 {
-    LOGLINE("parseSensorMessage");
     int deviceIndex = getDeviceIndexForPortNumber(pData[3]);
 
     byte deviceType = connectedDevices[deviceIndex].DeviceType;
 
-    if (connectedDevices[deviceIndex].callback != nullptr)
+    if (connectedDevices[deviceIndex].Callback != nullptr)
     {
-        connectedDevices[deviceIndex].callback(pData[3], (DeviceType)deviceType, pData);
+        connectedDevices[deviceIndex].Callback(pData[3], (DeviceType)deviceType, pData);
     }
 
     if (deviceType == (byte)DeviceType::CURRENT_SENSOR)
@@ -688,12 +584,9 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     else if (deviceType == (byte)DeviceType::REMOTE_CONTROL_BUTTON)
     {
         int port = pData[3];
-        LOG("Port: ");
-        LOG(port, DEC);
         int buttonState = (int)parseRemoteButton(pData);
         if (buttonState == 0x01)
         {
-            LOGLINE(" ButtonState: UP");
             if (port == 0x00)
             {
                 _lpf2HubRemoteLeftUpButtonPressed = true;
@@ -705,7 +598,6 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
         }
         else if (buttonState == 0xff)
         {
-            LOGLINE(" ButtonState: DOWN");
             if (port == 0x00)
             {
                 _lpf2HubRemoteLeftDownButtonPressed = true;
@@ -717,7 +609,6 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
         }
         else if (buttonState == 0x7f)
         {
-            LOGLINE(" ButtonState: STOP");
             if (port == 0x00)
             {
                 _lpf2HubRemoteLeftStopButtonPressed = true;
@@ -729,7 +620,6 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
         }
         else if (buttonState == 0x00)
         {
-            LOGLINE(" ButtonState: RELEASED");
             if (port == 0x00)
             {
                 _lpf2HubRemoteLeftUpButtonPressed = false;
@@ -755,7 +645,7 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
  */
 void Lpf2Hub::parsePortAction(uint8_t *pData)
 {
-    LOGLINE("parsePortAction");
+    log_d("parsePortAction");
 }
 
 /**
@@ -771,16 +661,7 @@ void Lpf2Hub::notifyCallback(
     size_t length,
     bool isNotify)
 {
-    LOG("Notify callback for characteristic ");
-    LOG(pBLERemoteCharacteristic->getUUID().toString().c_str());
-    LOG("data: ");
-
-    for (int i = 0; i < length; i++)
-    {
-        LOG(pData[i], HEX);
-        LOG(" ");
-    }
-    LOGLINE();
+    log_d("notify callback for characteristic %s", pBLERemoteCharacteristic->getUUID().toString().c_str());
 
     switch (pData[2])
     {
@@ -881,19 +762,17 @@ NimBLEAddress Lpf2Hub::getHubAddress()
  */
 int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber)
 {
-    LOGLINE("getDeviceIndexForPortNumber");
-    LOGLINE(numberOfConnectedDevices, DEC);
+    log_d("Number of connected devices: %d", numberOfConnectedDevices);
     for (int idx = 0; idx < numberOfConnectedDevices; idx++)
     {
-        LOGLINE(idx, DEC);
-        LOGLINE(connectedDevices[idx].PortNumber, HEX);
-        LOGLINE(connectedDevices[idx].DeviceType, HEX);
-        LOGLINE((long)(connectedDevices[idx].callback), HEX);
+        log_v("device %d, port number: %x, device type: %x, callback address: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType, connectedDevices[idx].Callback );
         if (connectedDevices[idx].PortNumber == portNumber)
         {
+            log_d("device on port %x has index %d", portNumber, idx);
             return idx;
         }
     }
+    log_w("no device found for port number %x", portNumber);
     //ToDo: What happens if the device could not be found
 }
 
@@ -904,31 +783,20 @@ int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber)
  */
 byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
 {
-    LOGLINE("getDeviceTypeForPortNumber");
-    LOGLINE(numberOfConnectedDevices, DEC);
+    log_d("Number of connected devices: %d", numberOfConnectedDevices);
     for (int idx = 0; idx < numberOfConnectedDevices; idx++)
     {
-        LOGLINE(idx, DEC);
-        LOGLINE(connectedDevices[idx].PortNumber, HEX);
-        LOGLINE(connectedDevices[idx].DeviceType, HEX);
+        log_v("device %d, port number: %x, device type: %x, callback address: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType, connectedDevices[idx].Callback );
         if (connectedDevices[idx].PortNumber == portNumber)
         {
-            LOG("deviceType: ");
-            LOGLINE(connectedDevices[idx].DeviceType, HEX);
+            log_d("device on port %x has type %x", portNumber, connectedDevices[idx].DeviceType);
             return connectedDevices[idx].DeviceType;
         }
     }
+    log_w("no device found for port number %x", portNumber);
     return (byte)DeviceType::UNKNOWNDEVICE;
 }
 
-/**
- * @brief Register the callback function if a button message is received
- * @param [in] buttonCallback Function pointer to the callback function which handles the button notification
- */
-void Lpf2Hub::registerButtonCallback(ButtonCallback buttonCallback)
-{
-    _buttonCallback = buttonCallback;
-}
 
 /**
  * @brief Set the color of the HUB LED with predefined colors
@@ -1038,19 +906,13 @@ void Lpf2Hub::setHubName(char name[])
  */
 void Lpf2Hub::activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback)
 {
-    if (propertyChangeCallback != nullptr) {
+    if (hubPropertyChangeCallback != nullptr) {
         _hubPropertyChangeCallback = hubPropertyChangeCallback;
     }
 
     // Activate reports
-    byte notifyPropertyCommand[3] = {0x01, (byte)hubProperty, HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM};
+    byte notifyPropertyCommand[3] = {0x01, (byte)hubProperty, (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM};
     WriteValue(notifyPropertyCommand, 3);
-
-    byte setCurrentReport[8] = {0x41, 0x3b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
-    WriteValue(setCurrentReport, 8);
-
-    byte setVoltageReport[8] = {0x41, 0x3c, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
-    WriteValue(setVoltageReport, 8);
 }
 
 /**
@@ -1061,7 +923,7 @@ void Lpf2Hub::deactivateHubPropertyUpdate(HubPropertyReference hubProperty)
 {
 
     // Activate reports
-    byte notifyPropertyCommand[3] = {0x01, (byte)hubProperty, HubPropertyOperation::DISABLE_UPDATES_DOWNSTREAM};
+    byte notifyPropertyCommand[3] = {0x01, (byte)hubProperty, (byte)HubPropertyOperation::DISABLE_UPDATES_DOWNSTREAM};
     WriteValue(notifyPropertyCommand, 3);
 }
 
@@ -1073,8 +935,7 @@ bool Lpf2Hub::connectHub()
     BLEAddress pAddress = *_pServerAddress;
     NimBLEClient *pClient = nullptr;
 
-    Serial.print("Number of Clients: ");
-    Serial.println(NimBLEDevice::getClientListSize(), DEC);
+    log_d("number of ble clients: %d", NimBLEDevice::getClientListSize());
 
     /** Check if we have a client we should reuse first **/
     if (NimBLEDevice::getClientListSize())
@@ -1088,10 +949,10 @@ bool Lpf2Hub::connectHub()
         {
             if (!pClient->connect(pAddress, false))
             {
-                Serial.println("Reconnect failed");
+                log_e("reconnect failed");
                 return false;
             }
-            Serial.println("Reconnected client");
+            log_d("reconnect client");
         }
         /** We don't already have a client that knows this device,
          *  we will check for a client that is disconnected that we can use.
@@ -1107,43 +968,34 @@ bool Lpf2Hub::connectHub()
     {
         if (NimBLEDevice::getClientListSize() >= NIMBLE_MAX_CONNECTIONS)
         {
-            Serial.print("Max clients reached - no more connections available: ");
-            Serial.println(NimBLEDevice::getClientListSize(), DEC);
+            log_w("max clients reached - no more connections available: %d", NimBLEDevice::getClientListSize());
             return false;
         }
 
         pClient = NimBLEDevice::createClient();
-        Serial.println("New client created");
     }
 
     if (!pClient->isConnected())
     {
         if (!pClient->connect(pAddress))
         {
-            Serial.println("Failed to connect");
+            log_e("failed to connect");
             return false;
         }
     }
 
-    Serial.print("Connected to: ");
-    Serial.println(pClient->getPeerAddress().toString().c_str());
-    Serial.print("RSSI: ");
-    Serial.println(pClient->getRssi());
-
-    LOGLINE("get pClient");
+    log_d("connected to: %s, RSSI: %d", pClient->getPeerAddress().toString().c_str(), pClient->getRssi());
     BLERemoteService *pRemoteService = pClient->getService(_bleUuid);
     if (pRemoteService == nullptr)
     {
-        LOGLINE("get pClient failed");
+        log_e("failed to get ble client");
         return false;
     }
-    LOGLINE("get pRemoteService");
 
     _pRemoteCharacteristic = pRemoteService->getCharacteristic(_charachteristicUuid);
     if (_pRemoteCharacteristic == nullptr)
     {
-        LOGLINE("get pRemoteService failed");
-
+        log_e("failed to get ble service");
         return false;
     }
 
