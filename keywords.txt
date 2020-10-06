@@ -11,11 +11,6 @@ Lpf2Hub KEYWORD1
 PoweredUpHub KEYWORD1
 ControlPlusHub	KEYWORD1
 
-Device	KEYWORD3
-Version	KEYWORD3
-
-Color	KEYWORD3
-Port	KEYWORD3
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -77,6 +72,26 @@ parseRssi	KEYWORD2
 parseVersion	KEYWORD2
 parseHubButton	KEYWORD2
 parseHubAdvertisingName	KEYWORD2
+
+#######################################
+# Structs (KEYWORD3)
+#######################################
+Device	KEYWORD3
+Version	KEYWORD3
+
+Color	KEYWORD3
+Port	KEYWORD3
+HubType	KEYWORD3
+BLEManufacturererData	KEYWORD3
+DeviceType	KEYWORD3
+MessageType	KEYWORD3
+HubPropertyReference	KEYWORD3
+BatteryType	KEYWORD3
+ButtonState	KEYWORD3
+HubPropertyOperation	KEYWORD3
+ActionType	KEYWORD3
+Event	KEYWORD3
+COLOR_STRING	KEYWORD3
 
 #######################################
 # Constants (LITERAL1)
