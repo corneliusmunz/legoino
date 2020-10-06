@@ -3,35 +3,49 @@
 #######################################
 
 #######################################
-# Datatypes (KEYWORD1)
+# Classes (KEYWORD1)
 #######################################
 
-BoostHub KEYWORD1	BoostHub
-Lpf2Hub KEYWORD1	Lpf2Hub
-PoweredUpHub KEYWORD1	PoweredUpHub
+BoostHub	KEYWORD1
+Lpf2Hub KEYWORD1
+PoweredUpHub KEYWORD1
+ControlPlusHub	KEYWORD1
 
-Color	KEYWORD1	Color
-Port	KEYWORD1	Port
+Device	KEYWORD3
+Version	KEYWORD3
+
+Color	KEYWORD3
+Port	KEYWORD3
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
+init	KEYWORD2
+connectHub	KEYWORD2
+isConnected	KEYWORD2
+isConnecting	KEYWORD2
+getHubAddress	KEYWORD2
+setHubName	KEYWORD2
+shutDownHub	KEYWORD2
+activateHubPropertyUpdate	KEYWORD2
+deactivateHubPropertyUpdate	KEYWORD2
 setLedColor	KEYWORD2
 setLedRGBColor	KEYWORD2
-setMotorSpeed	KEYWORD2
-stopMotor	KEYWORD2
-connectHub	KEYWORD2
-shutDownHub	KEYWORD2
-setHubName	KEYWORD2
+setLedHSVColor	KEYWORD2
+
+stopBasicMotor	KEYWORD2
+setBasicMotorSpeed	KEYWORD2
 
 setAccelerationProfile	KEYWORD2
 setDecelerationProfile	KEYWORD2
-stopMotor	KEYWORD2
-setMotorSpeed	KEYWORD2
-setMotorSpeedForTime	KEYWORD2
-setMotorSpeedForDegrees	KEYWORD2
-setMotorSpeedsForDegrees	KEYWORD2
+stopTachoMotor	KEYWORD2
+setTachoMotorSpeed	KEYWORD2
+setTachoMotorSpeedForTime	KEYWORD2
+setTachoMotorSpeedForDegrees	KEYWORD2
+setTachoMotorAbsolutePosition	KEYWORD2
+setTachoMotorEncoderPosition	KEYWORD2
 
+setMotorSpeedsForDegrees	KEYWORD2
 moveForward	KEYWORD2
 moveBack	KEYWORD2
 rotate	KEYWORD2
@@ -41,6 +55,28 @@ moveArc	KEYWORD2
 moveArcLeft	KEYWORD2
 moveArcRight	KEYWORD2
 
+parseDeviceInfo	KEYWORD2
+parsePortMessage	KEYWORD2
+parseSensorMessage	KEYWORD2
+parseVoltageSensor	KEYWORD2
+parseCurrentSensor	KEYWORD2
+parseDistanc	KEYWORD2
+parseColo	KEYWORD2
+parseTachoMoto	KEYWORD2
+parseBoostTiltSensor	KEYWORD2
+parseBoostTiltSensor	KEYWORD2
+parseControlPlusHubTiltSensorX	KEYWORD2
+parseControlPlusHubTiltSensorY	KEYWORD2
+parseControlPlusHubTiltSensorZ	KEYWORD2
+parseRemoteButton	KEYWORD2
+parsePortAction	KEYWORD2
+parseSystemTypeId	KEYWORD2
+parseBatteryType	KEYWORD2
+parseBatteryLevel	KEYWORD2
+parseRssi	KEYWORD2
+parseVersion	KEYWORD2
+parseHubButton	KEYWORD2
+parseHubAdvertisingName	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
@@ -49,6 +85,8 @@ moveArcRight	KEYWORD2
 A	LITERAL1
 B	LITERAL1
 AB	LITERAL1
+C	LITERAL1
+D	LITERAL1
 
 BOOST	LITERAL1
 POWEREDUP	LITERAL1

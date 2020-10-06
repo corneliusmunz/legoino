@@ -6,8 +6,15 @@ Arduino Library for controlling Powered UP and Boost controllers
 
 *Disclaimer*: LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this project.
 
-*Attention*:
+## Breaking Changes
+Starting from version 1.0.0 many functions have been renamed and the global variables have been removed and are replaced by callback functions. In former versions the reading of sensor values of single or multiple sensors and even reading sensors from different hubs was not working properly. Due to the change to the NimBLE-Arduino library the callbacks could now be part of member functions and has not to be globally defined. 
+
+So have a look on the changes and adapt your sketches to the new callbacks. You can find a migration guide here: (Add link)
+
+**Attention**:
 From version 0.7.0 on, the legoino library switched from the former BLE ESP32 Library to the new NimBLE-Arduino library (https://github.com/h2zero/NimBLE-Arduino) which is needed in version 1.0.1 So just install as a prerequesite the version 1.0.1 of that library via the Arduino Library manager or the platform.io library manager (https://www.arduinolibraries.info/libraries/nim-ble-arduino)
+
+## Examples
 
 Remote control your boost model example (just click the image to see the video)
 
@@ -21,7 +28,8 @@ Simple Boost movement example (just click the image to see the video)
 
 [![Legoino BoostHub simple movements example](http://img.youtube.com/vi/VgWObhyUmi0/mqdefault.jpg)](http://www.youtube.com/watch?v=VgWObhyUmi0 "Legoino BoostHub simple movements example")
 
-Up to now the Library is only teseted for a Powered Up Train controllers, Boost controllers and Control+ Hubs. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. You also are able to read in hub device infos (rssi, battery level, tilt) and sensor values (color, distance, rotation angle). 
+ToDo: Add PowerFunction Adapter to show Hub Emulation
+
 
 # Examples
 You can find different Examples in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". Just have a look on the videos to see the examples running :smiley: 
@@ -38,7 +46,28 @@ You can find different Examples in the "examples" folder. You can select the exa
 # Setup and Usage
 Just install the Library via the Arduino Library Manager.
 
-The usage is dependent on your hub type. Some basic commands are shared for the hubs and are covered in the Lpf2Hub library. Some other commands ar hub specific (e.g. Boost movement).
+The usage is dependent on your hub type. Most of the commands are shared for all Hub Types and are mor dependent on the device (motor, sensor) which is connected to a specific port. Some commands are hub specific (e.g. Boost movement).
+
+
+## First example
+
+## Connection procedure
+
+## Motor Commands
+
+## Hub Commands
+
+## Sensor handling
+
+## Hub emulation
+
+## PowerFunction IR
+
+## Supported devices
+
+### Hubs
+
+### Devices
 
 ## Boost Hub
 Add the follwoing include in your *.ino sketch
@@ -328,9 +357,20 @@ https://github.com/nathankellenicki/node-poweredup
 
 Thanks to [@h2zero](https://github.com/h2zero/NimBLE-Arduino) for developing a new BLE library based on the NimBLE project and supporting legoino with the posibility in changing the callback functions that it works also for member functions.
 
+@giancann and xx for hub emulation
+
+@powerfunction credits
+
 # Remarks
 Prerequisite of that library is the NimBLE-Arduino library (https://github.com/h2zero/NimBLE-Arduino) with at least version 1.0.1 Otherwise the notifcations of changed charachteristic values will not work.
 
+Up to now the Library is only teseted for a Powered Up Train controllers, Boost controllers and Control+ Hubs. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. You also are able to read in hub device infos (rssi, battery level, tilt) and sensor values (color, distance, rotation angle). 
+
 # ToDo
 * Virtual Ports
-* Notification for sensor value updates
+* Mario Hub
+* Duplo Train Hub
+
+# Contribution
+
+ToDo: Add some info about contribution

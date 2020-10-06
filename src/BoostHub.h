@@ -32,10 +32,6 @@ public:
   //Constructor
   BoostHub();
 
-  //Basic Hub methods
-  void requestSensorValue();
-  void setInputFormatSingle();
-
   //Basic Motor methods
   void setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees);
 
