@@ -31,7 +31,7 @@ Simple Boost movement example (just click the image to see the video)
 ToDo: Add PowerFunction Adapter to show Hub Emulation
 
 # Quickstart
-You can find a step by step instruction to your first Legoino project on the following link: [Quickstart Tutorial](docs/QUICKSTART.md)
+You can find a step by step instruction to your first Legoino project on the following link: [Quickstart Tutorial](doc/QUICKSTART.md)
 
 # Examples
 You can find different Examples in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". Just have a look on the videos to see the examples running :smiley: 
