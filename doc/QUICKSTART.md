@@ -15,8 +15,8 @@ To develop your application you have to download the Arduino Integrated Developm
 After the download, just install the tool
 
 ## Step4: Install Legoino Library
-![Arduino Library Manager](docs/ArduinoLibraryManager_01.png?raw=true "Arduino Library Manager")
-![Select Legoino](docs/ArduinoLibraryManager_02.png?raw=true "Legoino Library")
+![Arduino Library Manager](doc/ArduinoLibraryManager_01.png?raw=true "Arduino Library Manager")
+![Select Legoino](doc/ArduinoLibraryManager_02.png?raw=true "Legoino Library")
 
 ## Step5: Open Example Sketch
 
