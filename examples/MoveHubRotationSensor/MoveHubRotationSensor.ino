@@ -1,5 +1,5 @@
 /**
- * A BoostHub basic example to connect a boost hub, set the led color of the hub 
+ * A MoveHub basic example to connect a boost hub, set the led color of the hub 
  * dependent on the detected rotation of the boost tacho motor. Usage of callback function
  * if motor angle is changed
  * 
@@ -8,19 +8,19 @@
  * 
  */
 
-#include "BoostHub.h"
+#include "MoveHub.h"
 
 // create a hub instance
-BoostHub myBoostHub;
-BoostHub::Port portD = BoostHub::Port::D;
+MoveHub myMoveHub;
+MoveHub::Port portD = MoveHub::Port::D;
 
 
 void buttonCallback(HubPropertyReference hubProperty, uint8_t *pData)
 {
   if (hubProperty == HubPropertyReference::BUTTON)
   {
-    if (myBoostHub.parseHubButton(pData) == ButtonState::PRESSED) {
-      myBoostHub.setTachoMotorEncoderPosition(portD, 0);
+    if (myMoveHub.parseHubButton(pData) == ButtonState::PRESSED) {
+      myMoveHub.setTachoMotorEncoderPosition(portD, 0);
     }
   }
 }
@@ -32,18 +32,18 @@ void tachoMotorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
   Serial.println(portNumber, DEC);
   if (deviceType == DeviceType::MEDIUM_LINEAR_MOTOR)
   {
-    int rotation = myBoostHub.parseTachoMotor(pData);
+    int rotation = myMoveHub.parseTachoMotor(pData);
     Serial.print("Rotation: ");
     Serial.print(rotation, DEC);
     Serial.println(" [degrees]");
-    myBoostHub.setLedHSVColor(abs(rotation), 1.0, 1.0);
+    myMoveHub.setLedHSVColor(abs(rotation), 1.0, 1.0);
   }
 }
 
 void setup()
 {
   Serial.begin(115200);
-  myBoostHub.init(); // initalize the BoostHub instance
+  myMoveHub.init(); // initalize the MoveHub instance
 }
 
 // main loop
@@ -51,19 +51,19 @@ void loop()
 {
 
   // connect flow. Search for BLE services and try to connect if the uuid of the hub is found
-  if (myBoostHub.isConnecting())
+  if (myMoveHub.isConnecting())
   {
-    myBoostHub.connectHub();
-    if (myBoostHub.isConnected())
+    myMoveHub.connectHub();
+    if (myMoveHub.isConnected())
     {
       Serial.println("Connected to HUB");
       delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
       // connect boost tacho motor  to port d, activate sensor for updates, set callback function for rotation changes
-      myBoostHub.activatePortDevice(portD, tachoMotorCallback);
+      myMoveHub.activatePortDevice(portD, tachoMotorCallback);
       delay(50);
-      myBoostHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, buttonCallback);
+      myMoveHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, buttonCallback);
 
-      myBoostHub.setLedColor(GREEN);
+      myMoveHub.setLedColor(GREEN);
     }
     else
     {
@@ -72,7 +72,7 @@ void loop()
   }
 
   // if connected, you can set the name of the hub, the led color and shut it down
-  if (myBoostHub.isConnected())
+  if (myMoveHub.isConnected())
   {
     // nothing has to be done because the sensor values are received in the callback function if an update occurs
   }

@@ -1,8 +1,8 @@
 /**
- * A Legoino example to connect to a Powered Up remote and a boost hub to control the Vernie model
+ * A Legoino example to connect to a Powered Up remote and a move hub to control the Vernie model
  * 
  * ATTENTION: The connection order is relevant!
- * 1) Power up the Boost Hub
+ * 1) Power up the move Hub
  * 2) Power up the ESP32
  * 3) Power up the PoweredUp remote control
  * 
@@ -20,15 +20,15 @@
  */
 
 #include "PoweredUpRemote.h"
-#include "BoostHub.h"
+#include "MoveHub.h"
 
 // create a hub instance
 PoweredUpRemote myRemote;
-BoostHub myHub;
+MoveHub myHub;
 
 PoweredUpRemote::Port portLeft = PoweredUpRemote::Port::LEFT;
 PoweredUpRemote::Port portRight = PoweredUpRemote::Port::RIGHT;
-BoostHub::Port portD = BoostHub::Port::D;
+MoveHub::Port portD = MoveHub::Port::D;
 
 bool isInitialized = false;
 

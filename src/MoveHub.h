@@ -1,19 +1,19 @@
 /*
- * BoostHub.h - Arduino Library for controlling Boost hubs
+ * MoveHub.h - Arduino Library for controlling LEGO® Move Hub (88006)
  *
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  *
 */
 
-#ifndef BoostHub_h
-#define BoostHub_h
+#ifndef MoveHub_h
+#define MoveHub_h
 
 #include "Arduino.h"
 #include "NimBLEDevice.h"
 #include "Lpf2Hub.h"
 
-class BoostHub : public Lpf2Hub
+class MoveHub : public Lpf2Hub
 {
 public:
   //Port definitions specific to Boost Hubs
@@ -30,7 +30,7 @@ public:
   };
 
   //Constructor
-  BoostHub();
+  MoveHub();
 
   //Basic Motor methods
   void setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees);

@@ -34,7 +34,7 @@ If you have any problems during the above steps and need support, just use the g
 
 If you have had no problems: :thumbsup: **CONGRATULATION!** :clap: :tada:
 
-## Step 6 Your first own sketch
+## Step 6: Your first own sketch
 
 After you have successfully run the first example you can go one step further and make some adaptions or your own sketch. It ist strongly dependent on what you will do but the following basic building blocks are normally needed
 

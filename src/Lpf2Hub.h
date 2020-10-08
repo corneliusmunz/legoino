@@ -61,6 +61,7 @@ public:
   // port and device related methods
   int getDeviceIndexForPortNumber(byte portNumber);
   byte getDeviceTypeForPortNumber(byte portNumber);
+  byte getPortForDeviceType(byte deviceType);
   byte getModeForDeviceType(byte deviceType);
   void registerPortDevice(byte portNumber, byte deviceType);
   void deregisterPortDevice(byte portNumber);
@@ -96,7 +97,9 @@ public:
   double parseCurrentSensor(uint8_t *pData);
   double parseDistance(uint8_t *data);
   int parseColor(uint8_t *data);
+  int parseReflectivity(uint8_t *pData);
   int parseTachoMotor(uint8_t *data);
+  int parseSpeedometer(uint8_t *pData);
   int parseBoostTiltSensorX(uint8_t *data);
   int parseBoostTiltSensorY(uint8_t *data);
   int parseControlPlusHubTiltSensorX(uint8_t *pData);

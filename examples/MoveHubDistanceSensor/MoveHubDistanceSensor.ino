@@ -1,5 +1,5 @@
 /**
- * A BoostHub basic example to connect a boost hub, set the led color of the hub 
+ * A MoveHub basic example to connect a boost hub, set the led color of the hub 
  * dependent on the detected distance of the distance/color sensor
  * 
  * (c) Copyright 2020 - Cornelius Munz
@@ -7,11 +7,11 @@
  * 
  */
 
-#include "BoostHub.h"
+#include "MoveHub.h"
 
 // create a hub instance
-BoostHub myBoostHub;
-BoostHub::Port portC = BoostHub::Port::C;
+MoveHub myMoveHub;
+MoveHub::Port portC = MoveHub::Port::C;
 
 // callback function to handle updates of sensor values
 void distanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
@@ -20,7 +20,7 @@ void distanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pDa
   Serial.println(portNumber, DEC);
   if (deviceType == DeviceType::COLOR_DISTANCE_SENSOR)
   {
-    double distance = myBoostHub.parseDistance(pData);
+    double distance = myMoveHub.parseDistance(pData);
     Serial.print("Distance: ");
     Serial.println(distance, DEC);
     // set hub LED color dependent on the distance of the sensor to an object
@@ -29,15 +29,15 @@ void distanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pDa
     // green -- large distance
     if (distance < 40.0)
     {
-      myBoostHub.setLedColor(RED);
+      myMoveHub.setLedColor(RED);
     }
     else if (distance < 80.0 && distance >= 40.0)
     {
-      myBoostHub.setLedColor(ORANGE);
+      myMoveHub.setLedColor(ORANGE);
     }
     else
     {
-      myBoostHub.setLedColor(GREEN);
+      myMoveHub.setLedColor(GREEN);
     }
   }
 }
@@ -45,7 +45,7 @@ void distanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pDa
 void setup()
 {
   Serial.begin(115200);
-  myBoostHub.init(); // initalize the BoostHub instance
+  myMoveHub.init(); // initalize the MoveHub instance
 }
 
 // main loop
@@ -53,16 +53,16 @@ void loop()
 {
 
   // connect flow. Search for BLE services and try to connect if the uuid of the hub is found
-  if (myBoostHub.isConnecting())
+  if (myMoveHub.isConnecting())
   {
-    myBoostHub.connectHub();
-    if (myBoostHub.isConnected())
+    myMoveHub.connectHub();
+    if (myMoveHub.isConnected())
     {
       Serial.println("Connected to HUB");
       delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
       // connect color/distance sensor to port c, activate sensor for updates, set callback function if distance value changes
-      myBoostHub.activatePortDevice(portC, distanceSensorCallback);
-      myBoostHub.setLedColor(GREEN);
+      myMoveHub.activatePortDevice(portC, distanceSensorCallback);
+      myMoveHub.setLedColor(GREEN);
     }
     else
     {
@@ -71,7 +71,7 @@ void loop()
   }
 
   // if connected, you can set the name of the hub, the led color and shut it down
-  if (myBoostHub.isConnected())
+  if (myMoveHub.isConnected())
   {
   }
 

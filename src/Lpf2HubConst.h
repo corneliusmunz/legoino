@@ -190,4 +190,13 @@ typedef enum Color
 static const char *COLOR_STRING[] = {
     "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white"};
 
+
+enum struct DuploTrainBaseSound {
+    BRAKE = 3,
+    STATION_DEPARTURE = 5,
+    WATER_REFILL = 7,
+    HORN = 9,
+    STEAM = 10
+};
+
 #endif

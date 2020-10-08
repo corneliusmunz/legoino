@@ -1,7 +1,7 @@
 /*
- * PoweredUpHub.cpp - Arduino Library for controlling PoweredUp hubs (Train, Batmobil)
+ * PoweredUpHub.cpp - Arduino Library for controlling LEGO® Powered Up (88009)
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
 */

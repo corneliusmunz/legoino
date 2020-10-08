@@ -382,6 +382,19 @@ int Lpf2Hub::parseTachoMotor(uint8_t *pData)
 }
 
 /**
+ * @brief Parse speed value of a duplo train hub
+ * @param [in] pData The pointer to the received data
+ * @return speed value
+ */
+int Lpf2Hub::parseSpeedometer(uint8_t *pData)
+{
+    int value = LegoinoCommon::ReadInt16LE(pData, 4);
+    log_d("speedometer value: %d ", value);
+    return value;
+}
+
+
+/**
  * @brief Parse distance value [centimeters] of a distance sensor
  * @param [in] pData The pointer to the received data
  * @return distance in unit centimeters
@@ -417,6 +430,19 @@ int Lpf2Hub::parseColor(uint8_t *pData)
     }
     return color;
 }
+
+/**
+ * @brief Parse detected reflectivity value of a duplo train hub color sensor
+ * @param [in] pData The pointer to the received data
+ * @return reflectivity [%]
+ */
+int Lpf2Hub::parseReflectivity(uint8_t *pData)
+{
+    int reflectivity = pData[4];
+    log_d("reflectivity: %d [%]", reflectivity);
+    return reflectivity;
+}
+
 
 /**
  * @brief Parse button state value of a button sensor
@@ -583,6 +609,16 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     else if (deviceType == (byte)DeviceType::MEDIUM_LINEAR_MOTOR || deviceType == (byte)DeviceType::MOVE_HUB_MEDIUM_LINEAR_MOTOR)
     {
         parseTachoMotor(pData);
+        return;
+    }
+    else if (deviceType == (byte)DeviceType::DUPLO_TRAIN_BASE_SPEEDOMETER)
+    {
+        parseSpeedometer(pData);
+        return;
+    }
+    else if (deviceType == (byte)DeviceType::DUPLO_TRAIN_BASE_COLOR_SENSOR)
+    {
+        parseColor(pData);
         return;
     }
     else if (deviceType == (byte)DeviceType::COLOR_DISTANCE_SENSOR)
@@ -771,14 +807,36 @@ byte Lpf2Hub::getDeviceTypeForPortNumber(byte portNumber)
 }
 
 /**
+ * @brief Get the port where a specific device is connected
+ * @param [in] device type
+ * @return port number if device type is found or 255
+ */
+byte Lpf2Hub::getPortForDeviceType(byte deviceType)
+{
+    log_d("Number of connected devices: %d", numberOfConnectedDevices);
+    for (int idx = 0; idx < numberOfConnectedDevices; idx++)
+    {
+        log_v("device %d, port number: %x, device type: %x, callback address: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType, connectedDevices[idx].Callback);
+        if (connectedDevices[idx].DeviceType == deviceType)
+        {
+            log_d("port %x has device of type %x", connectedDevices[idx].PortNumber, deviceType);
+            return connectedDevices[idx].PortNumber;
+        }
+    }
+    log_w("no port found with device type %x", deviceType);
+    return 255;
+}
+
+/**
  * @brief Set the color of the HUB LED with predefined colors
  * @param [in] color one of the available hub colors
  */
 void Lpf2Hub::setLedColor(Color color)
 {
-    byte setColorMode[8] = {0x41, 0x32, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00};
+    byte port = getPortForDeviceType((byte)DeviceType::HUB_LED);
+    byte setColorMode[8] = {0x41, port, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00};
     WriteValue(setColorMode, 8);
-    byte setColor[6] = {0x81, 0x32, 0x11, 0x51, 0x00, color};
+    byte setColor[6] = {0x81, port, 0x11, 0x51, 0x00, color};
     WriteValue(setColor, 6);
 }
 
@@ -790,9 +848,10 @@ void Lpf2Hub::setLedColor(Color color)
  */
 void Lpf2Hub::setLedRGBColor(char red, char green, char blue)
 {
-    byte setRGBMode[8] = {0x41, 0x32, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
+    byte port = getPortForDeviceType((byte)DeviceType::HUB_LED);
+    byte setRGBMode[8] = {0x41, port, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
     WriteValue(setRGBMode, 8);
-    byte setRGBColor[8] = {0x81, 0x32, 0x11, 0x51, 0x01, red, green, blue};
+    byte setRGBColor[8] = {0x81, port, 0x11, 0x51, 0x01, red, green, blue};
     WriteValue(setRGBColor, 8);
 }
 

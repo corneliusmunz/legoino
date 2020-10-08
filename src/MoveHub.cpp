@@ -1,17 +1,17 @@
 /*
- * BoostHub.cpp - Arduino Library for controlling Boost hubs
+ * MoveHub.cpp - Arduino Library for controlling LEGO® Move Hub (88006)
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
 */
 
-#include "BoostHub.h"
+#include "MoveHub.h"
 
-BoostHub::BoostHub(){};
+MoveHub::MoveHub(){};
 
 
-void BoostHub::setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees)
+void MoveHub::setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees)
 {
     byte *degreeBytes = LegoinoCommon::Int32ToByteArray(degrees);
     Port port = AB;
@@ -28,7 +28,7 @@ void BoostHub::setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t d
  * @brief Move forward (Port AB) with the default speed and stop after the number of steps
  * @param [in] steps Number of steps (Boost grid)
  */
-void BoostHub::moveForward(int steps)
+void MoveHub::moveForward(int steps)
 {
     Port port = AB;
     Port portA = A;
@@ -42,7 +42,7 @@ void BoostHub::moveForward(int steps)
  * @brief Move back (Port AB) with the default speed and stop after the number of steps
  * @param [in] steps Number of steps (Boost grid)
  */
-void BoostHub::moveBack(int steps)
+void MoveHub::moveBack(int steps)
 {
     Port port = AB;
     setTachoMotorSpeedForDegrees(port, -50, steps * 360 * 2);
@@ -52,7 +52,7 @@ void BoostHub::moveBack(int steps)
  * @brief rotate (Port AB) with the default speed and stop after the degrees
  * @param [in] degrees (negative: left, positive: right)
  */
-void BoostHub::rotate(int degrees)
+void MoveHub::rotate(int degrees)
 {
     if (degrees > 0)
     {
@@ -70,7 +70,7 @@ void BoostHub::rotate(int degrees)
  * @brief rotate left (Port AB) with the default speed and stop after degrees (default 90)
  * @param [in] degrees (default 90)
  */
-void BoostHub::rotateLeft(int degrees = 90)
+void MoveHub::rotateLeft(int degrees = 90)
 {
     rotate(-degrees);
 }
@@ -79,7 +79,7 @@ void BoostHub::rotateLeft(int degrees = 90)
  * @brief rotate right (Port AB) with the default speed and stop after degrees (default 90)
  * @param [in] degrees (default 90)
  */
-void BoostHub::rotateRight(int degrees = 90)
+void MoveHub::rotateRight(int degrees = 90)
 {
     rotate(degrees);
 }
@@ -88,7 +88,7 @@ void BoostHub::rotateRight(int degrees = 90)
  * @brief move an arc (Port AB) with the default speed and stop after degrees
  * @param [in] degrees (negative: left, positive: right)
  */
-void BoostHub::moveArc(int degrees)
+void MoveHub::moveArc(int degrees)
 {
     if (degrees > 0)
     {
@@ -106,12 +106,12 @@ void BoostHub::moveArc(int degrees)
  * @brief move an arc left (Port AB) with the default speed and stop after degrees (default 90)
  * @param [in] degrees (default 90)
  */
-void BoostHub::moveArcLeft(int degrees = 90)
+void MoveHub::moveArcLeft(int degrees = 90)
 {
     moveArc(-degrees);
 }
 
-void BoostHub::moveArcRight(int degrees = 90)
+void MoveHub::moveArcRight(int degrees = 90)
 {
     moveArc(degrees);
 }

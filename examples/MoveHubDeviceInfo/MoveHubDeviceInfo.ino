@@ -1,5 +1,5 @@
 /**
- * A BoostHub basic example to connect a boost hub and try to get the
+ * A MoveHub basic example to connect a boost hub and try to get the
  * hub device infos like battery level, Rssi and firmware version. Additionally the read out
  * of the hub button with a callback is shown.
  * 
@@ -8,10 +8,10 @@
  * 
  */
 
-#include "BoostHub.h"
+#include "MoveHub.h"
 
 // create a hub instance
-BoostHub myBoostHub;
+MoveHub myMoveHub;
 
 void hubPropertyChangeCallback(HubPropertyReference hubProperty, uint8_t *pData)
 {
@@ -21,41 +21,41 @@ void hubPropertyChangeCallback(HubPropertyReference hubProperty, uint8_t *pData)
   if (hubProperty == HubPropertyReference::RSSI)
   {
     Serial.print("RSSI: ");
-    Serial.println(myBoostHub.parseRssi(pData), DEC);
+    Serial.println(myMoveHub.parseRssi(pData), DEC);
     return;
   }
 
   if (hubProperty == HubPropertyReference::ADVERTISING_NAME)
   {
     Serial.print("Advertising Name: ");
-    Serial.println(myBoostHub.parseHubAdvertisingName(pData).c_str());
+    Serial.println(myMoveHub.parseHubAdvertisingName(pData).c_str());
     return;
   }
 
   if (hubProperty == HubPropertyReference::BATTERY_VOLTAGE)
   {
     Serial.print("BatteryLevel: ");
-    Serial.println(myBoostHub.parseBatteryLevel(pData), DEC);
+    Serial.println(myMoveHub.parseBatteryLevel(pData), DEC);
     return;
   }
 
   if (hubProperty == HubPropertyReference::BUTTON)
   {
     Serial.print("Button: ");
-    Serial.println((byte)myBoostHub.parseHubButton(pData), HEX);
+    Serial.println((byte)myMoveHub.parseHubButton(pData), HEX);
     return;
   }
 
   if (hubProperty == HubPropertyReference::BATTERY_TYPE)
   {
     Serial.print("BatteryType: ");
-    Serial.println(myBoostHub.parseBatteryType(pData), HEX);
+    Serial.println(myMoveHub.parseBatteryType(pData), HEX);
     return;
   }
 
   if (hubProperty == HubPropertyReference::FW_VERSION)
   {
-    Version version = myBoostHub.parseVersion(pData);
+    Version version = myMoveHub.parseVersion(pData);
     Serial.print("FWVersion: ");
     Serial.print(version.Major);
     Serial.print("-");
@@ -70,7 +70,7 @@ void hubPropertyChangeCallback(HubPropertyReference hubProperty, uint8_t *pData)
 
   if (hubProperty == HubPropertyReference::HW_VERSION)
   {
-    Version version = myBoostHub.parseVersion(pData);
+    Version version = myMoveHub.parseVersion(pData);
     Serial.print("HWVersion: ");
     Serial.print(version.Major);
     Serial.print("-");
@@ -90,7 +90,7 @@ void portValueChangeCallback(byte portNumber, DeviceType deviceType, uint8_t *pD
 
   if (deviceType == DeviceType::VOLTAGE_SENSOR)
   {
-    double voltage = myBoostHub.parseVoltageSensor(pData);
+    double voltage = myMoveHub.parseVoltageSensor(pData);
     Serial.print("Voltage: ");
     Serial.println(voltage, 2);
     return;
@@ -98,7 +98,7 @@ void portValueChangeCallback(byte portNumber, DeviceType deviceType, uint8_t *pD
 
   if (deviceType == DeviceType::CURRENT_SENSOR)
   {
-    double current = myBoostHub.parseCurrentSensor(pData);
+    double current = myMoveHub.parseCurrentSensor(pData);
     Serial.print("Current: ");
     Serial.println(current, 2);
     return;
@@ -106,8 +106,8 @@ void portValueChangeCallback(byte portNumber, DeviceType deviceType, uint8_t *pD
 
   if (deviceType == DeviceType::MOVE_HUB_TILT_SENSOR)
   {
-    int x = myBoostHub.parseBoostTiltSensorX(pData);
-    int y = myBoostHub.parseBoostTiltSensorY(pData);
+    int x = myMoveHub.parseBoostTiltSensorX(pData);
+    int y = myMoveHub.parseBoostTiltSensorY(pData);
     Serial.print("Tilt X: ");
     Serial.print(x, DEC);
     Serial.print(" Y: ");
@@ -118,7 +118,7 @@ void portValueChangeCallback(byte portNumber, DeviceType deviceType, uint8_t *pD
 void setup()
 {
   Serial.begin(115200);
-  myBoostHub.init(); // initalize the BoostHub instance
+  myMoveHub.init(); // initalize the MoveHub instance
 }
 
 // main loop
@@ -126,33 +126,33 @@ void loop()
 {
 
   // connect flow. Search for BLE services and try to connect if the uuid of the hub is found
-  if (myBoostHub.isConnecting())
+  if (myMoveHub.isConnecting())
   {
-    myBoostHub.connectHub();
-    if (myBoostHub.isConnected())
+    myMoveHub.connectHub();
+    if (myMoveHub.isConnected())
     {
       Serial.println("Connected to HUB");
       delay(50); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
-      myBoostHub.activateHubPropertyUpdate(HubPropertyReference::FW_VERSION, hubPropertyChangeCallback);
+      myMoveHub.activateHubPropertyUpdate(HubPropertyReference::FW_VERSION, hubPropertyChangeCallback);
       delay(50);
-      myBoostHub.activateHubPropertyUpdate(HubPropertyReference::HW_VERSION, hubPropertyChangeCallback);
+      myMoveHub.activateHubPropertyUpdate(HubPropertyReference::HW_VERSION, hubPropertyChangeCallback);
       delay(50);
-      myBoostHub.activateHubPropertyUpdate(HubPropertyReference::ADVERTISING_NAME, hubPropertyChangeCallback);
+      myMoveHub.activateHubPropertyUpdate(HubPropertyReference::ADVERTISING_NAME, hubPropertyChangeCallback);
       delay(50);
-      myBoostHub.activateHubPropertyUpdate(HubPropertyReference::BATTERY_TYPE, hubPropertyChangeCallback);
+      myMoveHub.activateHubPropertyUpdate(HubPropertyReference::BATTERY_TYPE, hubPropertyChangeCallback);
       delay(50);
-      myBoostHub.activateHubPropertyUpdate(HubPropertyReference::BATTERY_VOLTAGE, hubPropertyChangeCallback);
+      myMoveHub.activateHubPropertyUpdate(HubPropertyReference::BATTERY_VOLTAGE, hubPropertyChangeCallback);
       delay(50);
-      myBoostHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, hubPropertyChangeCallback);
+      myMoveHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, hubPropertyChangeCallback);
       delay(50);
-      myBoostHub.activateHubPropertyUpdate(HubPropertyReference::RSSI, hubPropertyChangeCallback);
+      myMoveHub.activateHubPropertyUpdate(HubPropertyReference::RSSI, hubPropertyChangeCallback);
 
       delay(50);
-      myBoostHub.activatePortDevice(BoostHub::Port::TILT, portValueChangeCallback);
+      myMoveHub.activatePortDevice(MoveHub::Port::TILT, portValueChangeCallback);
       delay(50);
-      myBoostHub.activatePortDevice(BoostHub::Port::CURRENT, portValueChangeCallback);
+      myMoveHub.activatePortDevice(MoveHub::Port::CURRENT, portValueChangeCallback);
       delay(50);
-      myBoostHub.activatePortDevice(BoostHub::Port::VOLTAGE, portValueChangeCallback);
+      myMoveHub.activatePortDevice(MoveHub::Port::VOLTAGE, portValueChangeCallback);
     }
     else
     {

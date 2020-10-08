@@ -1,7 +1,7 @@
 /*
- * PoweredUpRemote.h - Arduino Library for controlling PoweredUp remote controls (train)
+ * PoweredUpRemote.h - Arduino Library for controlling PoweredUp remote controls (88010)
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
 */
