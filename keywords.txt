@@ -6,10 +6,11 @@
 # Classes (KEYWORD1)
 #######################################
 
-BoostHub	KEYWORD1
+MoveHub	KEYWORD1
 Lpf2Hub KEYWORD1
 PoweredUpHub KEYWORD1
 ControlPlusHub	KEYWORD1
+DuploTrainHub	KEYWORD1
 
 
 #######################################
@@ -27,6 +28,9 @@ deactivateHubPropertyUpdate	KEYWORD2
 setLedColor	KEYWORD2
 setLedRGBColor	KEYWORD2
 setLedHSVColor	KEYWORD2
+
+playSound	KEYWORD2
+playTone	KEYWORD2
 
 stopBasicMotor	KEYWORD2
 setBasicMotorSpeed	KEYWORD2
@@ -56,7 +60,9 @@ parseSensorMessage	KEYWORD2
 parseVoltageSensor	KEYWORD2
 parseCurrentSensor	KEYWORD2
 parseDistanc	KEYWORD2
-parseColo	KEYWORD2
+parseColor	KEYWORD2
+parseReflectivity	KEYWORD2
+parseSpeedometer	KEYWORD2
 parseTachoMoto	KEYWORD2
 parseBoostTiltSensor	KEYWORD2
 parseBoostTiltSensor	KEYWORD2
@@ -92,6 +98,7 @@ HubPropertyOperation	KEYWORD3
 ActionType	KEYWORD3
 Event	KEYWORD3
 COLOR_STRING	KEYWORD3
+DuploTrainBaseSound	KEYWORD3
 
 #######################################
 # Constants (LITERAL1)
