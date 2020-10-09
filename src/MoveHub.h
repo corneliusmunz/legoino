@@ -9,8 +9,6 @@
 #ifndef MoveHub_h
 #define MoveHub_h
 
-#include "Arduino.h"
-#include "NimBLEDevice.h"
 #include "Lpf2Hub.h"
 
 class MoveHub : public Lpf2Hub

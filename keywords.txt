@@ -9,6 +9,7 @@
 MoveHub	KEYWORD1
 Lpf2Hub KEYWORD1
 PoweredUpHub KEYWORD1
+PoweredUpRemoteHub	KEYWORD1
 ControlPlusHub	KEYWORD1
 DuploTrainHub	KEYWORD1
 

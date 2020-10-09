@@ -19,15 +19,15 @@
  * 
  */
 
-#include "PoweredUpRemote.h"
+#include "PoweredUpRemoteHub.h"
 #include "MoveHub.h"
 
 // create a hub instance
-PoweredUpRemote myRemote;
+PoweredUpRemoteHub myRemote;
 MoveHub myHub;
 
-PoweredUpRemote::Port portLeft = PoweredUpRemote::Port::LEFT;
-PoweredUpRemote::Port portRight = PoweredUpRemote::Port::RIGHT;
+PoweredUpRemoteHub::Port portLeft = PoweredUpRemoteHub::Port::LEFT;
+PoweredUpRemoteHub::Port portRight = PoweredUpRemoteHub::Port::RIGHT;
 MoveHub::Port portD = MoveHub::Port::D;
 
 bool isInitialized = false;

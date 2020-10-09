@@ -34,16 +34,70 @@ If you have any problems during the above steps and need support, just use the g
 
 If you have had no problems: :thumbsup: **CONGRATULATION!** :clap: :tada:
 
-## Step 6: Your first own sketch
+# Your first own sketch
 
-After you have successfully run the first example you can go one step further and make some adaptions or your own sketch. It ist strongly dependent on what you will do but the following basic building blocks are normally needed
+After you have successfully run the first example you can go one step further and make some adaptions or your own sketch. It ist strongly dependent on what you will do but the following basic building blocks are normally needed.
 
-### Decide which Hub you want to connect
+## Decide which Hub you want to connect
+The sketch setup is dependent on the Hub or Hubs you like to connect. You have to add the Header files `*.h` of the Hub types you want to add on the top of your sketch. Addtionally you need a so called instance of that Hub to access the functions of that hub. 
 
-### Add a connection procedure
+In the following table you see the mapping which Hub type needs which Header file. Additionally you see how to create an instance of your Hub.
 
-### Motor/Actuator commands (Basic Motor, Tacho Motor, LED, ...)
 
-### Sensor usage (Color, Distance, Tilt, ...)
+| Hubtype        | Needed Header file include          | Create Hub instance  |
+| ------------- |:-------------:| -----:|
+| PoweredUp (Train) #88009      | `#include "PoweredUpHub.h"` | `PoweredUpHub myHub;` |
+| MoveHub (Boost, StarWars) #88006      | `#include "MoveHub.h"` | `MoveHub myHub;` |
+| ControlPlusHub (Lego Technic) #88012      | `#include "ControlPlusHub.h"` | `ControlPlusHub myHub;` |
+| Duplo Train Hub #10874, #10875      | `#include "DuploTrainHub.h"` | `DuploTrainHub myHub;` |
+| PoweredUp Remote #88010      | `#include "PoweredUpRemoteHub.h"` | `PoweredUpRemoteHub myHub;` |
+
+Select your Hub and dependent on the selection add the following lines in the top of your sketch
+
+```c
+#include "MoveHub.h"
+
+MoveHub myHub;
+```
+
+## Add a connection procedure
+
+To setup a connection to your hub, the Hub instance has to be initialized. This will trigger a Scan procedure to look if a Lego Hub is active. If the library found an active hub, it will read out his data (Hub Address, Hub Name, etc.) and changes the state to `myHub.isConnecting() == true` 
+
+Now you are ready to connect to the hub with the command `myHub.connectHub();`
+
+If the library changes the state to `myHub.isConnected() == true` you are ready to go and do some cool stuff :grin:
+
+
+In the ```setup``` part of your Arduino sketch, just initialize your Hub
+```c
+myHub.init();
+```
+
+In the main ```loop``` just add the following connection flow
+```c
+  if (myHub.isConnecting()) {
+    myHub.connectHub();
+    if (myHub.isConnected()) {
+      Serial.println("We are now connected to the HUB");
+    } else {
+      Serial.println("We have failed to connect to the HUB");
+    }
+  }
+```
+
+## Motor/Actuator commands (Basic Motor, Tacho Motor, LED, ...)
+
+If you want to control a motor or e.g. an LED you can find several commands to do that. It is dependent on the device you want to control which command is needed. 
+
+| Device type        | Available commands |
+| ------------- |:-------------:| -----:|
+| Train motor #88011<br> Simple linear motor #45303<br> Duplo train motor #10874 #10875       | `stopBasicMotor(byte port)`<br>`setBasicMotorSpeed(byte port, int speed)` | 
+| Medium linear motor #88008<br>Technic large motor #88013<br> Technic XL motor #88014<br> Build in MoveHub motor #88006      |   `setAccelerationProfile(byte port, int16_t time, int8_t profileNumber)`<br>`setDecelerationProfile(byte port, int16_t time, int8_t profileNumber)`<br>`stopTachoMotor(byte port)`<br>`setTachoMotorSpeed(byte port, int speed)`<br>`setTachoMotorSpeedForTime(byte port, int speed, int16_t time)`<br>`setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees)`<br>`setTachoMotorAbsolutePosition(byte port, int speed, int32_t position)`<br>`setTachoMotorEncoderPosition(byte port, int32_t position)`<br> | 
+| Hub LEDs     |`setLedColor(Color color)`<br>`setLedRGBColor(char red, char green, char blue)`<br>`setLedHSVColor(int hue, double saturation, double value)`<br>| 
+
+## Sensor usage (Color, Distance, Tilt, ...)
+
+To read in a sensor signal a callback function is registered. 
 
 ### Hub value usage (Button, Battery level, ...)

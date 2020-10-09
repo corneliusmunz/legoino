@@ -15,6 +15,8 @@ PoweredUpHub myHub;
 PoweredUpHub::Port portA = PoweredUpHub::Port::A;
 PoweredUpHub::Port portB = PoweredUpHub::Port::B;
 
+bool isInitialized = false;
+
 void hubButtonCallback(HubPropertyReference hubProperty, uint8_t *pData)
 {
   if (hubProperty == HubPropertyReference::BUTTON)
@@ -77,13 +79,7 @@ void loop()
     if (myHub.isConnected())
     {
       Serial.println("Connected to HUB");
-      delay(1000); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
-      // connect color/distance sensor to port c, activate sensor for updates
-      myHub.activatePortDevice(portB, (byte)DeviceType::COLOR_DISTANCE_SENSOR, colorDistanceSensorCallback);
-      delay(50);
-      // activate hub button to receive updates
-      myHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, hubButtonCallback);
-      myHub.setLedColor(GREEN);
+      myHub.setLedColor(RED);
     }
     else
     {
@@ -91,5 +87,24 @@ void loop()
     }
   }
 
+  if (myHub.isConnected() && !isInitialized)
+  {
+    delay(200);
+    Serial.print("check ports... if needed sensor is already connected: ");
+    byte portForDevice = myHub.getPortForDeviceType((byte)DeviceType::COLOR_DISTANCE_SENSOR);
+    Serial.println(portForDevice, DEC);
+    if (portForDevice != 255)
+    {
+      Serial.println("activatePortDevice");
+      myHub.activatePortDevice(portB, colorDistanceSensorCallback);
+      delay(200);
+      // activate hub button to receive updates
+      myHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, hubButtonCallback);
+      delay(200);
+      myHub.setLedColor(GREEN);
+      isInitialized = true;
+    };
+
+  }
 
 } // End of loop

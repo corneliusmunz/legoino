@@ -7,14 +7,14 @@
  * 
  */
 
-#include "PoweredUpRemote.h"
+#include "PoweredUpRemoteHub.h"
 #include "PoweredUpHub.h"
 
 // create a hub instance
 PoweredUpHub myTrainHub1;
 PoweredUpHub myTrainHub2;
-PoweredUpRemote myRemote1;
-PoweredUpRemote myRemote2;
+PoweredUpRemoteHub myRemote1;
+PoweredUpRemoteHub myRemote2;
 
 
 void setup() {

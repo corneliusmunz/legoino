@@ -12,16 +12,16 @@
  * 
  */
 
-#include "PoweredUpRemote.h"
+#include "PoweredUpRemoteHub.h"
 #include "PoweredUpHub.h"
 
 // create a hub instance
-PoweredUpRemote myRemote;
+PoweredUpRemoteHub myRemote;
 PoweredUpHub myTrainHub1;
 PoweredUpHub myTrainHub2;
 
-PoweredUpRemote::Port portLeft = PoweredUpRemote::Port::LEFT;
-PoweredUpRemote::Port portRight = PoweredUpRemote::Port::RIGHT;
+PoweredUpRemoteHub::Port portLeft = PoweredUpRemoteHub::Port::LEFT;
+PoweredUpRemoteHub::Port portRight = PoweredUpRemoteHub::Port::RIGHT;
 PoweredUpHub::Port portA = PoweredUpHub::Port::A;
 
 int currentSpeedTrain1 = 0;

@@ -9,8 +9,6 @@
 #ifndef DuploTrainHub_h
 #define DuploTrainHub_h
 
-#include "Arduino.h"
-#include "NimBLEDevice.h"
 #include "Lpf2Hub.h"
 
 class DuploTrainHub : public Lpf2Hub

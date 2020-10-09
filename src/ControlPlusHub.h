@@ -9,8 +9,6 @@
 #ifndef ControlPlusHub_h
 #define ControlPlusHub_h
 
-#include "Arduino.h"
-#include "NimBLEDevice.h"
 #include "Lpf2Hub.h"
 
 class ControlPlusHub : public Lpf2Hub
