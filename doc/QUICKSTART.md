@@ -45,7 +45,7 @@ In the following table you see the mapping which Hub type needs which Header fil
 
 
 | Hubtype        | Needed Header file include          | Create Hub instance  |
-| ------------- |:-------------:| -----:|
+| ------------- |-------------| -----|
 | PoweredUp (Train) #88009      | `#include "PoweredUpHub.h"` | `PoweredUpHub myHub;` |
 | MoveHub (Boost, StarWars) #88006      | `#include "MoveHub.h"` | `MoveHub myHub;` |
 | ControlPlusHub (Lego Technic) #88012      | `#include "ControlPlusHub.h"` | `ControlPlusHub myHub;` |
@@ -91,7 +91,7 @@ In the main ```loop``` just add the following connection flow
 If you want to control a motor or e.g. an LED you can find several commands to do that. It is dependent on the device you want to control which command is needed. 
 
 | Device type        | Available commands |
-| ------------- |:-------------:|
+| ------------- |-------------|
 | Train motor #88011<br> Simple linear motor #45303<br> Duplo train motor #10874 #10875       | `stopBasicMotor(byte port)`<br>`setBasicMotorSpeed(byte port, int speed)` | 
 | Medium linear motor #88008<br>Technic large motor #88013<br> Technic XL motor #88014<br> Build in MoveHub motor #88006      |   `setAccelerationProfile(byte port, int16_t time, int8_t profileNumber)`<br>`setDecelerationProfile(byte port, int16_t time, int8_t profileNumber)`<br>`stopTachoMotor(byte port)`<br>`setTachoMotorSpeed(byte port, int speed)`<br>`setTachoMotorSpeedForTime(byte port, int speed, int16_t time)`<br>`setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees)`<br>`setTachoMotorAbsolutePosition(byte port, int speed, int32_t position)`<br>`setTachoMotorEncoderPosition(byte port, int32_t position)`<br> | 
 | Hub LEDs     |`setLedColor(Color color)`<br>`setLedRGBColor(char red, char green, char blue)`<br>`setLedHSVColor(int hue, double saturation, double value)`<br>| 
