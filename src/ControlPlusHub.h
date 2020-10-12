@@ -21,7 +21,7 @@ public:
     B = 0x01,
     C = 0x02,
     D = 0x03,
-    HUB_LED = 0x32,
+    LED = 0x32,
     CURRENT = 0x3B,
     VOLTAGE = 0x3C,
     ACCELEROMETER = 0x61,

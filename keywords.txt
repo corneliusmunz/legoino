@@ -42,8 +42,8 @@ stopTachoMotor	KEYWORD2
 setTachoMotorSpeed	KEYWORD2
 setTachoMotorSpeedForTime	KEYWORD2
 setTachoMotorSpeedForDegrees	KEYWORD2
-setTachoMotorAbsolutePosition	KEYWORD2
-setTachoMotorEncoderPosition	KEYWORD2
+setAbsoluteMotorPosition	KEYWORD2
+setAbsoluteMotorEncoderPosition	KEYWORD2
 
 setMotorSpeedsForDegrees	KEYWORD2
 moveForward	KEYWORD2
@@ -100,6 +100,8 @@ ActionType	KEYWORD3
 Event	KEYWORD3
 COLOR_STRING	KEYWORD3
 DuploTrainBaseSound	KEYWORD3
+BrakingStyle	KEYWORD3
+
 
 #######################################
 # Constants (LITERAL1)
@@ -110,8 +112,11 @@ B	LITERAL1
 AB	LITERAL1
 C	LITERAL1
 D	LITERAL1
+LED	LITERAL1
+CURRENT	LITERAL1
+VOLTAGE	LITERAL1
 
-BOOST	LITERAL1
+MOVE	LITERAL1
 POWEREDUP	LITERAL1
 
 BLACK	LITERAL1
@@ -126,3 +131,10 @@ ORANGE	LITERAL1
 RED	LITERAL1
 WHITE	LITERAL1
 NONE	LITERAL1
+
+FLOAT	LITERAL1
+HOLD	LITERAL1
+BRAKE	LITERAL1
+
+
+

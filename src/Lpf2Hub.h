@@ -80,14 +80,14 @@ public:
   void stopBasicMotor(byte port);
   void setBasicMotorSpeed(byte port, int speed);
 
-  void setAccelerationProfile(byte port, int16_t time, int8_t profileNumber);
-  void setDecelerationProfile(byte port, int16_t time, int8_t profileNumber);
+  void setAccelerationProfile(byte port, int16_t time);
+  void setDecelerationProfile(byte port, int16_t time);
   void stopTachoMotor(byte port);
-  void setTachoMotorSpeed(byte port, int speed);
-  void setTachoMotorSpeedForTime(byte port, int speed, int16_t time);
-  void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees);
-  void setTachoMotorAbsolutePosition(byte port, int speed, int32_t position);
-  void setTachoMotorEncoderPosition(byte port, int32_t position);
+  void setTachoMotorSpeed(byte port, int speed, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
+  void setTachoMotorSpeedForTime(byte port, int speed, int16_t time, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
+  void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
+  void setAbsoluteMotorPosition(byte port, int speed, int32_t position, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
+  void setAbsoluteMotorEncoderPosition(byte port, int32_t position);
 
   // parse methods to read in the message content of the charachteristic value
   void parseDeviceInfo(uint8_t *pData);

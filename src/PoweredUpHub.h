@@ -19,9 +19,9 @@ public:
   {
     A = 0x00,
     B = 0x01,
-    HUB_LED = 0x34, 
-    VOLTAGE = 0x3B,
-    REMOTE_CONTROL_RSSI = 0x3C
+    LED = 0x34, 
+    CURRENT = 0x3B,
+    VOLTAGE = 0x3C
   };
 
   //Constructor

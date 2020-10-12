@@ -19,15 +19,13 @@ public:
   {
     LEFT = 0x00,
     RIGHT = 0x01,
-    HUB_LED = 0x34,
-    VOLTAGE_SENSOR = 0x3B,
-    REMOTE_CONTROL_RSSI = 0x3C
+    LED = 0x34,
+    VOLTAGE = 0x3B,
+    RSSI = 0x3C
   };
 
   //Constructor
   PoweredUpRemoteHub();
-
-  //Methods
   
 };
 

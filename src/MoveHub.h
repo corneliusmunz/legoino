@@ -22,6 +22,7 @@ public:
     AB = 0x10,
     C = 0x02,
     D = 0x03,
+    LED = 0x32,
     TILT = 0x3A,
     CURRENT = 0x3B,
     VOLTAGE = 0x3C

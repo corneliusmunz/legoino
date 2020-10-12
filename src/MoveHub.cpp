@@ -33,8 +33,8 @@ void MoveHub::moveForward(int steps)
     Port port = AB;
     Port portA = A;
     Port portB = B;
-    setDecelerationProfile(portA, 1000, 0);
-    setDecelerationProfile(portB, 1000, 0);
+    setDecelerationProfile(portA, 1000);
+    setDecelerationProfile(portB, 1000);
     setTachoMotorSpeedForDegrees(port, 50, steps * 360 * 2);
 }
 

@@ -176,8 +176,6 @@ typedef enum Color
   NONE = 255
 };
 
-
-
 static const char *COLOR_STRING[] = {
     "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white"};
 
@@ -188,6 +186,12 @@ enum struct DuploTrainBaseSound {
     WATER_REFILL = 7,
     HORN = 9,
     STEAM = 10
+};
+
+enum struct BrakingStyle {
+    FLOAT = 0,
+    HOLD = 126,
+    BRAKE = 127
 };
 
 #endif
