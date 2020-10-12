@@ -2,9 +2,14 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/corneliusmunz/legoino)](https://github.com/corneliusmunz/legoino/releases/latest/)
 # Legoino
 
-Arduino Library for controlling Powered UP and Boost controllers
+Arduino Library for controlling all kinds of Powered UP devices. From the two port hub, move hub (e.g. boost), duplo train hub, technic hub to several devices like distance and color sensor, tilt sensor, train motor, remote control, speedometer, etc. you can control almost everthing with that library and your Arduino sketch. 
+
+It is also possible to use the "old" Power Function IR Modules and control them via an IR LED connected to a PIN of your ESP32 device. With the Hub emulation function you can even control an "old" Power Function Light or Motor with the Powered Up App.
 
 *Disclaimer*: LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this project.
+
+## Quickstart
+You can find a step by step instruction to your first Legoino project on the following link: [Quickstart Tutorial](doc/QUICKSTART.md)
 
 ## Breaking Changes
 Starting from version 1.0.0 many functions have been renamed and the global variables have been removed and are replaced by callback functions. In former versions the reading of sensor values of single or multiple sensors and even reading sensors from different hubs was not working properly. Due to the change to the NimBLE-Arduino library the callbacks could now be part of member functions and has not to be globally defined. 
@@ -12,10 +17,9 @@ Starting from version 1.0.0 many functions have been renamed and the global vari
 So have a look on the changes and adapt your sketches to the new callbacks. You can find a migration guide here: 
 [Migration Guide](doc/MIGRATION.md)
 
-## Quickstart
-You can find a step by step instruction to your first Legoino project on the following link: [Quickstart Tutorial](doc/QUICKSTART.md)
+## Usage Videos
 
-## Examples
+In the following videos you can see wiht short examples what you can do with the library.
 
 Remote control your boost model example (just click the image to see the video)
 
@@ -34,6 +38,8 @@ ToDo: Add PowerFunction Adapter to show Hub Emulation
 
 
 # Examples
+All the included examples are a great source to find a solution or pattern for your problem you want to solve with your Arduino sketch.
+
 You can find different Examples in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". Just have a look on the videos to see the examples running :smiley: 
 * **BoostHub.ino:** Example who uses the basic boost moovements (feasable for M.T.R.4 or Vernie model). http://www.youtube.com/watch?v=VgWObhyUmi0 
 * **BoostHubColorSensor.ino:** Example which reads in the color Sensor value on port C and uses the detected color to set the Hub LED accordingly. https://youtu.be/_xCd9Owy1nk
@@ -189,39 +195,7 @@ myBoostHub.setMotorSpeedsForDegrees(50, -50, 360); // speed motor A 50%, speed m
 myBoostHub.setMotorSpeedsForDegrees(50, 25, 180); // speed motor A 50%, speed motor B 25%, for 180 degrees. This will lead to a arc movement 
 ```
 
-### Sensor values
 
-If you want to read in sensor values, you first have to activate the updates for sensor values with the following command
-```c
-// activate color/distance sensor on port c for updates
-myBoostHub.activatePortDevice(0x02, 37);
-// activate tacho motor on port d for updates
-myBoostHub.activatePortDevice(0x03, 38);
-```
-Every sensor has its own device type value (second parameter). You can find the mapping in the ```Lpf2Hub.h``` file. You should activate the sensor updates after a successful connection to the hub. 
-
-If you have activated the sensor value updates, you can fetch the current values with the following available commands
-```c
-int getTachoMotorRotation(); // continious angle in degrees
-double getDistance(); // distance approximation in mm
-int getColor();
-int getRssi(); // dB
-int getBatteryLevel(); // %
-int getBoostHubMotorRotation(); //continious angle in degrees
-int getTiltX(); // angle
-int getTiltY(); // angle
-int getFirmwareVersionBuild();
-int getFirmwareVersionBugfix();
-int getFirmwareVersionMajor();
-int getFirmwareVersionMinor();
-int getHardwareVersionBuild();
-int getHardwareVersionBugfix();
-int getHardwareVersionMajor();
-int getHardwareVersionMinor();
-bool isButtonPressed();
-```
-
-Up to a limitation of the BLE library implementation it is not possible to use callback functions which are member functions of a class. Therefore, the implementation is based on public variables and you have to poll the values in your loop and will not be notified when an upadte is available. 
 
 ### Basic movements (Vernie, M.T.R. 4)
 If you want to move Vernie or M.T.R. 4 you can use the following commands. These commands are using the underlying basic motor commands and are adjusted to the boost grid map.
@@ -253,86 +227,6 @@ myBoostHub.moveArcRight(90) // move with an arc for 90 degrees to the right
 myBoostHub.moveArc(270) // move with an arc for 270 degrees to the right (positive angles means right, negative means left)
 myBoostHub.moveArc(-90) // move with an arc for 90 degrees to the left (positive angles means right, negative means left)
 ```
-
-## PoweredUp Hub (Trains, Batmobile)
-Add the follwoing include in your *.ino sketch
-
-```c
-#include "PoweredUpHub.h"
-```
-
-Make a new instance of the Hub object
-```c
-PoweredUpHub myTrainHub;
-```
-
-In the ```setup``` part of your Arduino sketch, just initialize your Hub
-```c
-myTrainHub.init();
-```
-
-In the main ```loop``` just add the following connection flow
-```c
-  if (myTrainHub.isConnecting()) {
-    myTrainHub.connectHub();
-    if (myTrainHub.isConnected()) {
-      Serial.println("We are now connected to the HUB");
-    } else {
-      Serial.println("We have failed to connect to the HUB");
-    }
-  }
-```
-Now you are ready to control your actuators on your Hub
-
-### Hub control
-You can define the display name of the Hub (e.g. displayed in the PoweredUp Apps) with the following command. 
-```c
-char hubName[] = "myTrainHub";
-myTrainHub.setHubName(hubName);
-```
-The maximum supported length of the character array is 14
-
-If you want to shut down the LEGO Hub, you can use the following command:
-```c
-myTrainHub.shutDownHub();
-```
-The Hub will disconnect and then shut down. 
-
-### LED control
-
-You can either define a color of the LED in the HUB via predifined colors or you can define the color via RGB values
-```c
-myTrainHub.setLedColor(GREEN);
-```
-Available colors are: BLACK, PINK, PURPLE, BLUE, LIGHT_BLUE, CYAN, GREEN, YELLOW, ORANGE, RED, WHITE
-
-```c
-myTrainHub.setLedRGBColor(255, 50, 0);
-```
-The ranges of the colors are from 0..255
-
-### Motor control
-
-You can define the port and speed of a motor which is connected to your HUB. The speed values vary from -100...100. 0 will stop the Motor. If you use negative values the direction is reversed. 
-```c
-myTrainHub.setMotorSpeed(A, 25); // 25% forward speed, Port A
-myTrainHub.setMotorSpeed(A, -30); // 30% reversed speed, Port A
-```
-
-If you want to stop the motor, you can use the follwing command. If you do not specify a port value, all motors will be stopped.
-```c
-myTrainHub.stopMotor(A); // Stop motor on Port A
-myTrainHub.stopMotor(); // Stop all motors (Port A and Port B)
-```
-
-## Control+ Hubs (Lego technic hubs)
-Add the follwoing include in your *.ino sketch
-
-```c
-#include "ControlPlusHub.h"
-```
-
-All the other stuff is the same as for the other Hub types.
 
 # Arduino Hardware
 The library is implemented for the ESP32 Boards and does use the ESP32 NimBLE-Arduino Library.
@@ -373,5 +267,6 @@ Up to now the Library is only teseted for a Powered Up Train controllers, Boost 
 
 # ToDo
 * Virtual Ports
+* HW Families
 * Mario Hub
 
