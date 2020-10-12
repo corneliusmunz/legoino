@@ -20,7 +20,7 @@ void buttonCallback(HubPropertyReference hubProperty, uint8_t *pData)
   if (hubProperty == HubPropertyReference::BUTTON)
   {
     if (myMoveHub.parseHubButton(pData) == ButtonState::PRESSED) {
-      myMoveHub.setTachoMotorEncoderPosition(portD, 0);
+      myMoveHub.setAbsoluteMotorEncoderPosition(portD, 0);
     }
   }
 }
