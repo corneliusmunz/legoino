@@ -20,11 +20,11 @@
  */
 
 #include "Lpf2Hub.h"
-#include "MoveHub.h"
+#include "Boost.h"
 
 // create a hub instance
 Lpf2Hub myRemote;
-MoveHub myHub;
+Boost myHub;
 
 byte portLeft = (byte)PoweredUpRemoteHubPort::LEFT;
 byte portRight = (byte)PoweredUpRemoteHubPort::RIGHT;

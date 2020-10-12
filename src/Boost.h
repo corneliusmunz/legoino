@@ -1,24 +1,23 @@
 /*
- * MoveHub.h - Arduino Library for controlling LEGO® Move Hub (88006)
- *
+ * Boost.h - Arduino Library for controlling LEGO® Boost Model (17101)
+ * It has included some higher level abstratctions for moving one step forward/back
+ * rotate the model or move with an arc. 
+ * 
  * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
- *
+ * 
 */
 
-#ifndef MoveHub_h
-#define MoveHub_h
+#ifndef Boost_h
+#define Boost_h
 
 #include "Lpf2Hub.h"
 
-class MoveHub : public Lpf2Hub
+class Boost : public Lpf2Hub
 {
 public:
   //Constructor
-  MoveHub();
-
-  //Basic Motor methods
-  void setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees);
+  Boost();
 
   //Basic Move/Rotate methods
   void moveForward(int steps);

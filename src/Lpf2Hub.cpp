@@ -8,7 +8,6 @@
 
 #include "Lpf2Hub.h"
 
-
 /**
  * Derived class which could be added as an instance to the BLEClient for callback handling
  * The current hub is given as a parameter in the constructor to be able to set the 
@@ -393,7 +392,6 @@ int Lpf2Hub::parseSpeedometer(uint8_t *pData)
     return value;
 }
 
-
 /**
  * @brief Parse distance value [centimeters] of a distance sensor
  * @param [in] pData The pointer to the received data
@@ -442,7 +440,6 @@ int Lpf2Hub::parseReflectivity(uint8_t *pData)
     log_d("reflectivity: %d [%]", reflectivity);
     return reflectivity;
 }
-
 
 /**
  * @brief Parse button state value of a button sensor
@@ -1100,7 +1097,7 @@ void Lpf2Hub::stopBasicMotor(byte port)
 void Lpf2Hub::setTachoMotorSpeed(byte port, int speed, byte maxPower, BrakingStyle brakingStyle)
 {
     //Use acc and dec profile (0x03 last two bits set)
-    byte setMotorCommand[8] = {0x81, port, 0x11, 0x01, LegoinoCommon::MapSpeed(speed), maxPower, (byte)brakingStyle, 0x03}; 
+    byte setMotorCommand[8] = {0x81, port, 0x11, 0x01, LegoinoCommon::MapSpeed(speed), maxPower, (byte)brakingStyle, 0x03};
     WriteValue(setMotorCommand, 8);
 }
 
@@ -1194,9 +1191,26 @@ void Lpf2Hub::setAbsoluteMotorEncoderPosition(byte port, int32_t position)
 {
     byte *positionBytes = LegoinoCommon::Int32ToByteArray(position);
     //WriteModeData (0x51)
-	//PresetEncoder mode (0x02)
+    //PresetEncoder mode (0x02)
     byte setMotorCommand[9] = {0x81, port, 0x11, 0x51, 0x02, positionBytes[0], positionBytes[1], positionBytes[2], positionBytes[3]};
     WriteValue(setMotorCommand, 9);
+}
+
+/**
+ * @brief Set the speeds of the MoveHub Motors
+ * @param [in] speedLeft Speed of the left motor
+ * @param [in] speedRight speed of the right motor
+ * @param [in] degrees till which rotation in degrees the motors should run
+ * @param [in] maximum Power of the Motor 0..100 (default value = 100)
+ * @param [in] brakingStyle Braking style how the motor will stop. Brake(default), Float, Hold are available
+ */
+void Lpf2Hub::setTachoMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees, byte maxPower, BrakingStyle brakingStyle)
+{
+    byte *degreeBytes = LegoinoCommon::Int32ToByteArray(degrees);
+    byte port = (byte)MoveHubPort::AB;
+    //Use acc and dec profile (0x03 last two bits set)
+    byte setMotorCommand[13] = {0x81, port, 0x11, 0x0C, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], LegoinoCommon::MapSpeed(speedLeft), LegoinoCommon::MapSpeed(speedRight), maxPower, (byte)brakingStyle, 0x03}; //boost with time
+    WriteValue(setMotorCommand, 13);
 }
 
 /**

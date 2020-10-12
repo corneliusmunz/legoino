@@ -86,6 +86,7 @@ public:
   void setTachoMotorSpeed(byte port, int speed, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
   void setTachoMotorSpeedForTime(byte port, int speed, int16_t time, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
   void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
+  void setTachoMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
   
   void setAbsoluteMotorPosition(byte port, int speed, int32_t position, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
   void setAbsoluteMotorEncoderPosition(byte port, int32_t position);

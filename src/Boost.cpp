@@ -1,32 +1,22 @@
 /*
- * MoveHub.cpp - Arduino Library for controlling LEGO® Move Hub (88006)
+ * Boost.cpp - Arduino Library for controlling LEGO® Boost Model (17101)
+ * It has included some higher level abstratctions for moving one step forward/back
+ * rotate the model or move with an arc. 
  * 
  * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
 */
 
-#include "MoveHub.h"
+#include "Boost.h"
 
-MoveHub::MoveHub(){};
-
-void MoveHub::setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees)
-{
-    byte *degreeBytes = LegoinoCommon::Int32ToByteArray(degrees);
-    byte port = (byte)MoveHubPort::AB;
-    //both ports A and B
-    //max power 100 (0x64)
-    //End state Brake (127)
-    //Use acc and dec profile (0x03 last two bits set)
-    byte setMotorCommand[13] = {0x81, port, 0x11, 0x0C, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], LegoinoCommon::MapSpeed(speedLeft), LegoinoCommon::MapSpeed(speedRight), 0x64, 0x7F, 0x03}; //boost with time
-    WriteValue(setMotorCommand, 13);
-}
+Boost::Boost(){};
 
 /**
  * @brief Move forward (Port AB) with the default speed and stop after the number of steps
  * @param [in] steps Number of steps (Boost grid)
  */
-void MoveHub::moveForward(int steps)
+void Boost::moveForward(int steps)
 {
     byte port = (byte)MoveHubPort::AB;
     byte portA = (byte)MoveHubPort::A;
@@ -41,7 +31,7 @@ void MoveHub::moveForward(int steps)
  * @brief Move back (Port AB) with the default speed and stop after the number of steps
  * @param [in] steps Number of steps (Boost grid)
  */
-void MoveHub::moveBack(int steps)
+void Boost::moveBack(int steps)
 {
     byte port = (byte)MoveHubPort::AB;
     setTachoMotorSpeedForDegrees(port, -50, steps * 360 * 2);
@@ -51,17 +41,17 @@ void MoveHub::moveBack(int steps)
  * @brief rotate (Port AB) with the default speed and stop after the degrees
  * @param [in] degrees (negative: left, positive: right)
  */
-void MoveHub::rotate(int degrees)
+void Boost::rotate(int degrees)
 {
     if (degrees > 0)
     {
         // right
-        setMotorSpeedsForDegrees(-50, 50, degrees * 4.5);
+        setTachoMotorSpeedsForDegrees(-50, 50, degrees * 4.5);
     }
     else
     {
         // left
-        setMotorSpeedsForDegrees(50, -50, degrees * 4.5);
+        setTachoMotorSpeedsForDegrees(50, -50, degrees * 4.5);
     }
 }
 
@@ -69,7 +59,7 @@ void MoveHub::rotate(int degrees)
  * @brief rotate left (Port AB) with the default speed and stop after degrees (default 90)
  * @param [in] degrees (default 90)
  */
-void MoveHub::rotateLeft(int degrees = 90)
+void Boost::rotateLeft(int degrees = 90)
 {
     rotate(-degrees);
 }
@@ -78,7 +68,7 @@ void MoveHub::rotateLeft(int degrees = 90)
  * @brief rotate right (Port AB) with the default speed and stop after degrees (default 90)
  * @param [in] degrees (default 90)
  */
-void MoveHub::rotateRight(int degrees = 90)
+void Boost::rotateRight(int degrees = 90)
 {
     rotate(degrees);
 }
@@ -87,17 +77,17 @@ void MoveHub::rotateRight(int degrees = 90)
  * @brief move an arc (Port AB) with the default speed and stop after degrees
  * @param [in] degrees (negative: left, positive: right)
  */
-void MoveHub::moveArc(int degrees)
+void Boost::moveArc(int degrees)
 {
     if (degrees > 0)
     {
         // right
-        setMotorSpeedsForDegrees(60, 20, degrees * 12);
+        setTachoMotorSpeedsForDegrees(60, 20, degrees * 12);
     }
     else
     {
         // left
-        setMotorSpeedsForDegrees(20, 60, degrees * 12);
+        setTachoMotorSpeedsForDegrees(20, 60, degrees * 12);
     }
 }
 
@@ -105,12 +95,12 @@ void MoveHub::moveArc(int degrees)
  * @brief move an arc left (Port AB) with the default speed and stop after degrees (default 90)
  * @param [in] degrees (default 90)
  */
-void MoveHub::moveArcLeft(int degrees = 90)
+void Boost::moveArcLeft(int degrees = 90)
 {
     moveArc(-degrees);
 }
 
-void MoveHub::moveArcRight(int degrees = 90)
+void Boost::moveArcRight(int degrees = 90)
 {
     moveArc(degrees);
 }

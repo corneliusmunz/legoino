@@ -38,26 +38,13 @@ If you have had no problems: :thumbsup: **CONGRATULATION!** :clap: :tada:
 
 After you have successfully run the first example you can go one step further and make some adaptions or your own sketch. It ist strongly dependent on what you will do but the following basic building blocks are normally needed.
 
-## Decide which Hub you want to connect
-The sketch setup is dependent on the Hub or Hubs you like to connect. You have to add the Header files `*.h` of the Hub types you want to add on the top of your sketch. Addtionally you need a so called instance of that Hub to access the functions of that hub. 
-
-In the following table you see the mapping which Hub type needs which Header file. Additionally you see how to create an instance of your Hub.
-
-
-| Hubtype        | Needed Header file include          | Create Hub instance  |
-| ------------- |-------------| -----|
-| PoweredUp (Train) #88009      | `#include "PoweredUpHub.h"` | `PoweredUpHub myHub;` |
-| MoveHub (Boost, StarWars) #88006      | `#include "MoveHub.h"` | `MoveHub myHub;` |
-| ControlPlusHub (Lego Technic) #88012      | `#include "ControlPlusHub.h"` | `ControlPlusHub myHub;` |
-| Duplo Train Hub #10874, #10875      | `#include "DuploTrainHub.h"` | `DuploTrainHub myHub;` |
-| PoweredUp Remote #88010      | `#include "PoweredUpRemoteHub.h"` | `PoweredUpRemoteHub myHub;` |
-
-Select your Hub and dependent on the selection add the following lines in the top of your sketch
+## Add a Hub instance to your sketch
+You have to add the Header files `Lpf2Hub.h` of the Hub to the top of the sketch.  Addtionally you need a so called instance of that Hub to access the functions of that hub. 
 
 ```c++
-#include "MoveHub.h"
+#include "Lpf2Hub.h"
 
-MoveHub myHub;
+Lpf2Hub myHub;
 ```
 
 ## Add a connection procedure

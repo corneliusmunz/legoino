@@ -10,9 +10,9 @@ To get a more consistent naming, some classes and functions has been renamed
 
 | Old name        | New name |
 | ------------- |-------------|
-| BoostHub        | MoveHub |
-| PoweredUpRemote        | PoweredUpRemoteHub |
+| BoostHub        | Boost |
 
+All classes for different Hub types (like ControlPlusHub, PoweredUpHub, BoostHub, ...) was removed and all Hub Types could be controlled via the Base Lpf2Hub class. On exeption is the Boost.cpp which contains some "higher" level commands specific to boost models. But that is more a model class than a base hub or device class. 
 
 ### Changes in functions
 
