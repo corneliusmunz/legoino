@@ -7,11 +7,11 @@
  * 
  */
 
-#include "ControlPlusHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-ControlPlusHub myHub;
-ControlPlusHub::Port portB = ControlPlusHub::Port::B;
+Lpf2Hub myHub;
+byte portB = (byte)ControlPlusHubPort::B;
 
 bool isCalibrated;
 
@@ -49,10 +49,10 @@ void loop() {
       myHub.setTachoMotorSpeedForDegrees(portB, -100, 180);
       delay(2000);
       // Reset the encoded position to -90
-      myHub.setTachoMotorEncoderPosition(portB, -90);
+      myHub.setAbsoluteMotorEncoderPosition(portB, -90);
       delay(1000);
       // Move to center
-      myHub.setTachoMotorAbsolutePosition(portB, 100, 0);
+      myHub.setAbsoluteMotorPosition(portB, 100, 0);
       myHub.setLedColor(YELLOW);
       delay(5000);
       // Do not repeat calibration
@@ -61,15 +61,15 @@ void loop() {
 
     // Cycle between the min/max steering points, then back to center 
     myHub.setLedColor(GREEN);
-    myHub.setTachoMotorAbsolutePosition(portB, 100, -90);
+    myHub.setAbsoluteMotorPosition(portB, 100, -90);
     delay(1000);
-    myHub.setTachoMotorAbsolutePosition(portB, 100, -45);
+    myHub.setAbsoluteMotorPosition(portB, 100, -45);
     delay(1000);
-    myHub.setTachoMotorAbsolutePosition(portB, 100, 45);
+    myHub.setAbsoluteMotorPosition(portB, 100, 45);
     delay(1000);
-    myHub.setTachoMotorAbsolutePosition(portB, 100, 90);
+    myHub.setAbsoluteMotorPosition(portB, 100, 90);
     delay(1000);
-    myHub.setTachoMotorAbsolutePosition(portB, 100, 0);
+    myHub.setAbsoluteMotorPosition(portB, 100, 0);
     delay(1000);
     myHub.setLedColor(RED);
     delay(1000);

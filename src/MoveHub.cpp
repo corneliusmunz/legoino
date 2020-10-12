@@ -10,11 +10,10 @@
 
 MoveHub::MoveHub(){};
 
-
 void MoveHub::setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees)
 {
     byte *degreeBytes = LegoinoCommon::Int32ToByteArray(degrees);
-    Port port = AB;
+    byte port = (byte)MoveHubPort::AB;
     //both ports A and B
     //max power 100 (0x64)
     //End state Brake (127)
@@ -23,16 +22,16 @@ void MoveHub::setMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t de
     WriteValue(setMotorCommand, 13);
 }
 
-
 /**
  * @brief Move forward (Port AB) with the default speed and stop after the number of steps
  * @param [in] steps Number of steps (Boost grid)
  */
 void MoveHub::moveForward(int steps)
 {
-    Port port = AB;
-    Port portA = A;
-    Port portB = B;
+    byte port = (byte)MoveHubPort::AB;
+    byte portA = (byte)MoveHubPort::A;
+    byte portB = (byte)MoveHubPort::B;
+
     setDecelerationProfile(portA, 1000);
     setDecelerationProfile(portB, 1000);
     setTachoMotorSpeedForDegrees(port, 50, steps * 360 * 2);
@@ -44,7 +43,7 @@ void MoveHub::moveForward(int steps)
  */
 void MoveHub::moveBack(int steps)
 {
-    Port port = AB;
+    byte port = (byte)MoveHubPort::AB;
     setTachoMotorSpeedForDegrees(port, -50, steps * 360 * 2);
 }
 

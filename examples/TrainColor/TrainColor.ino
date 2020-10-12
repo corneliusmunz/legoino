@@ -8,12 +8,12 @@
  * 
  */
 
-#include "PoweredUpHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-PoweredUpHub myHub;
-PoweredUpHub::Port portA = PoweredUpHub::Port::A;
-PoweredUpHub::Port portB = PoweredUpHub::Port::B;
+Lpf2Hub myHub;
+byte portA = (byte)PoweredUpHubPort::A;
+byte portB = (byte)PoweredUpHubPort::B;
 
 bool isInitialized = false;
 

@@ -7,11 +7,11 @@
  * 
  */
 
-#include "PoweredUpHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-PoweredUpHub myTrainHub;
-PoweredUpHub::Port port = PoweredUpHub::Port::A;
+Lpf2Hub myTrainHub;
+byte port = (byte)PoweredUpHubPort::A;
 
 void setup() {
     Serial.begin(115200);

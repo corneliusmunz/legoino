@@ -19,16 +19,16 @@
  * 
  */
 
-#include "PoweredUpRemoteHub.h"
+#include "Lpf2Hub.h"
 #include "MoveHub.h"
 
 // create a hub instance
-PoweredUpRemoteHub myRemote;
+Lpf2Hub myRemote;
 MoveHub myHub;
 
-PoweredUpRemoteHub::Port portLeft = PoweredUpRemoteHub::Port::LEFT;
-PoweredUpRemoteHub::Port portRight = PoweredUpRemoteHub::Port::RIGHT;
-MoveHub::Port portD = MoveHub::Port::D;
+byte portLeft = (byte)PoweredUpRemoteHubPort::LEFT;
+byte portRight = (byte)PoweredUpRemoteHubPort::RIGHT;
+byte portD = (byte)MoveHubPort::D;
 
 bool isInitialized = false;
 

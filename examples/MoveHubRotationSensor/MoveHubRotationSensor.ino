@@ -8,11 +8,11 @@
  * 
  */
 
-#include "MoveHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-MoveHub myMoveHub;
-MoveHub::Port portD = MoveHub::Port::D;
+Lpf2Hub myMoveHub;
+byte portD = (byte)MoveHubPort::D;
 
 
 void buttonCallback(HubPropertyReference hubProperty, uint8_t *pData)

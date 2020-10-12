@@ -7,11 +7,11 @@
  * 
  */
 
-#include "MoveHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-MoveHub myMoveHub;
-MoveHub::Port portC = MoveHub::Port::C;
+Lpf2Hub myMoveHub;
+byte portC = (byte)MoveHubPort::C;
 
 // callback function to handle updates of sensor values
 void distanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)

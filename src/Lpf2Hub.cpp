@@ -1198,3 +1198,28 @@ void Lpf2Hub::setAbsoluteMotorEncoderPosition(byte port, int32_t position)
     byte setMotorCommand[9] = {0x81, port, 0x11, 0x51, 0x02, positionBytes[0], positionBytes[1], positionBytes[2], positionBytes[3]};
     WriteValue(setMotorCommand, 9);
 }
+
+/**
+ * @brief Play a predefined sound on the Duplo train hub
+ * @param [in] sound value. Could be set via the DuploTrainBaseSound enum
+ */
+void Lpf2Hub::playSound(byte sound)
+{
+    byte setSoundMode[8] = {0x41, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x01};
+    WriteValue(setSoundMode, 8);
+    byte playSound[6] = {0x81, 0x01, 0x11, 0x51, 0x01, sound};
+    WriteValue(playSound, 6);
+}
+
+/**
+ * @brief Play a predefined tone on the Duplo train hub
+ * @param [in] tone value. Different bieps on different number 0..10 Which number is which
+ * biep is not really clear right now.
+ */
+void Lpf2Hub::playTone(byte number)
+{
+    byte setToneMode[8] = {0x41, 0x01, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01};
+    WriteValue(setToneMode, 8);
+    byte playTone[6] = {0x81, 0x01, 0x11, 0x51, 0x02, number};
+    WriteValue(playTone, 6);
+}

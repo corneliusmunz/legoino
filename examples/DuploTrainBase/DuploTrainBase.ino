@@ -12,12 +12,12 @@
  * 
  */
 
-#include "DuploTrainHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-DuploTrainHub myHub;
+Lpf2Hub myHub;
 
-DuploTrainHub::Port motorPort = DuploTrainHub::MOTOR;
+byte motorPort = (byte)DuploTrainHubPort::MOTOR;
 
 void colorSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
@@ -88,10 +88,10 @@ void loop()
 
       delay(200);
       // connect color sensor and activate it for updates
-      myHub.activatePortDevice(DuploTrainHub::SPEEDOMETER, speedometerSensorCallback);
+      myHub.activatePortDevice((byte)DuploTrainHubPort::SPEEDOMETER, speedometerSensorCallback);
       delay(200);
       // connect speed sensor and activate it for updates
-      myHub.activatePortDevice(DuploTrainHub::COLOR, colorSensorCallback);
+      myHub.activatePortDevice((byte)DuploTrainHubPort::COLOR, colorSensorCallback);
       delay(200);
       myHub.setLedColor(GREEN);
     }

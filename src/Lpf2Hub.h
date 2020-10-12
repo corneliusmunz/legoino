@@ -70,7 +70,7 @@ public:
   void deactivatePortDevice(byte portNumber, byte deviceType);
   void deactivatePortDevice(byte portNumber);
 
-  // write (set) operations on devices
+  // write (set) operations on port devices
   void WriteValue(byte command[], int size);
 
   void setLedColor(Color color);
@@ -86,8 +86,12 @@ public:
   void setTachoMotorSpeed(byte port, int speed, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
   void setTachoMotorSpeedForTime(byte port, int speed, int16_t time, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
   void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
+  
   void setAbsoluteMotorPosition(byte port, int speed, int32_t position, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
   void setAbsoluteMotorEncoderPosition(byte port, int32_t position);
+
+  void playSound(byte sound);
+  void playTone(byte number);
 
   // parse methods to read in the message content of the charachteristic value
   void parseDeviceInfo(uint8_t *pData);

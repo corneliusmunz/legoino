@@ -7,11 +7,11 @@
  * 
  */
 
-#include "MoveHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-MoveHub myMoveHub;
-MoveHub::Port _portC = MoveHub::Port::C;
+Lpf2Hub myMoveHub;
+byte portC = (byte)MoveHubPort::C;
 
 void setup()
 {
@@ -49,7 +49,7 @@ void loop()
       Serial.println("Connected to HUB");
       delay(200); //needed because otherwise the message is to fast after the connection procedure and the message will get lost
       // connect color/distance sensor to port c, activate sensor for updates
-      myMoveHub.activatePortDevice(_portC, colorDistanceSensorCallback);
+      myMoveHub.activatePortDevice(portC, colorDistanceSensorCallback);
       myMoveHub.setLedColor(GREEN);
     }
     else

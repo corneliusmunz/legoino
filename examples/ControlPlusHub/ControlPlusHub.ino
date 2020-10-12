@@ -7,11 +7,11 @@
  * 
  */
 
-#include "ControlPlusHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-ControlPlusHub myHub;
-ControlPlusHub::Port portD = ControlPlusHub::Port::D;
+Lpf2Hub myHub;
+byte portD = (byte)ControlPlusHubPort::D;
 
 void setup() {
     Serial.begin(115200);

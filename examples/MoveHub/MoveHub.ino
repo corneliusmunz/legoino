@@ -11,8 +11,8 @@
 
 // create a hub instance
 MoveHub myMoveHub;
-byte portC = MoveHub::Port::C;
-byte portD = MoveHub::Port::D;
+byte portC = (byte)MoveHubPort::C;
+byte portD = (byte)MoveHubPort::D;
 
 void setup()
 {

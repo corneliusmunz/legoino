@@ -7,14 +7,13 @@
  * 
  */
 
-#include "PoweredUpRemoteHub.h"
-#include "PoweredUpHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-PoweredUpHub myTrainHub1;
-PoweredUpHub myTrainHub2;
-PoweredUpRemoteHub myRemote1;
-PoweredUpRemoteHub myRemote2;
+Lpf2Hub myTrainHub1;
+Lpf2Hub myTrainHub2;
+Lpf2Hub myRemote1;
+Lpf2Hub myRemote2;
 
 
 void setup() {

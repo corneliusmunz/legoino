@@ -11,16 +11,15 @@
  * 
  */
 
-#include "PoweredUpRemoteHub.h"
-#include "PoweredUpHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-PoweredUpRemoteHub myRemote;
-PoweredUpHub myHub;
+Lpf2Hub myRemote;
+Lpf2Hub myHub;
 
-PoweredUpRemoteHub::Port portLeft = PoweredUpRemoteHub::Port::LEFT;
-PoweredUpRemoteHub::Port portRight = PoweredUpRemoteHub::Port::RIGHT;
-PoweredUpHub::Port portA = PoweredUpHub::Port::A;
+byte portLeft = (byte)PoweredUpRemoteHubPort::LEFT;
+byte portRight = (byte)PoweredUpRemoteHubPort::RIGHT;
+byte portA = (byte)PoweredUpHubPort::A;
 
 int currentSpeed = 0;
 int updatedSpeed = 0;

@@ -8,10 +8,10 @@
  * 
  */
 
-#include "MoveHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-MoveHub myMoveHub;
+Lpf2Hub myMoveHub;
 
 void hubPropertyChangeCallback(HubPropertyReference hubProperty, uint8_t *pData)
 {
@@ -148,11 +148,11 @@ void loop()
       myMoveHub.activateHubPropertyUpdate(HubPropertyReference::RSSI, hubPropertyChangeCallback);
 
       delay(50);
-      myMoveHub.activatePortDevice(MoveHub::Port::TILT, portValueChangeCallback);
+      myMoveHub.activatePortDevice((byte)MoveHubPort::TILT, portValueChangeCallback);
       delay(50);
-      myMoveHub.activatePortDevice(MoveHub::Port::CURRENT, portValueChangeCallback);
+      myMoveHub.activatePortDevice((byte)MoveHubPort::CURRENT, portValueChangeCallback);
       delay(50);
-      myMoveHub.activatePortDevice(MoveHub::Port::VOLTAGE, portValueChangeCallback);
+      myMoveHub.activatePortDevice((byte)MoveHubPort::VOLTAGE, portValueChangeCallback);
     }
     else
     {
