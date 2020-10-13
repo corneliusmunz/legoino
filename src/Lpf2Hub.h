@@ -25,14 +25,6 @@ typedef struct Device
   PortValueChangeCallback Callback;
 };
 
-typedef struct Version
-{
-  int Build;
-  int Major;
-  int Minor;
-  int Bugfix;
-};
-
 class Lpf2Hub
 {
 

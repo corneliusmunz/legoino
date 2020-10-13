@@ -59,7 +59,7 @@ public:
     {
       log_d("message received: %s", msgReceived);
     
-      if (msgReceived[MSG_TYPE] == (char)MessageType::HUB_PROPERTIES)
+      if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (char)MessageType::HUB_PROPERTIES)
       {
         if (msgReceived[0x03] == (char)HubPropertyReference::ADVERTISING_NAME)
         {
@@ -71,29 +71,26 @@ public:
 
       //It's a port out command:
       //execute and send feedback to the App
-      if (msgReceived[MSG_TYPE] == OUT_PORT_CMD)
+      if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (char)MessageType::PORT_OUTPUT_COMMAND)
       {
         delay(30);
 
         //Reply to the App "Command excecuted"
         byte msgPortCommandFeedbackReply[] = {0x05, 0x00, 0x82, 0x00, 0x0A}; //0x0A Command complete+buffer empty+idle
-        msgPortCommandFeedbackReply[PORT_ID] = msgReceived[PORT_ID];         //set the port_id
+        msgPortCommandFeedbackReply[(byte)PortOutputCommand::PORT_ID] = msgReceived[(byte)PortOutputCommand::PORT_ID];         //set the port_id
         _lpf2HubEmulation->pCharacteristic->setValue(msgPortCommandFeedbackReply, sizeof(msgPortCommandFeedbackReply));
         _lpf2HubEmulation->pCharacteristic->notify();
 
-        if (msgReceived[OUT_PORT_SUB_CMD_TYPE] == OUT_PORT_CMD_WRITE_DIRECT)
+        if (msgReceived[(byte)PortOutputCommand::SUB_COMMAND] == 0x51) //OUT_PORT_CMD_WRITE_DIRECT
         {
-          //Serial.print("Write Direct on port: ");
-          // port_id_value=msgReceived[PORT_ID];
-          // port_write_value=msgReceived[WRITE_DIRECT_VALUE];
           if (_lpf2HubEmulation->writePortCallback != nullptr)
           {
-            _lpf2HubEmulation->writePortCallback(msgReceived[PORT_ID], msgReceived[WRITE_DIRECT_VALUE]);
+            _lpf2HubEmulation->writePortCallback(msgReceived[(byte)PortOutputCommand::PORT_ID], msgReceived[0x07]); //WRITE_DIRECT_VALUE
           }
         }
       }
 
-      if (msgReceived[MSG_TYPE] == HUB_ACTION_CMD && msgReceived[3] == ACTION_SWITCH_OFF)
+      if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::HUB_ACTIONS && msgReceived[3] == (byte)ActionType::SWITCH_OFF_HUB)
       {
         log_d("disconnect");
         delay(30);
@@ -127,37 +124,6 @@ Lpf2HubEmulation::Lpf2HubEmulation(std::string hubName, HubType hubType)
 void Lpf2HubEmulation::setWritePortCallback(WritePortCallback callback)
 {
   writePortCallback = callback;
-}
-
-void Lpf2HubEmulation::initializePorts()
-{
-  if (isConnected == true)
-  {
-    if (isPortInitialized == false)
-    {
-      log_d("initializePorts");
-
-      delay(1000);
-      isPortInitialized = true;
-      //Boost motor on Port_A
-      byte PORT_A_INFORMATION[] = {0x0F, 0x00, 0x04, 0x00, 0x01, 0x26, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10};
-      pCharacteristic->setValue(PORT_A_INFORMATION, 15);
-      pCharacteristic->notify();
-      delay(100);
-      //Boost motor on Port_B
-      byte PORT_B_INFORMATION[] = {0x0F, 0x00, 0x04, 0x01, 0x01, 0x26, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10};
-      pCharacteristic->setValue(PORT_B_INFORMATION, 15);
-      pCharacteristic->notify();
-      delay(100);
-
-      //Led
-      byte PORT_LIGHT_INFORMATION[] = {0x0F, 0x00, 0x04, 0x32, 0x01, 0x17, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10};
-      pCharacteristic->setValue(PORT_LIGHT_INFORMATION, 15);
-      pCharacteristic->notify();
-
-      delay(50);
-    }
-  }
 }
 
 void Lpf2HubEmulation::attachDevice(byte port, DeviceType deviceType)
@@ -254,36 +220,14 @@ std::string Lpf2HubEmulation::getHubName()
   return _hubName;
 }
 
-void Lpf2HubEmulation::setHubFirmwareVersion(int build, int bugfix, int major, int minor)
+void Lpf2HubEmulation::setHubFirmwareVersion(Version version)
 {
-  _firmwareVersionBuild = build;
-  _firmwareVersionBugfix = bugfix;
-  _firmwareVersionMajor = major;
-  _firmwareVersionMinor = minor;
+  _firmwareVersion = version;
 }
 
-void Lpf2HubEmulation::setHubHardwareVersion(int build, int bugfix, int major, int minor)
+void Lpf2HubEmulation::setHubHardwareVersion(Version version)
 {
-  _hardwareVersionBuild = build;
-  _hardwareVersionBugfix = bugfix;
-  _hardwareVersionMajor = major;
-  _hardwareVersionMinor = minor;
-
-  //All version numbers are encoded into a 32 bit Signed Integer [Little Endianness]:
-  //0MMM mmmm
-  //BBBB BBBB
-  //bbbb bbbb
-  //bbbb bbbb
-  //std::bitset byte1;
-  //   _lpf2HubFirmwareVersionBuild = LegoinoCommon::ReadUInt16LE(pData, 5);
-  // uint16_t value = data[0 + offset] | (uint16_t)(data[1 + offset] << 8);
-  // _lpf2HubFirmwareVersionBugfix = LegoinoCommon::ReadUInt8(pData, 7);
-  // _lpf2HubFirmwareVersionMajor = LegoinoCommon::ReadUInt8(pData, 8) >> 4;
-  // _lpf2HubFirmwareVersionMinor = LegoinoCommon::ReadUInt8(pData, 8) & 0xf;
-
-  // std::string payload;
-  // payload.push_back((char)HubPropertyReference::HW_VERSION);
-  // payload.p
+  _hardwareVersion = version;
 }
 
 void Lpf2HubEmulation::start()
@@ -299,11 +243,11 @@ void Lpf2HubEmulation::start()
   _pServer->setCallbacks(new Lpf2HubServerCallbacks(this));
 
   log_d("Create service");
-  _pService = _pServer->createService(SERVICE_UUID);
+  _pService = _pServer->createService(LPF2_UUID);
 
   // Create a BLE Characteristic
   pCharacteristic = _pService->createCharacteristic(
-      NimBLEUUID(CHARACTERISTIC_UUID),
+      NimBLEUUID(LPF2_CHARACHTERISTIC),
       NIMBLE_PROPERTY::READ |
           NIMBLE_PROPERTY::WRITE |
           NIMBLE_PROPERTY::NOTIFY |
@@ -316,7 +260,7 @@ void Lpf2HubEmulation::start()
   _pService->start();
   _pAdvertising = NimBLEDevice::getAdvertising();
 
-  _pAdvertising->addServiceUUID(SERVICE_UUID);
+  _pAdvertising->addServiceUUID(LPF2_UUID);
   _pAdvertising->setScanResponse(true);
 
   //Techinc HUB
@@ -343,7 +287,7 @@ void Lpf2HubEmulation::start()
   // because of a lenght check in addData to the payload structure
   //  advertisementData.setName("Fake Hub");
   advertisementData.setManufacturerData(manufacturerData);
-  advertisementData.setCompleteServices(NimBLEUUID(SERVICE_UUID));
+  advertisementData.setCompleteServices(NimBLEUUID(LPF2_UUID));
 
   std::string payload = advertisementData.getPayload();
   log_d("advertisment data payload: %s", payload);

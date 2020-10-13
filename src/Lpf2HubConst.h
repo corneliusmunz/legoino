@@ -18,6 +18,14 @@
 #define LPF2_CURRENT_MAX 2444
 #define LPF2_CURRENT_MAX_RAW 4095
 
+typedef struct Version
+{
+  int Build;
+  int Major;
+  int Minor;
+  int Bugfix;
+};
+
 enum struct HubType
 {
   UNKNOWNHUB = 0,
@@ -35,6 +43,20 @@ typedef enum BLEManufacturerData
   POWERED_UP_HUB_ID = 65,    //0x41
   POWERED_UP_REMOTE_ID = 66, //0x42
   CONTROL_PLUS_HUB_ID = 128  //0x80
+};
+
+enum struct MessageHeader 
+{
+  LENGTH = 0x00,
+  HUB_ID = 0x01,
+  MESSAGE_TYPE = 0x02
+};
+
+enum struct PortOutputCommand
+{
+  PORT_ID = 0x03,
+  STARTUP_AND_COMPLETION = 0x04,
+  SUB_COMMAND = 0x05
 };
 
 enum struct DeviceType
