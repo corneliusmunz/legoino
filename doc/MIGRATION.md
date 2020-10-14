@@ -14,6 +14,19 @@ To get a more consistent naming, some classes and functions has been renamed
 
 All classes for different Hub types (like ControlPlusHub, PoweredUpHub, BoostHub, ...) was removed and all Hub Types could be controlled via the Base Lpf2Hub class. On exeption is the Boost.cpp which contains some "higher" level commands specific to boost models. But that is more a model class than a base hub or device class. 
 
+The main difference between the hub types was formerly the assignment of port numbers. This is no covered in the following enums 
+* `ControlPlusHubPort`
+* `DuploTrainHubPort`
+* `MoveHubPort`
+* `PoweredUpHubPort`
+* `PoweredUpRemoteHubPort`
+
+The ports numbers could now be fetched with (as an example) the following line of code
+```c++
+ControlPlusHub::Port _port = ControlPlusHub::Port::D; // old way (version < 1.0.0)
+byte portD = (byte)ControlPlusHubPort::D; // new way
+```
+
 ### Changes in functions
 
 to get more specific which motor command is for wich type of motor, the functions get the `<BasicMotor>`, `<TachoMotor>` or `<AbsoluteMotor>` prefixes.
@@ -139,6 +152,21 @@ Example
 ```c++
 // get notified for value updates of the build in Button of the hub
 myMoveHub.activateHubPropertyUpdat(HubPropertyReference::BUTTON, buttonCallback);
+```
+
+
+You can also check if an expected device is really connected to a port by using the new introduced function `checkPortForDevice`like in the following example
+
+```c++
+Serial.print("check ports... if needed sensor is already connected: ");
+byte portForDevice = myHub.getPortForDeviceType((byte)DeviceType::COLOR_DISTANCE_SENSOR);
+Serial.println(portForDevice, DEC);
+// check for expected port number where the device should be connected
+if (portForDevice == 1)  
+{
+	Serial.println("activatePortDevice");
+	myHub.activatePortDevice(portB, colorDistanceSensorCallback);
+}
 ```
 
 ## Debugging
