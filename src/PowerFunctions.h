@@ -49,18 +49,6 @@
 #define PF_PWM_REV2 0xE
 #define PF_PWM_REV1 0xf
 
-//speed
-/*
-#define RED_FLT 0x0
-#define RED_FWD 0x1
-#define RED_REV 0x2
-#define RED_BRK 0x3
-#define BLUE_FLT 0x0
-#define BLUE_FWD 0x4
-#define BLUE_REV 0x8
-#define BLUE_BRK 0xC
-*/
-
 //output
 #define PF_RED 0x0
 #define PF_BLUE 0x1

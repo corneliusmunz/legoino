@@ -10,13 +10,15 @@
  * Port A of the powered up hub is mapped to the RED power function port
  * Port B of the powered up hub is mapped to the BLUE power function port
  * 
+ * Example video: https://www.youtube.com/watch?v=RTNexxT4-yQ&t=16s
+ * 
  * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
  */
 
 #include "Lpf2HubEmulation.h"
-#include <PowerFunctions.h>
+#include "PowerFunctions.h"
 #include "LegoinoCommon.h"
 
 // create a hub instance
