@@ -65,14 +65,15 @@ class PowerFunctions
 public:
   PowerFunctions(uint8_t pin, uint8_t channel);
   PowerFunctions(uint8_t pin);
-  void single_pwm(uint8_t port, uint8_t pwm);
-  void single_pwm(uint8_t port, uint8_t pwm, uint8_t channel);
-  void single_increment(uint8_t port);
-  void single_increment(uint8_t port, uint8_t channel);
-  void single_decrement(uint8_t port);
-  void single_decrement(uint8_t port, uint8_t channel);
-  void combo_pwm(uint8_t redPwm, uint8_t bluePwm);
-  void combo_pwm(uint8_t redPwm, uint8_t bluePwm, uint8_t channel);
+  void single_pwm(PowerFunctionsPort port, PowerFunctionsPwm pwm);
+  void single_pwm(PowerFunctionsPort port, PowerFunctionsPwm pwm, uint8_t channel);
+  void single_increment(PowerFunctionsPort port);
+  void single_increment(PowerFunctionsPort port, uint8_t channel);
+  void single_decrement(PowerFunctionsPort port);
+  void single_decrement(PowerFunctionsPort port, uint8_t channel);
+  void combo_pwm(PowerFunctionsPwm redPwm, PowerFunctionsPwm bluePwm);
+  void combo_pwm(PowerFunctionsPwm redPwm, PowerFunctionsPwm bluePwm, uint8_t channel);
+  PowerFunctionsPwm speedToPwm(byte speed);
 
 private:
   void pause(uint8_t count, uint8_t channel);

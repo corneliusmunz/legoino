@@ -19,7 +19,7 @@
  * @param [in] speed value -100..100 which should be converted to a PWM value
  * @return pwm value 
  */
-uint8_t speed2Pwm(int speed) {
+PowerFunctionsPwm PowerFunctions::speedToPwm(byte speed) {
     uint8_t pwm;
     if (speed == 0) {
       pwm = 0x08;
@@ -28,7 +28,7 @@ uint8_t speed2Pwm(int speed) {
     } else {
       pwm = speed >> 4;
     }
-    return pwm;
+    return (PowerFunctionsPwm)pwm;
 }
 
 
@@ -64,7 +64,7 @@ PowerFunctions::PowerFunctions(uint8_t pin)
  * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
  * @param [in] pwm PWM signal which is applied to the output port (Use enum values PowerFunctionsPwm)
  */
-void PowerFunctions::single_pwm(uint8_t port, uint8_t pwm)
+void PowerFunctions::single_pwm(PowerFunctionsPort port, PowerFunctionsPwm pwm)
 {
   single_pwm(port, pwm, _channel);
 }
@@ -75,11 +75,11 @@ void PowerFunctions::single_pwm(uint8_t port, uint8_t pwm)
  * @param [in] pwm PWM signal which is applied to the output port (Use enum values PowerFunctionsPwm)
  * @param [in] channel IR channel 0..4 which should be used to send out signals
  */
-void PowerFunctions::single_pwm(uint8_t port, uint8_t pwm, uint8_t channel)
+void PowerFunctions::single_pwm(PowerFunctionsPort port, PowerFunctionsPwm pwm, uint8_t channel)
 {
   _nib1 = _toggle | channel;
-  _nib2 = PF_SINGLE_OUTPUT | port;
-  _nib3 = pwm;
+  _nib2 = PF_SINGLE_OUTPUT | (uint8_t)port;
+  _nib3 = (uint8_t)pwm;
   send(channel);
   toggle();
 }
@@ -88,7 +88,7 @@ void PowerFunctions::single_pwm(uint8_t port, uint8_t pwm, uint8_t channel)
  * @brief increment pwm signal on a defined port (red/blue)
  * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
   */
-void PowerFunctions::single_increment(uint8_t port)
+void PowerFunctions::single_increment(PowerFunctionsPort port)
 {
   single_increment(port, _channel);
 }
@@ -98,10 +98,10 @@ void PowerFunctions::single_increment(uint8_t port)
  * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
  * @param [in] channel IR channel 0..4 which should be used to send out signals
   */
-void PowerFunctions::single_increment(uint8_t port, uint8_t channel)
+void PowerFunctions::single_increment(PowerFunctionsPort port, uint8_t channel)
 {
   _nib1 = _toggle | channel;
-  _nib2 = PF_SINGLE_EXT | port;
+  _nib2 = PF_SINGLE_EXT | (uint8_t)port;
   _nib3 = 0x4;
   send(channel);
   toggle();
@@ -111,7 +111,7 @@ void PowerFunctions::single_increment(uint8_t port, uint8_t channel)
  * @brief decrement pwm signal on a defined port (red/blue)
  * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
   */
-void PowerFunctions::single_decrement(uint8_t port)
+void PowerFunctions::single_decrement(PowerFunctionsPort port)
 {
   single_decrement(port, _channel);
 }
@@ -121,10 +121,10 @@ void PowerFunctions::single_decrement(uint8_t port)
  * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
  * @param [in] channel IR channel 0..4 which should be used to send out signals
   */
-void PowerFunctions::single_decrement(uint8_t port, uint8_t channel)
+void PowerFunctions::single_decrement(PowerFunctionsPort port, uint8_t channel)
 {
   _nib1 = _toggle | channel;
-  _nib2 = PF_SINGLE_EXT | port;
+  _nib2 = PF_SINGLE_EXT | (uint8_t)port;
   _nib3 = 0x5;
   send(channel);
   toggle();
@@ -135,7 +135,7 @@ void PowerFunctions::single_decrement(uint8_t port, uint8_t channel)
  * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
  * @param [in] pwm PWM signal which is applied to the output port (Use enum values PowerFunctionsPwm)
  */
-void PowerFunctions::combo_pwm(uint8_t bluePwm, uint8_t redPwm)
+void PowerFunctions::combo_pwm(PowerFunctionsPwm bluePwm, PowerFunctionsPwm redPwm)
 {
   combo_pwm(bluePwm, redPwm, _channel);
 }
@@ -146,11 +146,11 @@ void PowerFunctions::combo_pwm(uint8_t bluePwm, uint8_t redPwm)
  * @param [in] pwm PWM signal which is applied to the output port (Use enum values PowerFunctionsPwm)
  * @param [in] channel IR channel 0..4 which should be used to send out signals
  */
-void PowerFunctions::combo_pwm(uint8_t bluePwm, uint8_t redPwm, uint8_t channel)
+void PowerFunctions::combo_pwm(PowerFunctionsPwm bluePwm, PowerFunctionsPwm redPwm, uint8_t channel)
 {
   _nib1 = PF_ESCAPE | channel;
-  _nib2 = bluePwm;
-  _nib3 = redPwm;
+  _nib2 = (uint8_t)bluePwm;
+  _nib3 = (uint8_t)redPwm;
   send(channel);
 }
 

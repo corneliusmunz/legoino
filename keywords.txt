@@ -6,12 +6,9 @@
 # Classes (KEYWORD1)
 #######################################
 
-MoveHub	KEYWORD1
+BoostHub	KEYWORD1
 Lpf2Hub KEYWORD1
-PoweredUpHub KEYWORD1
-PoweredUpRemoteHub	KEYWORD1
-ControlPlusHub	KEYWORD1
-DuploTrainHub	KEYWORD1
+PowerFunctions	KEYWORD1
 
 
 #######################################
@@ -80,6 +77,12 @@ parseVersion	KEYWORD2
 parseHubButton	KEYWORD2
 parseHubAdvertisingName	KEYWORD2
 
+single_pwm	KEYWORD2
+single_increment	KEYWORD2
+single_decrement	KEYWORD2
+combo_pwm	KEYWORD2
+speedToPwm	KEYWORD2
+
 #######################################
 # Structs (KEYWORD3)
 #######################################
@@ -101,7 +104,8 @@ Event	KEYWORD3
 COLOR_STRING	KEYWORD3
 DuploTrainBaseSound	KEYWORD3
 BrakingStyle	KEYWORD3
-
+PowerFunctionsPwm	KEYWORD3
+PowerFunctionsPort	KEYWORD3
 
 #######################################
 # Constants (LITERAL1)

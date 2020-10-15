@@ -36,12 +36,12 @@ void writeValueCallback(byte port, byte value)
 
   if (port == 0x00)
   {
-    pf.single_pwm((uint8_t)PowerFunctionsPort::RED, pf.speedToPwm(value));    
+    pf.single_pwm(PowerFunctionsPort::RED, pf.speedToPwm(value));    
   }
 
   if (port == 0x01)
   {
-    pf.single_pwm((uint8_t)PowerFunctionsPort::BLUE, pf.speedToPwm(value));
+    pf.single_pwm(PowerFunctionsPort::BLUE, pf.speedToPwm(value));
   }
 
   if (port == 0x32)
