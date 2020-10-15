@@ -27,18 +27,6 @@ Lpf2HubEmulation myEmulatedHub("TrainHub", HubType::POWERED_UP_HUB);
 // create a power functions instance (IR LED on Pin 12, IR Channel 0)
 PowerFunctions pf(12, 0);
 
-// method to map a speed value to a power function speed value
-void setPfSpeed(byte port, byte value) {
-    char pfSpeed;
-    if (value == 0) {
-      pfSpeed = 0x08;
-    } else if (value <= 100) {
-      pfSpeed = (value >> 4) + 1;
-    } else {
-      pfSpeed = value >> 4;
-    }
-    pf.single_pwm(port, pfSpeed);
-}
 
 void writeValueCallback(byte port, byte value)
 {
@@ -48,12 +36,12 @@ void writeValueCallback(byte port, byte value)
 
   if (port == 0x00)
   {
-    setPfSpeed(PF_RED, value);
+    pf.single_pwm((uint8_t)PowerFunctionsPort::RED, pf.speedToPwm(value));    
   }
 
   if (port == 0x01)
   {
-    setPfSpeed(PF_BLUE, value);
+    pf.single_pwm((uint8_t)PowerFunctionsPort::BLUE, pf.speedToPwm(value));
   }
 
   if (port == 0x32)

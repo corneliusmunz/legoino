@@ -9,78 +9,163 @@
 *
 */
 
-// By spec CHECKSUM is a XOR based on the 4-bit triplet you are sending
-#define PF_CHECKSUM() (0xf ^ _nib1 ^ _nib2 ^ _nib3)
-
 #include <stdlib.h>
 #include "PowerFunctions.h"
 #include "Arduino.h"
 
-// Aliases
-void PowerFunctions::red_pwm(uint8_t pwm) { single_pwm(PF_RED, pwm); }
-void PowerFunctions::blue_pwm(uint8_t pwm) { single_pwm(PF_BLUE, pwm); }
 
-// Constructor
-PowerFunctions::PowerFunctions(uint8_t pin, uint8_t channel, bool debug)
+/**
+ * @brief Convert speed value to the supported PWM ranges
+ * @param [in] speed value -100..100 which should be converted to a PWM value
+ * @return pwm value 
+ */
+uint8_t speed2Pwm(int speed) {
+    uint8_t pwm;
+    if (speed == 0) {
+      pwm = 0x08;
+    } else if (speed <= 100) {
+      pwm = (speed >> 4) + 1;
+    } else {
+      pwm = speed >> 4;
+    }
+    return pwm;
+}
+
+
+/**
+ * @brief Constructor to define the pin of the IR LED and power function channel
+ * @param [in] pin Pin of the IR LED which should be used to send out power function IR signals
+ * @param [in] channel IR channel 0..4 which should be used to send out signals
+ */
+PowerFunctions::PowerFunctions(uint8_t pin, uint8_t channel)
 {
   _channel = channel;
   _toggle = 0;
   _pin = pin;
-  _debug = debug;
   pinMode(_pin, OUTPUT);
   digitalWrite(_pin, LOW);
 }
 
-// Single output mode PWM
-void PowerFunctions::single_pwm(uint8_t output, uint8_t pwm)
+/**
+ * @brief Constructor to define the pin of the IR LED
+ * @param [in] pin Pin of the IR LED which should be used to send out power function IR signals
+  */
+PowerFunctions::PowerFunctions(uint8_t pin)
 {
-  _nib1 = _toggle | _channel;
-  _nib2 = PF_SINGLE_OUTPUT | output;
+  _channel = 0;
+  _toggle = 0;
+  _pin = pin;
+  pinMode(_pin, OUTPUT);
+  digitalWrite(_pin, LOW);
+}
+
+/**
+ * @brief Set the pwm signal on a defined port (red/blue)
+ * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
+ * @param [in] pwm PWM signal which is applied to the output port (Use enum values PowerFunctionsPwm)
+ */
+void PowerFunctions::single_pwm(uint8_t port, uint8_t pwm)
+{
+  single_pwm(port, pwm, _channel);
+}
+
+/**
+ * @brief Set the pwm signal on a defined port (red/blue)
+ * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
+ * @param [in] pwm PWM signal which is applied to the output port (Use enum values PowerFunctionsPwm)
+ * @param [in] channel IR channel 0..4 which should be used to send out signals
+ */
+void PowerFunctions::single_pwm(uint8_t port, uint8_t pwm, uint8_t channel)
+{
+  _nib1 = _toggle | channel;
+  _nib2 = PF_SINGLE_OUTPUT | port;
   _nib3 = pwm;
-  send();
+  send(channel);
   toggle();
 }
 
-void PowerFunctions::single_increment(uint8_t output)
+/**
+ * @brief increment pwm signal on a defined port (red/blue)
+ * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
+  */
+void PowerFunctions::single_increment(uint8_t port)
 {
-  _nib1 = _toggle | _channel;
-  _nib2 = PF_SINGLE_EXT | output;
+  single_increment(port, _channel);
+}
+
+/**
+ * @brief increment pwm signal on a defined port (red/blue)
+ * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
+ * @param [in] channel IR channel 0..4 which should be used to send out signals
+  */
+void PowerFunctions::single_increment(uint8_t port, uint8_t channel)
+{
+  _nib1 = _toggle | channel;
+  _nib2 = PF_SINGLE_EXT | port;
   _nib3 = 0x4;
-  send();
+  send(channel);
   toggle();
 }
 
-void PowerFunctions::single_decrement(uint8_t output)
+/**
+ * @brief decrement pwm signal on a defined port (red/blue)
+ * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
+  */
+void PowerFunctions::single_decrement(uint8_t port)
 {
-  _nib1 = _toggle | _channel;
-  _nib2 = PF_SINGLE_EXT | output;
+  single_decrement(port, _channel);
+}
+
+/**
+ * @brief decrement pwm signal on a defined port (red/blue)
+ * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
+ * @param [in] channel IR channel 0..4 which should be used to send out signals
+  */
+void PowerFunctions::single_decrement(uint8_t port, uint8_t channel)
+{
+  _nib1 = _toggle | channel;
+  _nib2 = PF_SINGLE_EXT | port;
   _nib3 = 0x5;
-  send();
+  send(channel);
   toggle();
 }
 
-// Combo PWM mode
-void PowerFunctions::combo_pwm(uint8_t blue_speed, uint8_t red_speed)
+/**
+ * @brief Set the pwm signal on a defined port (red/blue)
+ * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
+ * @param [in] pwm PWM signal which is applied to the output port (Use enum values PowerFunctionsPwm)
+ */
+void PowerFunctions::combo_pwm(uint8_t bluePwm, uint8_t redPwm)
 {
-  _nib1 = PF_ESCAPE | _channel;
-  _nib2 = blue_speed;
-  _nib3 = red_speed;
-  send();
+  combo_pwm(bluePwm, redPwm, _channel);
 }
 
+/**
+ * @brief Set the pwm signal on a defined port (red/blue)
+ * @param [in] port The output port to which the pwm signal is transmitted (Red=0x0, Blue=0x01)
+ * @param [in] pwm PWM signal which is applied to the output port (Use enum values PowerFunctionsPwm)
+ * @param [in] channel IR channel 0..4 which should be used to send out signals
+ */
+void PowerFunctions::combo_pwm(uint8_t bluePwm, uint8_t redPwm, uint8_t channel)
+{
+  _nib1 = PF_ESCAPE | channel;
+  _nib2 = bluePwm;
+  _nib3 = redPwm;
+  send(channel);
+}
 
 //
 // Private methods
 //
 
 // Pause function see "Transmitting Messages" in Power Functions PDF
-void PowerFunctions::pause(uint8_t count)
+void PowerFunctions::pause(uint8_t count, uint8_t channel)
 {
   uint8_t pause = 0;
 
   if (count == 0)
   {
-    pause = 4 - (_channel + 1);
+    pause = 4 - (channel + 1);
   }
   else if (count < 3)
   { // 1, 2
@@ -88,7 +173,7 @@ void PowerFunctions::pause(uint8_t count)
   }
   else
   { // 3, 4, 5
-    pause = 5 + (_channel + 1) * 2;
+    pause = 5 + (channel + 1) * 2;
   }
   delayMicroseconds(pause * 77); //MAX_MESSAGE_LENGTH
 }
@@ -112,14 +197,14 @@ void PowerFunctions::send_bit()
   }
 }
 
-void PowerFunctions::send()
+void PowerFunctions::send(uint8_t channel)
 {
   uint8_t i, j;
   uint16_t message = _nib1 << 12 | _nib2 << 8 | _nib3 << 4 | PF_CHECKSUM();
   bool flipDebugLed = false;
   for (i = 0; i < 6; i++)
   {
-    pause(i);
+    pause(i, channel);
     start_stop_bit();
     for (j = 0; j < 16; j++)
     {
