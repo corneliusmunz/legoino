@@ -13,49 +13,51 @@
 // create a hub instance
 Lpf2Hub myMoveHub;
 
-void hubPropertyChangeCallback(HubPropertyReference hubProperty, uint8_t *pData)
+void hubPropertyChangeCallback(void *hub, HubPropertyReference hubProperty, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   Serial.print("HubProperty: ");
   Serial.println((byte)hubProperty, HEX);
 
   if (hubProperty == HubPropertyReference::RSSI)
   {
     Serial.print("RSSI: ");
-    Serial.println(myMoveHub.parseRssi(pData), DEC);
+    Serial.println(myHub->parseRssi(pData), DEC);
     return;
   }
 
   if (hubProperty == HubPropertyReference::ADVERTISING_NAME)
   {
     Serial.print("Advertising Name: ");
-    Serial.println(myMoveHub.parseHubAdvertisingName(pData).c_str());
+    Serial.println(myHub->parseHubAdvertisingName(pData).c_str());
     return;
   }
 
   if (hubProperty == HubPropertyReference::BATTERY_VOLTAGE)
   {
     Serial.print("BatteryLevel: ");
-    Serial.println(myMoveHub.parseBatteryLevel(pData), DEC);
+    Serial.println(myHub->parseBatteryLevel(pData), DEC);
     return;
   }
 
   if (hubProperty == HubPropertyReference::BUTTON)
   {
     Serial.print("Button: ");
-    Serial.println((byte)myMoveHub.parseHubButton(pData), HEX);
+    Serial.println((byte)myHub->parseHubButton(pData), HEX);
     return;
   }
 
   if (hubProperty == HubPropertyReference::BATTERY_TYPE)
   {
     Serial.print("BatteryType: ");
-    Serial.println(myMoveHub.parseBatteryType(pData), HEX);
+    Serial.println(myHub->parseBatteryType(pData), HEX);
     return;
   }
 
   if (hubProperty == HubPropertyReference::FW_VERSION)
   {
-    Version version = myMoveHub.parseVersion(pData);
+    Version version = myHub->parseVersion(pData);
     Serial.print("FWVersion: ");
     Serial.print(version.Major);
     Serial.print("-");
@@ -70,7 +72,7 @@ void hubPropertyChangeCallback(HubPropertyReference hubProperty, uint8_t *pData)
 
   if (hubProperty == HubPropertyReference::HW_VERSION)
   {
-    Version version = myMoveHub.parseVersion(pData);
+    Version version = myHub->parseVersion(pData);
     Serial.print("HWVersion: ");
     Serial.print(version.Major);
     Serial.print("-");

@@ -89,7 +89,7 @@ This function will be called if an value update appears and you can react on the
 
 To read in changes of hub properties (button, RSSI, battery level, ...), you have to write a function with the following signature:
 ```c++
-typedef void (*HubPropertyChangeCallback)(HubPropertyReference hubProperty, uint8_t *pData);
+typedef void (*HubPropertyChangeCallback)(void *hub, HubPropertyReference hubProperty, uint8_t *pData);
 ```
 
 Example:

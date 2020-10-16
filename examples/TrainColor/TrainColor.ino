@@ -17,17 +17,19 @@ byte portB = (byte)PoweredUpHubPort::B;
 
 bool isInitialized = false;
 
-void hubButtonCallback(HubPropertyReference hubProperty, uint8_t *pData)
+void hubButtonCallback(void *hub, HubPropertyReference hubProperty, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   if (hubProperty == HubPropertyReference::BUTTON)
   {
-    ButtonState buttonState = myHub.parseHubButton(pData);
+    ButtonState buttonState = myHub->parseHubButton(pData);
     Serial.print("Button: ");
     Serial.println((byte)buttonState, HEX);
 
     if (buttonState == ButtonState::PRESSED)
     {
-      myHub.setBasicMotorSpeed(portA, 15);
+      myHub->setBasicMotorSpeed(portA, 15);
     }
   }
 }

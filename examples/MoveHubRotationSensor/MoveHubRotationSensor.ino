@@ -15,12 +15,14 @@ Lpf2Hub myMoveHub;
 byte portD = (byte)MoveHubPort::D;
 
 
-void buttonCallback(HubPropertyReference hubProperty, uint8_t *pData)
+void buttonCallback(void *hub, HubPropertyReference hubProperty, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   if (hubProperty == HubPropertyReference::BUTTON)
   {
-    if (myMoveHub.parseHubButton(pData) == ButtonState::PRESSED) {
-      myMoveHub.setAbsoluteMotorEncoderPosition(portD, 0);
+    if (myHub->parseHubButton(pData) == ButtonState::PRESSED) {
+      myHub->setAbsoluteMotorEncoderPosition(portD, 0);
     }
   }
 }
