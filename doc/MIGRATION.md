@@ -1,10 +1,10 @@
 # Migration from 0.x.x to 1.0.0
 
-Due to changes in the structure of the code, the existent sketches of former libraries (< version 1.0.0) has to be migrated. 
+Due to changes in the structure of the code, the existent sketches of former libraries (< version 1.0.0) have to be migrated. 
 
 ## Renaming
 
-To get a more consistent naming, some classes and functions has been renamed
+To get a more consistent naming, some classes and functions have been renamed
 
 ### Changes in classnames
 
@@ -12,9 +12,9 @@ To get a more consistent naming, some classes and functions has been renamed
 | ------------- |-------------|
 | BoostHub        | Boost |
 
-All classes for different Hub types (like ControlPlusHub, PoweredUpHub, BoostHub, ...) was removed and all Hub Types could be controlled via the Base Lpf2Hub class. On exeption is the Boost.cpp which contains some "higher" level commands specific to boost models. But that is more a model class than a base hub or device class. 
+All classes for different Hub types (like ControlPlusHub, PoweredUpHub, BoostHub, ...) were removed and all Hub Types can be controlled via the Base Lpf2Hub class. On exeption is the Boost.cpp which contains some "higher" level commands specific to boost models. But that is more a model class than a base hub or device class. 
 
-The main difference between the hub types was formerly the assignment of port numbers. This is no covered in the following enums 
+The main difference between the hub types was formerly the assignment of port numbers. This is now covered in the following enums 
 * `ControlPlusHubPort`
 * `DuploTrainHubPort`
 * `MoveHubPort`
@@ -29,7 +29,7 @@ byte portD = (byte)ControlPlusHubPort::D; // new way
 
 ### Changes in functions
 
-to get more specific which motor command is for wich type of motor, the functions get the `<BasicMotor>`, `<TachoMotor>` or `<AbsoluteMotor>` prefixes.
+To get more specific which motor command is for wich type of motor, the functions get the `<BasicMotor>`, `<TachoMotor>` or `<AbsoluteMotor>` prefixes.
 
 | Old name        | New name |
 | ------------- |-------------|
@@ -42,7 +42,7 @@ to get more specific which motor command is for wich type of motor, the function
 |`setMotorAbsolutePosition` |`setAbsoluteMotorPosition`|
 |`setMotorEncoderPosition` |`setAbsoluteMotorEncoderPosition`|
 
-The Tacho Motor commands has now 2 additional parameters to control the maximum Power and the Braking behaviour. Both parameters are added at the end of the functions and have default parameters so the call of the "old" parameter set should not lead to an error.
+The Tacho Motor commands now have 2 additional parameters to control the maximum Power and the Braking behaviour. Both parameters are added at the end of the functions and have default parameters so the call of the "old" parameter set should not lead to an error.
 
 `maxPower` default value = 100, range = 0..100
 
@@ -50,7 +50,7 @@ The Tacho Motor commands has now 2 additional parameters to control the maximum 
 
 
 ## Removal of global variables getters and button callback
-In the former library version global variables was used to write sensor values. In the new version callback functions could be used to get value updates. While removing all global variables related to sensor values, the not needed getter functions are also removed. The usage of the callback functions instead is described in the next [section](#callbacks).
+In the former library version global variables were used to write sensor values. In the new version callback functions could be used to get value updates. While removing all global variables related to sensor values, the not needed getter functions are also removed. The usage of the callback functions instead is described in the next [section](#callbacks).
 
 
 ## Callbacks
@@ -95,29 +95,33 @@ typedef void (*HubPropertyChangeCallback)(HubPropertyReference hubProperty, uint
 Example:
 ```c++
 // callback function to handle updates of hub properties
-void hubPropertyChangeCallback(HubPropertyReference hubProperty, uint8_t *pData)
+void hubPropertyChangeCallback(void *hub, HubPropertyReference hubProperty, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+  Serial.print("HubAddress: ");
+  Serial.println(myHub->getHubAddress().toString().c_str());
+
   Serial.print("HubProperty: ");
   Serial.println((byte)hubProperty, HEX);
 
   if (hubProperty == HubPropertyReference::RSSI)
   {
     Serial.print("RSSI: ");
-    Serial.println(myMoveHub.parseRssi(pData), DEC);
+    Serial.println(myHub->parseRssi(pData), DEC);
     return;
   }
 
   if (hubProperty == HubPropertyReference::BATTERY_VOLTAGE)
   {
     Serial.print("BatteryLevel: ");
-    Serial.println(myMoveHub.parseBatteryLevel(pData), DEC);
+    Serial.println(myHub->parseBatteryLevel(pData), DEC);
     return;
   }
 
   if (hubProperty == HubPropertyReference::BUTTON)
   {
     Serial.print("Button: ");
-    Serial.println((byte)myMoveHub.parseHubButton(pData), HEX);
+    Serial.println((byte)myHub->parseHubButton(pData), HEX);
     return;
   }
 }
@@ -140,7 +144,7 @@ Example
 // get notified for value updates of the device which is connected on port D
 myMoveHub.activatePortDevice(portD, tachoMotorCallback);
 delay(50);
-myMoveHub.activateHubPropertyUpdat(HubPropertyReference::BUTTON, buttonCallback);
+myMoveHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, buttonCallback);
 ```
 
 For Hub property related updates you have to use the function
@@ -151,7 +155,7 @@ For Hub property related updates you have to use the function
 Example
 ```c++
 // get notified for value updates of the build in Button of the hub
-myMoveHub.activateHubPropertyUpdat(HubPropertyReference::BUTTON, buttonCallback);
+myMoveHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, buttonCallback);
 ```
 
 
