@@ -16,7 +16,6 @@
 
 using namespace std::placeholders;
 
-
 typedef void (*HubPropertyChangeCallback)(void *hub, HubPropertyReference hubProperty, uint8_t *pData);
 typedef void (*PortValueChangeCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
 
@@ -77,12 +76,12 @@ public:
   void setAccelerationProfile(byte port, int16_t time);
   void setDecelerationProfile(byte port, int16_t time);
   void stopTachoMotor(byte port);
-  void setTachoMotorSpeed(byte port, int speed, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
-  void setTachoMotorSpeedForTime(byte port, int speed, int16_t time, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
-  void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
-  void setTachoMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
-  
-  void setAbsoluteMotorPosition(byte port, int speed, int32_t position, byte maxPower=100, BrakingStyle brakingStyle=BrakingStyle::BRAKE);
+  void setTachoMotorSpeed(byte port, int speed, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setTachoMotorSpeedForTime(byte port, int speed, int16_t time, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setTachoMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+
+  void setAbsoluteMotorPosition(byte port, int speed, int32_t position, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
   void setAbsoluteMotorEncoderPosition(byte port, int32_t position);
 
   void playSound(byte sound);
@@ -135,7 +134,6 @@ private:
 
   //BLE settings
   uint32_t _scanDuration = 5;
-
 };
 
 #endif

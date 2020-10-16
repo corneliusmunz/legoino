@@ -13,24 +13,28 @@
 #include "PowerFunctions.h"
 #include "Arduino.h"
 
-
 /**
  * @brief Convert speed value to the supported PWM ranges
  * @param [in] speed value -100..100 which should be converted to a PWM value
  * @return pwm value 
  */
-PowerFunctionsPwm PowerFunctions::speedToPwm(byte speed) {
-    uint8_t pwm;
-    if (speed == 0) {
-      pwm = 0x08;
-    } else if (speed <= 100) {
-      pwm = (speed >> 4) + 1;
-    } else {
-      pwm = speed >> 4;
-    }
-    return (PowerFunctionsPwm)pwm;
+PowerFunctionsPwm PowerFunctions::speedToPwm(byte speed)
+{
+  uint8_t pwm;
+  if (speed == 0)
+  {
+    pwm = 0x08;
+  }
+  else if (speed <= 100)
+  {
+    pwm = (speed >> 4) + 1;
+  }
+  else
+  {
+    pwm = speed >> 4;
+  }
+  return (PowerFunctionsPwm)pwm;
 }
-
 
 /**
  * @brief Constructor to define the pin of the IR LED and power function channel

@@ -2,11 +2,13 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/corneliusmunz/legoino)](https://github.com/corneliusmunz/legoino/releases/latest/)
 # Legoino
 
-Arduino Library for controlling all kinds of Powered UP devices. From the two port hub, move hub (e.g. boost), duplo train hub, technic hub to several devices like distance and color sensor, tilt sensor, train motor, remote control, speedometer, etc. you can control almost everthing with that library and your Arduino sketch. 
+*Disclaimer*: LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this project.
+
+Arduino Library for controlling all kinds of *LEGO* Powered UP devices. From the two port hub, move hub (e.g. boost), duplo train hub, technic hub to several devices like distance and color sensor, tilt sensor, train motor, remote control, speedometer, etc. you can control almost everthing with that library and your Arduino sketch. 
 
 It is also possible to use the "old" Power Function IR Modules and control them via an IR LED connected to a PIN of your ESP32 device. With the Hub emulation function you can even control an "old" Power Function Light or Motor with the Powered Up App.
 
-*Disclaimer*: LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this project.
+
 
 ## Quickstart
 You can find a step by step instruction to your first Legoino project on the following link: [Quickstart Tutorial](doc/QUICKSTART.md)
@@ -70,6 +72,19 @@ The usage is dependent on your hub type. Most of the commands are shared for all
 ## Hub emulation
 
 ## PowerFunction IR
+```c++
+  PowerFunctions(uint8_t pin, uint8_t channel);
+  PowerFunctions(uint8_t pin);
+  void single_pwm(PowerFunctionsPort port, PowerFunctionsPwm pwm);
+  void single_pwm(PowerFunctionsPort port, PowerFunctionsPwm pwm, uint8_t channel);
+  void single_increment(PowerFunctionsPort port);
+  void single_increment(PowerFunctionsPort port, uint8_t channel);
+  void single_decrement(PowerFunctionsPort port);
+  void single_decrement(PowerFunctionsPort port, uint8_t channel);
+  void combo_pwm(PowerFunctionsPwm redPwm, PowerFunctionsPwm bluePwm);
+  void combo_pwm(PowerFunctionsPwm redPwm, PowerFunctionsPwm bluePwm, uint8_t channel);
+  PowerFunctionsPwm speedToPwm(byte speed);
+  ```
 
 ## Supported devices
 
@@ -255,7 +270,9 @@ https://github.com/nathankellenicki/node-poweredup
 
 Thanks to [@h2zero](https://github.com/h2zero/NimBLE-Arduino) for developing a new BLE library based on the NimBLE project and supporting legoino with the posibility in changing the callback functions that it works also for member functions.
 
-Thanks to @giancann, @marcrupprath and @albant for the hub emulation idea and first implementation.
+Thanks to [@giancann](https://github.com/giancann), [@marcrupprath](https://github.com/marcrupprath) and [@albant](https://github.com/albant) for the hub emulation idea and first implementation.
+
+Thanks to [@fvanroie](https://github.com/fvanroie) for his contribution about callbacks.
 
 Thanks for the original [PowerFunctions](https://github.com/jurriaan/Arduino-PowerFunctions) Library by @jurriaan
 

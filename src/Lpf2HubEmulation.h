@@ -32,8 +32,7 @@ private:
   BLEAddress *_hubAddress = nullptr;
   BLEAdvertising *_pAdvertising;
 
-  
-  // Hub information values
+    // Hub information values
   int8_t _rssi;
   uint8_t _batteryLevel;
   BatteryType _batteryType;

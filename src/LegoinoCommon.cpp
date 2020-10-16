@@ -8,7 +8,6 @@
 
 #include "LegoinoCommon.h"
 
-
 /**
  * @brief Map speed from -100..100 to the 8bit internal value
  * @param [in] speed -100..100

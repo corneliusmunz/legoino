@@ -58,7 +58,7 @@ public:
     if (msgReceived.length() > 0)
     {
       log_d("message received: %s", msgReceived);
-    
+
       if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (char)MessageType::HUB_PROPERTIES)
       {
         if (msgReceived[0x03] == (char)HubPropertyReference::ADVERTISING_NAME)
@@ -76,8 +76,8 @@ public:
         delay(30);
 
         //Reply to the App "Command excecuted"
-        byte msgPortCommandFeedbackReply[] = {0x05, 0x00, 0x82, 0x00, 0x0A}; //0x0A Command complete+buffer empty+idle
-        msgPortCommandFeedbackReply[(byte)PortOutputCommand::PORT_ID] = msgReceived[(byte)PortOutputCommand::PORT_ID];         //set the port_id
+        byte msgPortCommandFeedbackReply[] = {0x05, 0x00, 0x82, 0x00, 0x0A};                                           //0x0A Command complete+buffer empty+idle
+        msgPortCommandFeedbackReply[(byte)PortOutputCommand::PORT_ID] = msgReceived[(byte)PortOutputCommand::PORT_ID]; //set the port_id
         _lpf2HubEmulation->pCharacteristic->setValue(msgPortCommandFeedbackReply, sizeof(msgPortCommandFeedbackReply));
         _lpf2HubEmulation->pCharacteristic->notify();
 

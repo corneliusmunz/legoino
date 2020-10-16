@@ -34,9 +34,9 @@
 #define PF_HALF_PERIOD PF_IR_CYCLES(0.5)
 #define PF_MAX_MESSAGE_LENGTH PF_IR_CYCLES(522) // 2 * 45 + 16 * 27
 
-
 //PWM speed steps
-enum struct PowerFunctionsPwm {
+enum struct PowerFunctionsPwm
+{
   FLOAT = 0x0,
   FORWARD1 = 0x1,
   FORWARD2 = 0x2,
@@ -44,7 +44,7 @@ enum struct PowerFunctionsPwm {
   FORWARD4 = 0x4,
   FORWARD5 = 0x5,
   FORWARD6 = 0x6,
-  FORWARD7 = 0x7,  
+  FORWARD7 = 0x7,
   BRAKE = 0x8,
   REVERSE7 = 0x9,
   REVERSE6 = 0xA,
@@ -55,7 +55,8 @@ enum struct PowerFunctionsPwm {
   REVERSE1 = 0xF
 };
 
-enum struct PowerFunctionsPort {
+enum struct PowerFunctionsPort
+{
   RED = 0x0,
   BLUE = 0x1
 };

@@ -45,7 +45,7 @@ typedef enum BLEManufacturerData
   CONTROL_PLUS_HUB_ID = 128  //0x80
 };
 
-enum struct MessageHeader 
+enum struct MessageHeader
 {
   LENGTH = 0x00,
   HUB_ID = 0x01,
