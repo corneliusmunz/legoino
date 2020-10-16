@@ -214,7 +214,7 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
 {
     if (_hubPropertyChangeCallback != nullptr)
     {
-        _hubPropertyChangeCallback((HubPropertyReference)pData[3], pData);
+        _hubPropertyChangeCallback(this,(HubPropertyReference)pData[3], pData);
         return;
     }
 

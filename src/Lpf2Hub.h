@@ -17,7 +17,7 @@
 using namespace std::placeholders;
 
 
-typedef void (*HubPropertyChangeCallback)(HubPropertyReference hubProperty, uint8_t *pData);
+typedef void (*HubPropertyChangeCallback)(void *hub, HubPropertyReference hubProperty, uint8_t *pData);
 typedef void (*PortValueChangeCallback)(byte portNumber, DeviceType deviceType, uint8_t *pData);
 
 typedef struct Device
