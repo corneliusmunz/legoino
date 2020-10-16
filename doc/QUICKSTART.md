@@ -93,19 +93,21 @@ To get a notification you have to do the following steps:
 
 To read in changes of devices which are attached to a Port (build in or external), you have to write a function with the following signature:
 ```c++
-typedef void (*PortValueChangeCallback)(byte portNumber, DeviceType deviceType, uint8_t *pData);
+typedef void (*PortValueChangeCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
 ````
 
 Example:
 ```c++
 // callback function to handle updates of sensor values
-void tachoMotorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+void tachoMotorCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   Serial.print("sensorMessage callback for port: ");
   Serial.println(portNumber, DEC);
   if (deviceType == DeviceType::MEDIUM_LINEAR_MOTOR)
   {
-    int rotation = myMoveHub.parseTachoMotor(pData);
+    int rotation = myHub->parseTachoMotor(pData);
     Serial.print("Rotation: ");
     Serial.print(rotation, DEC);
     Serial.println(" [degrees]");
@@ -120,35 +122,37 @@ This function will be called if an value update appears and you can react on the
 
 To read in changes of hub properties (button, RSSI, battery level, ...), you have to write a function with the following signature:
 ```c++
-typedef void (*HubPropertyChangeCallback)(HubPropertyReference hubProperty, uint8_t *pData);
+typedef void (*HubPropertyChangeCallback)(void *hub, HubPropertyReference hubProperty, uint8_t *pData);
 ```
 
 Example:
 ```c++
 // callback function to handle updates of hub properties
-void hubPropertyChangeCallback(HubPropertyReference hubProperty, uint8_t *pData)
+void hubPropertyChangeCallback(void *hub, HubPropertyReference hubProperty, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   Serial.print("HubProperty: ");
   Serial.println((byte)hubProperty, HEX);
 
   if (hubProperty == HubPropertyReference::RSSI)
   {
     Serial.print("RSSI: ");
-    Serial.println(myMoveHub.parseRssi(pData), DEC);
+    Serial.println(myHub->parseRssi(pData), DEC);
     return;
   }
 
   if (hubProperty == HubPropertyReference::BATTERY_VOLTAGE)
   {
     Serial.print("BatteryLevel: ");
-    Serial.println(myMoveHub.parseBatteryLevel(pData), DEC);
+    Serial.println(myHub->parseBatteryLevel(pData), DEC);
     return;
   }
 
   if (hubProperty == HubPropertyReference::BUTTON)
   {
     Serial.print("Button: ");
-    Serial.println((byte)myMoveHub.parseHubButton(pData), HEX);
+    Serial.println((byte)myHub->parseHubButton(pData), HEX);
     return;
   }
 }

@@ -19,51 +19,55 @@ Lpf2Hub myHub;
 
 byte motorPort = (byte)DuploTrainHubPort::MOTOR;
 
-void colorSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+void colorSensorCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   if (deviceType == DeviceType::DUPLO_TRAIN_BASE_COLOR_SENSOR)
   {
-    int color = myHub.parseColor(pData);
+    int color = myHub->parseColor(pData);
     Serial.print("Color: ");
     Serial.println(COLOR_STRING[color]);
-    myHub.setLedColor((Color)color);
+    myHub->setLedColor((Color)color);
 
     if (color == (byte)RED)
     {
-      myHub.playSound((byte)DuploTrainBaseSound::BRAKE);
+      myHub->playSound((byte)DuploTrainBaseSound::BRAKE);
     }
     else if (color == (byte)BLUE)
     {
-      myHub.playSound((byte)DuploTrainBaseSound::WATER_REFILL);
+      myHub->playSound((byte)DuploTrainBaseSound::WATER_REFILL);
     }
     else if (color == (byte)YELLOW)
     {
-      myHub.playSound((byte)DuploTrainBaseSound::HORN);
+      myHub->playSound((byte)DuploTrainBaseSound::HORN);
     }
   }
 }
 
-void speedometerSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+void speedometerSensorCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   if (deviceType == DeviceType::DUPLO_TRAIN_BASE_SPEEDOMETER)
   {
-    int speed = myHub.parseSpeedometer(pData);
+    int speed = myHub->parseSpeedometer(pData);
     Serial.print("Speed: ");
     Serial.println(speed);
     if (speed > 10)
     {
       Serial.println("Forward");
-      myHub.setBasicMotorSpeed(motorPort, 50);
+      myHub->setBasicMotorSpeed(motorPort, 50);
     }
     else if (speed < -10)
     {
       Serial.println("Back");
-      myHub.setBasicMotorSpeed(motorPort, -50);
+      myHub->setBasicMotorSpeed(motorPort, -50);
     }
     else
     {
       Serial.println("Stop");
-      myHub.stopBasicMotor(motorPort);
+      myHub->stopBasicMotor(motorPort);
     }
   }
 }

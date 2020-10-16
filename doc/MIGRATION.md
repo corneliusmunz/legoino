@@ -62,23 +62,25 @@ To use the callbacks you have to do the following steps:
 
 To read in changes of devices which are attached to a Port (build in or external), you have to write a function with the following signature:
 ```c++
-typedef void (*PortValueChangeCallback)(byte portNumber, DeviceType deviceType, uint8_t *pData);
+typedef void (*PortValueChangeCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
 ````
 
 Example:
 ```c++
 // callback function to handle updates of sensor values
-void tachoMotorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+void tachoMotorCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   Serial.print("sensorMessage callback for port: ");
   Serial.println(portNumber, DEC);
   if (deviceType == DeviceType::MEDIUM_LINEAR_MOTOR)
   {
-    int rotation = myMoveHub.parseTachoMotor(pData);
+    int rotation = myHub->parseTachoMotor(pData);
     Serial.print("Rotation: ");
     Serial.print(rotation, DEC);
     Serial.println(" [degrees]");
-    myMoveHub.setLedHSVColor(abs(rotation), 1.0, 1.0);
+    myHub->setLedHSVColor(abs(rotation), 1.0, 1.0);
   }
 }
 ```

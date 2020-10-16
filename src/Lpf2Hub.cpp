@@ -214,7 +214,7 @@ void Lpf2Hub::parseDeviceInfo(uint8_t *pData)
 {
     if (_hubPropertyChangeCallback != nullptr)
     {
-        _hubPropertyChangeCallback(this,(HubPropertyReference)pData[3], pData);
+        _hubPropertyChangeCallback(this, (HubPropertyReference)pData[3], pData);
         return;
     }
 
@@ -589,7 +589,7 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 
     if (connectedDevices[deviceIndex].Callback != nullptr)
     {
-        connectedDevices[deviceIndex].Callback(pData[3], (DeviceType)deviceType, pData);
+        connectedDevices[deviceIndex].Callback(this, pData[3], (DeviceType)deviceType, pData);
         return;
     }
 

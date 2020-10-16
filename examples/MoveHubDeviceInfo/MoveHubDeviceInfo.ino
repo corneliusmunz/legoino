@@ -87,12 +87,13 @@ void hubPropertyChangeCallback(void *hub, HubPropertyReference hubProperty, uint
 }
 
 // callback function to handle updates of sensor values
-void portValueChangeCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+void portValueChangeCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
 
   if (deviceType == DeviceType::VOLTAGE_SENSOR)
   {
-    double voltage = myMoveHub.parseVoltageSensor(pData);
+    double voltage = myHub->parseVoltageSensor(pData);
     Serial.print("Voltage: ");
     Serial.println(voltage, 2);
     return;
@@ -100,7 +101,7 @@ void portValueChangeCallback(byte portNumber, DeviceType deviceType, uint8_t *pD
 
   if (deviceType == DeviceType::CURRENT_SENSOR)
   {
-    double current = myMoveHub.parseCurrentSensor(pData);
+    double current = myHub->parseCurrentSensor(pData);
     Serial.print("Current: ");
     Serial.println(current, 2);
     return;
@@ -108,8 +109,8 @@ void portValueChangeCallback(byte portNumber, DeviceType deviceType, uint8_t *pD
 
   if (deviceType == DeviceType::MOVE_HUB_TILT_SENSOR)
   {
-    int x = myMoveHub.parseBoostTiltSensorX(pData);
-    int y = myMoveHub.parseBoostTiltSensorY(pData);
+    int x = myHub->parseBoostTiltSensorX(pData);
+    int y = myHub->parseBoostTiltSensorY(pData);
     Serial.print("Tilt X: ");
     Serial.print(x, DEC);
     Serial.print(" Y: ");

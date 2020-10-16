@@ -14,13 +14,15 @@ Lpf2Hub myMoveHub;
 byte portC = (byte)MoveHubPort::C;
 
 // callback function to handle updates of sensor values
-void distanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+void distanceSensorCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   Serial.print("sensorMessage callback for port: ");
   Serial.println(portNumber, DEC);
   if (deviceType == DeviceType::COLOR_DISTANCE_SENSOR)
   {
-    double distance = myMoveHub.parseDistance(pData);
+    double distance = myHub->parseDistance(pData);
     Serial.print("Distance: ");
     Serial.println(distance, DEC);
     // set hub LED color dependent on the distance of the sensor to an object
@@ -29,15 +31,15 @@ void distanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pDa
     // green -- large distance
     if (distance < 40.0)
     {
-      myMoveHub.setLedColor(RED);
+      myHub->setLedColor(RED);
     }
     else if (distance < 80.0 && distance >= 40.0)
     {
-      myMoveHub.setLedColor(ORANGE);
+      myHub->setLedColor(ORANGE);
     }
     else
     {
-      myMoveHub.setLedColor(GREEN);
+      myHub->setLedColor(GREEN);
     }
   }
 }

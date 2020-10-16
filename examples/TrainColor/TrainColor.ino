@@ -35,31 +35,33 @@ void hubButtonCallback(void *hub, HubPropertyReference hubProperty, uint8_t *pDa
 }
 
 // callback function to handle updates of sensor values
-void colorDistanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+void colorDistanceSensorCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   Serial.print("sensorMessage callback for port: ");
   Serial.println(portNumber, DEC);
   if (deviceType == DeviceType::COLOR_DISTANCE_SENSOR)
   {
-    int color = myHub.parseColor(pData);
+    int color = myHub->parseColor(pData);
     Serial.print("Color: ");
     Serial.println(COLOR_STRING[color]);
 
     // set hub LED color to detected color of sensor and set motor speed dependent on color
     if (color == (byte)Color::RED)
     {
-      myHub.setLedColor((Color)color);
-      myHub.stopBasicMotor(portA);
+      myHub->setLedColor((Color)color);
+      myHub->stopBasicMotor(portA);
     }
     else if (color == (byte)Color::YELLOW)
     {
-      myHub.setLedColor((Color)color);
-      myHub.setBasicMotorSpeed(portA, 25);
+      myHub->setLedColor((Color)color);
+      myHub->setBasicMotorSpeed(portA, 25);
     }
     else if (color == (byte)Color::BLUE)
     {
-      myHub.setLedColor((Color)color);
-      myHub.setBasicMotorSpeed(portA, 35);
+      myHub->setLedColor((Color)color);
+      myHub->setBasicMotorSpeed(portA, 35);
     }
   }
 }

@@ -20,19 +20,21 @@ void setup()
 }
 
 // callback function to handle updates of sensor values
-void colorDistanceSensorCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+void colorDistanceSensorCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
   Serial.print("sensorMessage callback for port: ");
   Serial.println(portNumber, DEC);
   if (deviceType == DeviceType::COLOR_DISTANCE_SENSOR)
   {
-    int color = myMoveHub.parseColor(pData);
-    double distance = myMoveHub.parseDistance(pData);
+    int color = myHub->parseColor(pData);
+    double distance = myHub->parseDistance(pData);
     Serial.print("Color: ");
     Serial.print(COLOR_STRING[color]);
     Serial.print(" Distance: ");
     Serial.println(distance, DEC);
-    myMoveHub.setLedColor((Color)color);
+    myHub->setLedColor((Color)color);
   }
 }
 

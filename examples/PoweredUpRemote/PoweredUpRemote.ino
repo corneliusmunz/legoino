@@ -28,13 +28,15 @@ int updatedSpeed = 0;
 bool isInitialized = false;
 
 // callback function to handle updates of remote buttons
-void remoteCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
+void remoteCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
+  Lpf2Hub *myRemoteHub = (Lpf2Hub *)hub;
+
   Serial.print("sensorMessage callback for port: ");
   Serial.println(portNumber, DEC);
   if (deviceType == DeviceType::REMOTE_CONTROL_BUTTON)
   {
-    ButtonState buttonState = myRemote.parseRemoteButton(pData);
+    ButtonState buttonState = myRemoteHub->parseRemoteButton(pData);
     Serial.print("Buttonstate: ");
     Serial.println((byte)buttonState, HEX);
 
@@ -53,7 +55,7 @@ void remoteCallback(byte portNumber, DeviceType deviceType, uint8_t *pData)
 
     if (currentSpeed != updatedSpeed)
     {
-      myHub.setBasicMotorSpeed(portA, updatedSpeed);
+      myHub->setBasicMotorSpeed(portA, updatedSpeed);
       currentSpeed = updatedSpeed;
     }
 
