@@ -187,6 +187,7 @@ All debug logs where restructured and now the standard `log_d`, `log_w`, `log_xx
 * PowerFunction (IR) functions included
 * Hub Emulation (powered up to powerfunction translator)
 * Support of `setAbsoluteMotorPosition`, `setAbsoluteMotorEncoderPosition`
+* Adding of `getHubName`
 
 * thanks to @carlalldis for the addition of the absolute motor commands
 * thanks to @giancann and @marcrupprath for the first super implementations of the hub emulation idea

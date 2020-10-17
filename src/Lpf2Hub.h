@@ -46,7 +46,6 @@ public:
   NimBLEAddress getHubAddress();
   HubType getHubType();
   std::string getHubName();
-  void setHubType(HubType hubType);
   void setHubName(char name[]);
   void shutDownHub();
   void activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);

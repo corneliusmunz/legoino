@@ -8,8 +8,6 @@ Arduino Library for controlling all kinds of *LEGO* Powered UP devices. From the
 
 It is also possible to use the "old" Power Function IR Modules and control them via an IR LED connected to a PIN of your ESP32 device. With the Hub emulation function you can even control an "old" Power Function Light or Motor with the Powered Up App.
 
-
-
 ## Quickstart
 You can find a step by step instruction to your first Legoino project on the following link: [Quickstart Tutorial](doc/QUICKSTART.md)
 
@@ -38,7 +36,6 @@ Simple Boost movement example (just click the image to see the video)
 ToDo: Add PowerFunction Adapter to show Hub Emulation
 
 
-
 # Examples
 All the included examples are a great source to find a solution or pattern for your problem you want to solve with your Arduino sketch.
 
@@ -56,25 +53,278 @@ You can find different Examples in the "examples" folder. You can select the exa
 # Setup and Usage
 Just install the Library via the Arduino Library Manager.
 
-The usage is dependent on your hub type. Most of the commands are shared for all Hub Types and are mor dependent on the device (motor, sensor) which is connected to a specific port. Some commands are hub specific (e.g. Boost movement).
-
-
 ## First example
+Just have a look on the [Quickstart Tutorial](doc/QUICKSTART.md).
 
 ## Connection procedure
+To setup a connection to your hub, the Hub instance has to be initialized. This will trigger a Scan procedure to look if a Lego Hub is active. If the library found an active hub, it will read out his data (Hub Address, Hub Name, etc.) and changes the state to `myHub.isConnecting() == true` 
+
+Now you are ready to connect to the hub with the command `myHub.connectHub();`
+
+If the library changes the state to `myHub.isConnected() == true` you are ready to go and do some cool stuff :grin:
+
+
+In the ```setup``` part of your Arduino sketch, just initialize your Hub
+```c++
+myHub.init();
+```
+
+In the main ```loop``` just add the following connection flow
+```c++
+  if (myHub.isConnecting()) {
+    myHub.connectHub();
+    if (myHub.isConnected()) {
+      Serial.println("We are now connected to the HUB");
+    } else {
+      Serial.println("We have failed to connect to the HUB");
+    }
+  }
+```
 
 ## Motor Commands
 
+There are different types of motors in the *LEGO* ecosystem. The Basic Motor (e.g. Train Hub), The Tacho motor and the absolute motor. The Prefixes `Basic`, `Tacho` and `Absolute` tells you which command fits for which type of motor. The Tacho Motor commands can also be used for the Absolute motor. 
+
+```c++
+  void stopBasicMotor(byte port);
+  void setBasicMotorSpeed(byte port, int speed);
+  ````
+
+```c++
+  void setAccelerationProfile(byte port, int16_t time);
+  void setDecelerationProfile(byte port, int16_t time);
+  void stopTachoMotor(byte port);
+  void setTachoMotorSpeed(byte port, int speed, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setTachoMotorSpeedForTime(byte port, int speed, int16_t time, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setTachoMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setAbsoluteMotorPosition(byte port, int speed, int32_t position, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setAbsoluteMotorEncoderPosition(byte port, int32_t position);
+```
+
+
 ## Hub Commands
 
-## Sensor handling
+For some use cases it is needed to get the hub address (check a specific hub), the hub type (check a hub type) or the hub name. It is also possible to change the hub name and shutdown the hub. 
+```c++
+  NimBLEAddress getHubAddress();
+  HubType getHubType();
+  std::string getHubName();
+  void setHubName(char name[]);
+  void shutDownHub();
+  ``` 
+
+## LED Commands
+
+To control the Hub LEDs, you can use predefined color Variables in the `Color` enum, RGB values or HSV values with the following commands:
+
+```c++
+  void setLedColor(Color color);
+  void setLedRGBColor(char red, char green, char blue);
+  void setLedHSVColor(int hue, double saturation, double value);
+```
+
+## Sensor and hub proptery handling
+To get notified about sensor value updates (Button, Hub properties like Voltag, Rssi, Tacho motor encoder, Speedometer, Colorsensor, Distancesensor, ...), callback functions are used. After you read the following section you can also have a look into the examples which are included in the library. They are always a good source to find solutions/patterns for problems you want to solve.
+
+### Callbacks
+
+To use the callbacks you have to do the following steps. Part of the callback ist the reference of the hub instance. So you can use the hub instance which have triggerd the callback function to control attached motors or devices.
+
+#### Write callback function for port devices
+
+To read in changes of devices which are attached to a Port (build in or external), you have to write a function with the following signature:
+```c++
+typedef void (*PortValueChangeCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
+````
+
+Example:
+```c++
+// callback function to handle updates of sensor values
+void tachoMotorCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
+{
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
+  Serial.print("sensorMessage callback for port: ");
+  Serial.println(portNumber, DEC);
+  if (deviceType == DeviceType::MEDIUM_LINEAR_MOTOR)
+  {
+    int rotation = myHub->parseTachoMotor(pData);
+    Serial.print("Rotation: ");
+    Serial.print(rotation, DEC);
+    Serial.println(" [degrees]");
+    myHub->setLedHSVColor(abs(rotation), 1.0, 1.0);
+  }
+}
+```
+
+This function will be called if an value update appears and you can react on the new value. In this case the LED color changes depentend on the motor rotation.
+
+#### Write callback function for hub properties
+
+To read in changes of hub properties (button, RSSI, battery level, ...), you have to write a function with the following signature:
+```c++
+typedef void (*HubPropertyChangeCallback)(void *hub, HubPropertyReference hubProperty, uint8_t *pData);
+```
+
+Example:
+```c++
+// callback function to handle updates of hub properties
+void hubPropertyChangeCallback(void *hub, HubPropertyReference hubProperty, uint8_t *pData)
+{
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+  Serial.print("HubAddress: ");
+  Serial.println(myHub->getHubAddress().toString().c_str());
+
+  Serial.print("HubProperty: ");
+  Serial.println((byte)hubProperty, HEX);
+
+  if (hubProperty == HubPropertyReference::RSSI)
+  {
+    Serial.print("RSSI: ");
+    Serial.println(myHub->parseRssi(pData), DEC);
+    return;
+  }
+
+  if (hubProperty == HubPropertyReference::BATTERY_VOLTAGE)
+  {
+    Serial.print("BatteryLevel: ");
+    Serial.println(myHub->parseBatteryLevel(pData), DEC);
+    return;
+  }
+
+  if (hubProperty == HubPropertyReference::BUTTON)
+  {
+    Serial.print("Button: ");
+    Serial.println((byte)myHub->parseHubButton(pData), HEX);
+    return;
+  }
+}
+```
+
+This function will be called if an value update appears and you can react on the new value. In this case it will check the hub button state (pressed, released) or the RSSI value has changed or the battery level has changed.
+
+### Activate notifications
+
+To get calls to your callback functions you have to register or activate it for the properties you want to get informed about updates. This has to be done after the hub is connected (not before). If you want to register updates for several properties/sensors, just add a short delay (50-100ms) after each register/activate call. 
+
+For Port related updates you have to use the function
+```c++
+  void activatePortDevice(byte portNumber, byte deviceType, PortValueChangeCallback portValueChangeCallback = nullptr);
+```
+
+Example
+```c++
+// get notified for value updates of the device which is connected on port D
+myMoveHub.activatePortDevice(portD, tachoMotorCallback);
+delay(50);
+myMoveHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, buttonCallback);
+```
+
+For Hub property related updates you have to use the function
+```c++
+  void activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);
+```
+
+Example
+```c++
+// get notified for value updates of the build in Button of the hub
+myMoveHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, buttonCallback);
+```
+
+You can also check if an expected device is really connected to a port by using the new introduced function `checkPortForDevice`like in the following example
+
+```c++
+Serial.print("check ports... if needed sensor is already connected: ");
+byte portForDevice = myHub.getPortForDeviceType((byte)DeviceType::COLOR_DISTANCE_SENSOR);
+Serial.println(portForDevice, DEC);
+// check for expected port number where the device should be connected
+if (portForDevice == 1)  
+{
+	Serial.println("activatePortDevice");
+	myHub.activatePortDevice(portB, colorDistanceSensorCallback);
+}
+```
 
 ## Hub emulation
 
-## PowerFunction IR
+The Hub emulation feature is in *BETA* mode. You can test it and if you find any issues or needed new requirements, just open an [issue](https://github.com/corneliusmunz/legoino/issues/new/choose) in github project
+
+The basic idea is that the ESP32 controller acts like an hub and could be controlled via the PoweredUp, Control+ or Boost App. 
+
+
+First you have to create an instance of a hub where you can define the Name of the Hub which will be advertised and the type of the hub. In the current implementation only the `POWERED_UP_HUB` and the `CONTROL_PLUS_HUB` type is supported. 
+
 ```c++
-  PowerFunctions(uint8_t pin, uint8_t channel);
-  PowerFunctions(uint8_t pin);
+#include "Lpf2HubEmulation.h"
+#include "LegoinoCommon.h"
+
+// create a hub instance
+Lpf2HubEmulation myEmulatedHub("TrainHub", HubType::POWERED_UP_HUB);
+```
+
+To get notified if a command is sent to the app, a callback has to be defined and registered with the `setWritePortCallback`. If the app is connected and send out a command, you can define what you want to do if you receive that command. For example you can send out a power function command to act as a hub relay. 
+
+```c++
+  // define the callback function if a write message event on the characteristic occurs
+  myEmulatedHub.setWritePortCallback(&writeValueCallback); 
+  myEmulatedHub.start();
+```
+
+```c++
+void writeValueCallback(byte port, byte value)
+{
+  Serial.println("writeValueCallback: ");
+  Serial.println(port, HEX);
+  Serial.println(value, HEX);
+
+  if (port == 0x00)
+  {
+    //do something when port 0x00 (A) has received a value
+  }
+
+  if (port == 0x01)
+  {
+    //do something when port 0x01 (B) has received a value
+  }
+
+  if (port == 0x32)
+  {
+    //do something when port 0x32 (LED) has received a value
+  }
+}
+```
+
+To signalize the app which devices are connected you have to send some commands with the `attachDevice` method. You can define on which port, which device type is connected. 
+
+```c++
+  // if an app is connected, attach some devices on the ports to signalize 
+  // the app that values could be received/written to that ports
+  if (myEmulatedHub.isConnected && !myEmulatedHub.isPortInitialized)
+  {
+    delay(1000);
+    myEmulatedHub.isPortInitialized = true;
+    myEmulatedHub.attachDevice(0x00, DeviceType::MEDIUM_LINEAR_MOTOR);
+    delay(1000);
+    myEmulatedHub.attachDevice(0x32, DeviceType::HUB_LED);
+    delay(1000);
+    myEmulatedHub.attachDevice(0x01, DeviceType::MEDIUM_LINEAR_MOTOR);
+    delay(1000);
+  }
+```
+
+## PowerFunction IR
+
+To use the PowerFunction Infrared library you have to connect a IR-LED to your ESP32 controller. To instanciate a new object, you have to define on which pin the IR Led is connected. Additionally you can define the Power function channel which should be used. 
+
+```c++
+#include "PowerFunctions.h"
+// create a power functions instance (IR LED on Pin 12, IR Channel 0)
+PowerFunctions pf(12, 0);
+````
+
+Then you can control the output ports (Red, Blue) with the following possible commands. The ports could be defined with the `PowerFunctionsPort` enum. For the PWM values the `PowerFunctionsPwm` enum is used.
+```c++
   void single_pwm(PowerFunctionsPort port, PowerFunctionsPwm pwm);
   void single_pwm(PowerFunctionsPort port, PowerFunctionsPwm pwm, uint8_t channel);
   void single_increment(PowerFunctionsPort port);
@@ -83,152 +333,40 @@ The usage is dependent on your hub type. Most of the commands are shared for all
   void single_decrement(PowerFunctionsPort port, uint8_t channel);
   void combo_pwm(PowerFunctionsPwm redPwm, PowerFunctionsPwm bluePwm);
   void combo_pwm(PowerFunctionsPwm redPwm, PowerFunctionsPwm bluePwm, uint8_t channel);
-  PowerFunctionsPwm speedToPwm(byte speed);
-  ```
+```
 
-## Supported devices
+There is a helper function to convert speed values from `-100...100` to the discrete PWM values
+```c++
+PowerFunctionsPwm speedToPwm(byte speed);
+```
 
-### Hubs
+## Boost
 
-### Devices
+The Boost functions are a higher level of abstraction for moving the Vernie or MTR4 model one step forward/back and rotate the model or move with an arc.
 
-### Function Mapping (App <-> Legoino)
-
-## Boost Hub
 Add the follwoing include in your *.ino sketch
-```c
-#include "BoostHub.h"
+```c++
+#include "Boost.h"
+Boost myBoostHub;
 ```
-Make a new instance of the Hub object
-```c
-BoostHub myBoostHub;
-```
-
-In the ```setup``` part of your Arduino sketch, just initialize your Hub
-```c
-myBoostHub.init();
-```
-Alternatively you can use the ```init()``` function also in the main loop if you want to check the ```isConnected()``` status e.g. to reconnect automatically the hub.
-
-If you want to connect to a specific hub you can initialize your Hub with a specific address. The address has to be 
-represented by a hex string of the format: ```00:00:00:00:00:00```
-```c
-myBoostHub.init("90:84:2b:03:19:7f");
-```
-
-If you want to change the BLE scan duration to detect a new Hub you can use the init function with a time parameter in seconds. The default value is 1 second. In former versions of the library it was 30 seconds which sometimes led to errors during the connection process.
-```c
-myBoostHub.init(2); // 2 seconds scan duration
-```
-
-Alternatively you can set the scan duration and the specific address of a hub in the init function with two parameters.
-```c
-myBoostHub.init("90:84:2b:03:19:7f", 2); // connect to hub with address and a scan duration of 2 seconds
-```
-
-In the main ```loop``` just add the following connection flow
-```c
-  if (myBoostHub.isConnecting()) {
-    myBoostHub.connectHub();
-    if (myBoostHub.isConnected()) {
-      Serial.println("We are now connected to the HUB");
-    } else {
-      Serial.println("We have failed to connect to the HUB");
-    }
-  }
-```
-
-Now you are ready to control your actuators on your Hub
-
-### Hub control
-You can define the display name of the Hub (e.g. displayed in the PoweredUp Apps) with the following command. 
-```c
-char hubName[] = "myBoostHub";
-myBoostHub.setHubName(hubName);
-```
-The maximum supported length of the character array is 14
-
-If you want to shut down the LEGO Hub, you can use the following command:
-```c
-myBoostHub.shutDownHub();
-```
-The Hub will disconnect and then shut down. 
-
-After the Hub is connected you can get the address of the Hub as a ```NimBLEAddress``` structure using the following command
-```
-myBoostHub.getHubAddress();
-```
-To print it out you can e.g. use the following commands
-```
-Serial.print("Hub address: ");
-Serial.println(myBoostHub.getHubAddress().toString().c_str());
-```
-
-
-### LED control
-
-You can either define a color of the LED in the HUB via predifined colors or you can define the color via RGB values
-```c
-myBoostHub.setLedColor(GREEN);
-```
-Available colors are: BLACK, PINK, PURPLE, BLUE, LIGHTBLUE, CYAN, GREEN, YELLOW, ORANGE, RED, WHITE
-
-```c
-myBoostHub.setLedRGBColor(255, 50, 0);
-```
-The ranges of the colors are from 0..255
-
-### Motor control
-
-You can define the port and speed of a motor which is connected to your HUB. The speed values vary from -100...100. 0 will stop the Motor. If you use negative values the direction is reversed. 
-```c
-myBoostHub.setMotorSpeed(A, 25); // 25% forward speed, Port A
-myBoostHub.setMotorSpeed(A, -30); // 30% reversed speed, Port A
-```
-
-If you want to stop the motor, you can use the follwing command. If you do not specify a port value, all motors will be stopped.
-```c
-myBoostHub.stopMotor(A); // Stop motor on Port A
-myBoostHub.stopMotor(); // Stop all motors (Port A and Port B)
-```
-
-If you want to set the motor speed for a port for a specific time in miliseconds, you can use the following command.
-```c
-myBoostHub.setMotorSpeedForTime(A, 50, 1000); // 50% speed, Port A, 1000ms duration
-myBoostHub.setMotorSpeedForTime(A, -25, 500); // -50% speed (reversed), Port A, 500ms duration
-```
-
-If you want to set the motor speed for a port for a specific angle in degrees, you can use the following command.
-```c
-myBoostHub.setMotorSpeedForDegrees(A, 50, 90); // 50% speed, Port A, 90 degrees rotation 
-myBoostHub.setMotorSpeedForDegrees(A, -25, 360); // -50% speed (reversed), Port A, 360 degrees rotation
-```
-
-If you want to set the motor speeds for the hub motors A,B for a specific angle in degrees, you can use the following command. Be aware, that here the so called [tacho math](https://lego.github.io/lego-ble-wireless-protocol-docs/index.html#tacho-math) from the lego wireless protocoll specification will be applied
-```c
-myBoostHub.setMotorSpeedsForDegrees(50, -50, 360); // speed motor A 50%, speed motor B -50%, for 360 degrees. This will lead to a rotation 
-myBoostHub.setMotorSpeedsForDegrees(50, 25, 180); // speed motor A 50%, speed motor B 25%, for 180 degrees. This will lead to a arc movement 
-```
-
-
 
 ### Basic movements (Vernie, M.T.R. 4)
 If you want to move Vernie or M.T.R. 4 you can use the following commands. These commands are using the underlying basic motor commands and are adjusted to the boost grid map.
 
 If you want to move forward for a specific number of steps, just use the follwing command
-```c
+```c++
 myBoostHub.moveForward(1) // move one step forward
 myBoostHub.moveForward(3) // move three steps forward
 ```
 
 If you want to move back for a specific number of steps, just use the follwing command
-```c
+```c++
 myBoostHub.moveBack(1) // move one step back
 myBoostHub.moveBack(3) // move three steps back
 ```
 
 If you want to rotate for a specific angle, just use the follwing commands
-```c
+```c++
 myBoostHub.rotateLeft(90) // rotate 90 degrees left
 myBoostHub.rotateRight(180) // rotate 180 degrees right
 myBoostHub.rotate(360) // rotate 360 degrees right (positive angles means right, negative means left)
@@ -236,7 +374,7 @@ myBoostHub.rotate(-180) // rotate 180 degrees left (positive angles means right,
 ```
 
 If you want to move with an arc for a specific angle, just use the follwing commands
-```c
+```c++
 myBoostHub.moveArcLeft(180) // move with an arc for 180 degrees to the left
 myBoostHub.moveArcRight(90) // move with an arc for 90 degrees to the right
 myBoostHub.moveArc(270) // move with an arc for 270 degrees to the right (positive angles means right, negative means left)
@@ -274,7 +412,7 @@ Thanks to [@giancann](https://github.com/giancann), [@marcrupprath](https://gith
 
 Thanks to [@fvanroie](https://github.com/fvanroie) for his contribution about callbacks.
 
-Thanks for the original [PowerFunctions](https://github.com/jurriaan/Arduino-PowerFunctions) Library by @jurriaan
+Thanks for the original [PowerFunctions](https://github.com/jurriaan/Arduino-PowerFunctions) Library by [@jurriaan](https://github.com/jurriaan)
 
 # Remarks
 Prerequisite of that library is the NimBLE-Arduino library (https://github.com/h2zero/NimBLE-Arduino) with at least version 1.0.1 Otherwise the notifcations of changed charachteristic values will not work. So just install as a prerequesite the version 1.0.1 of that library via the Arduino Library manager or the platform.io library manager (https://www.arduinolibraries.info/libraries/nim-ble-arduino)

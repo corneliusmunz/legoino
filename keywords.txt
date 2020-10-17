@@ -20,6 +20,7 @@ isConnected	KEYWORD2
 isConnecting	KEYWORD2
 getHubAddress	KEYWORD2
 setHubName	KEYWORD2
+getHubName	KEYWORD2
 shutDownHub	KEYWORD2
 activateHubPropertyUpdate	KEYWORD2
 deactivateHubPropertyUpdate	KEYWORD2
