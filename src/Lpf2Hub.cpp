@@ -58,6 +58,7 @@ public:
         {
             advertisedDevice->getScan()->stop();
             _lpf2Hub->_pServerAddress = new BLEAddress(advertisedDevice->getAddress());
+            _lpf2Hub->_hubName = advertisedDevice->getName();
 
             if (advertisedDevice->haveManufacturerData())
             {
@@ -918,6 +919,7 @@ void Lpf2Hub::setHubName(char name[])
     {
         return;
     }
+    _hubName = std::string(name, nameLength);
 
     char offset = 3;
     int arraySize = offset + nameLength;
@@ -1067,6 +1069,15 @@ bool Lpf2Hub::isConnected()
 HubType Lpf2Hub::getHubType()
 {
     return _hubType;
+}
+
+/**
+ * @brief Retrieve the hub name
+ * @return hub name 
+ */
+std::string Lpf2Hub::getHubName()
+{
+    return _hubName;
 }
 
 /**

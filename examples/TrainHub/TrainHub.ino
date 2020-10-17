@@ -34,6 +34,8 @@ void loop() {
       Serial.println("Connected to HUB");
       Serial.print("Hub address: ");
       Serial.println(myTrainHub.getHubAddress().toString().c_str());
+      Serial.print("Hub name: ");
+      Serial.println(myTrainHub.getHubName().c_str());
     } else {
       Serial.println("Failed to connect to HUB");
     }

@@ -45,6 +45,7 @@ public:
   bool isConnecting();
   NimBLEAddress getHubAddress();
   HubType getHubType();
+  std::string getHubName();
   void setHubType(HubType hubType);
   void setHubName(char name[]);
   void shutDownHub();
@@ -121,6 +122,7 @@ public:
   BLEAddress *_requestedDeviceAddress = nullptr;
   BLERemoteCharacteristic *_pRemoteCharacteristic;
   HubType _hubType;
+  std::string _hubName;
   boolean _isConnecting;
   boolean _isConnected;
 
