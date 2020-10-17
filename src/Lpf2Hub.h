@@ -134,7 +134,7 @@ private:
   int numberOfConnectedDevices = 0;
 
   //BLE settings
-  uint32_t _scanDuration = 5;
+  uint32_t _scanDuration = 10;
 };
 
 #endif

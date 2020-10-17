@@ -1,5 +1,5 @@
 /**
- * A MoveHub basic example to connect a boost hub, set the led color and the name of the hub and
+ * A Boost basic example to connect a boost hub, set the led color and the name of the hub and
  * do some basic movements on the boost map grid
  * 
  * (c) Copyright 2020 - Cornelius Munz
@@ -7,10 +7,10 @@
  * 
  */
 
-#include "MoveHub.h"
+#include "Boost.h"
 
 // create a hub instance
-MoveHub myMoveHub;
+Boost myMoveHub;
 byte portC = (byte)MoveHubPort::C;
 byte portD = (byte)MoveHubPort::D;
 

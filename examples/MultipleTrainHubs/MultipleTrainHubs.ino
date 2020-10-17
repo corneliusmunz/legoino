@@ -15,61 +15,71 @@ Lpf2Hub myTrainHub2;
 Lpf2Hub myRemote1;
 Lpf2Hub myRemote2;
 
-
-void setup() {
-    Serial.begin(115200);
-} 
-
+void setup()
+{
+  Serial.begin(115200);
+  myTrainHub1.init(); // initalize the PoweredUpHub instance
+}
 
 // main loop
-void loop() {
-
-  if (!myTrainHub1.isConnected() && !myTrainHub1.isConnecting()) 
-  {
-    myTrainHub1.init(); // initalize the PoweredUpHub instance
-    //myTrainHub.init("90:84:2b:03:19:7f"); //example of initializing an hub with a specific address
-  }
-
+void loop()
+{
   // connect flow. Search for BLE services and try to connect if the uuid of the hub is found
-  if (myTrainHub1.isConnecting()) {
+  if (myTrainHub1.isConnecting())
+  {
     myTrainHub1.connectHub();
-    if (myTrainHub1.isConnected()) {
+    if (myTrainHub1.isConnected())
+    {
       Serial.println("Connected to HUB1");
       myTrainHub2.init();
-    } else {
+    }
+    else
+    {
       Serial.println("Failed to connect to HUB");
     }
   }
-  
 
-  if (myTrainHub2.isConnecting()) {
+  if (myTrainHub2.isConnecting())
+  {
     myTrainHub2.connectHub();
-    if (myTrainHub2.isConnected()) {
+    if (myTrainHub2.isConnected())
+    {
       Serial.println("Connected to HUB2");
       myRemote1.init();
-    } else {
+    }
+    else
+    {
       Serial.println("Failed to connect to HUB");
     }
   }
 
-  
-  if (myRemote1.isConnecting()) {
+  if (myRemote1.isConnecting())
+  {
     myRemote1.connectHub();
-    if (myRemote1.isConnected()) {
+    if (myRemote1.isConnected())
+    {
       Serial.println("Connected to Remote1");
       myRemote2.init();
-    } else {
+    }
+    else
+    {
       Serial.println("Failed to connect to HUB");
     }
   }
 
-  if (myRemote2.isConnecting()) {
+  if (myRemote2.isConnecting())
+  {
     myRemote2.connectHub();
-    if (myRemote2.isConnected()) {
+    if (myRemote2.isConnected())
+    {
       Serial.println("Connected to Remote2");
-    } else {
+    }
+    else
+    {
       Serial.println("Failed to connect to HUB");
     }
   }
-  
+
+  delay(100);
+
 } // End of loop

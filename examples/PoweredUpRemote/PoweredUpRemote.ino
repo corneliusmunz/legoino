@@ -55,7 +55,7 @@ void remoteCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *
 
     if (currentSpeed != updatedSpeed)
     {
-      myHub->setBasicMotorSpeed(portA, updatedSpeed);
+      myHub.setBasicMotorSpeed(portA, updatedSpeed);
       currentSpeed = updatedSpeed;
     }
 

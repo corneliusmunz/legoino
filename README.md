@@ -393,6 +393,10 @@ It is possible to connect to up to 9 hubs in parallel with an common ESP32 board
 
 Then close the Arduino environment and open it again to force the rebuild of the library. Open your sketch build and upload it and be happy with multiple connections.
 
+# Debug Messages
+
+The standard `log_d`, `log_w`, `log_xx` messages are used. The log levels could be set via the arduino environment and the messages are send to the serial monitor.
+
 # Credits
 Hands up to Lego, that they have recently open-sourced the Specification
 https://github.com/LEGO/lego-ble-wireless-protocol-docs
