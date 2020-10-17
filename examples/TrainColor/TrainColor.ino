@@ -3,67 +3,112 @@
  * motor dependent on the detected color. If the train is stopped, you can start the train by
  * pressing the hub button.
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
  */
 
-#include "PoweredUpHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-PoweredUpHub myHub;
-PoweredUpHub::Port _portA = PoweredUpHub::Port::A;
-PoweredUpHub::Port _portB = PoweredUpHub::Port::B;
+Lpf2Hub myHub;
+byte portA = (byte)PoweredUpHubPort::A;
+byte portB = (byte)PoweredUpHubPort::B;
 
+bool isInitialized = false;
 
-void setup() {
-    Serial.begin(115200);
-    myHub.init(); // initalize the PoweredUp hub instance
-} 
+void hubButtonCallback(void *hub, HubPropertyReference hubProperty, uint8_t *pData)
+{
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
 
+  if (hubProperty == HubPropertyReference::BUTTON)
+  {
+    ButtonState buttonState = myHub->parseHubButton(pData);
+    Serial.print("Button: ");
+    Serial.println((byte)buttonState, HEX);
+
+    if (buttonState == ButtonState::PRESSED)
+    {
+      myHub->setBasicMotorSpeed(portA, 15);
+    }
+  }
+}
+
+// callback function to handle updates of sensor values
+void colorDistanceSensorCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
+{
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+
+  Serial.print("sensorMessage callback for port: ");
+  Serial.println(portNumber, DEC);
+  if (deviceType == DeviceType::COLOR_DISTANCE_SENSOR)
+  {
+    int color = myHub->parseColor(pData);
+    Serial.print("Color: ");
+    Serial.println(COLOR_STRING[color]);
+
+    // set hub LED color to detected color of sensor and set motor speed dependent on color
+    if (color == (byte)Color::RED)
+    {
+      myHub->setLedColor((Color)color);
+      myHub->stopBasicMotor(portA);
+    }
+    else if (color == (byte)Color::YELLOW)
+    {
+      myHub->setLedColor((Color)color);
+      myHub->setBasicMotorSpeed(portA, 25);
+    }
+    else if (color == (byte)Color::BLUE)
+    {
+      myHub->setLedColor((Color)color);
+      myHub->setBasicMotorSpeed(portA, 35);
+    }
+  }
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  myHub.init(); // initalize the PoweredUp hub instance
+}
 
 // main loop
-void loop() {
+void loop()
+{
 
   // connect flow. Search for BLE services and try to connect if the uuid of the hub is found
-  if (myHub.isConnecting()) {
+  if (myHub.isConnecting())
+  {
     myHub.connectHub();
-    if (myHub.isConnected()) {
+    if (myHub.isConnected())
+    {
       Serial.println("Connected to HUB");
-      // connect color/distance sensor to port c, activate sensor for updates
-      myHub.activatePortDevice(_portB, 37);
-      myHub.setLedColor(GREEN);
-    } else {
+      myHub.setLedColor(RED);
+    }
+    else
+    {
       Serial.println("Failed to connect to HUB");
     }
   }
 
-  // if connected, you can start your control-flow
-  if (myHub.isConnected()) {
-    
-    delay(100);
-
-    if (myHub.isButtonPressed()) {
-        myHub.setMotorSpeed(_portA, 15);
-    }
-   
-    // read color value of sensor
-    int color = myHub.getColor();
-    Serial.print("Color: ");
-    Serial.println(color, DEC);
-
-    // set hub LED color to detected color of sensor
-    if (color == 9) { 
-        myHub.setLedColor(RED);
-        myHub.stopMotor(_portA);     
-    } else if (color == 7){
-        myHub.setLedColor(YELLOW);
-        myHub.setMotorSpeed(_portA, 25);   
-    }else if (color == 3){ 
-        myHub.setLedColor(BLUE);
-        myHub.setMotorSpeed(_portA, 35);
-    } 
+  if (myHub.isConnected() && !isInitialized)
+  {
+    delay(200);
+    Serial.print("check ports... if needed sensor is already connected: ");
+    byte portForDevice = myHub.getPortForDeviceType((byte)DeviceType::COLOR_DISTANCE_SENSOR);
+    Serial.println(portForDevice, DEC);
+    if (portForDevice != 255)
+    {
+      Serial.println("activatePortDevice");
+      myHub.activatePortDevice(portB, colorDistanceSensorCallback);
+      delay(200);
+      // activate hub button to receive updates
+      myHub.activateHubPropertyUpdate(HubPropertyReference::BUTTON, hubButtonCallback);
+      delay(200);
+      myHub.setLedColor(GREEN);
+      isInitialized = true;
+    };
 
   }
-  
+
 } // End of loop

@@ -1,0 +1,74 @@
+/*
+ * Lpf2HubEmulation.h - Arduino base class for emulating a hub.
+ * 
+ * (c) Copyright 2020 - Cornelius Munz
+ * 
+ * Initial issue/idea by https://github.com/AlbanT
+ * Initial implementation idea by https://github.com/marcrupprath
+ * Initial implementation with controlling LEDs and outputs by https://github.com/GianCann
+ * 
+ * Released under MIT License
+ * 
+*/
+
+#ifndef Lpf2HubEmulation_h
+#define Lpf2HubEmulation_h
+
+#include "Arduino.h"
+#include <NimBLEDevice.h>
+#include "Lpf2HubConst.h"
+
+typedef void (*WritePortCallback)(byte port, byte value);
+
+class Lpf2HubEmulation
+{
+private:
+  // Notification callbacks if values are written to the characteristic
+  BLEUUID _bleUuid;
+  BLEUUID _charachteristicUuid;
+  BLEAddress *_pServerAddress;
+  BLEServer *_pServer;
+  BLEService *_pService;
+  BLEAddress *_hubAddress = nullptr;
+  BLEAdvertising *_pAdvertising;
+
+    // Hub information values
+  int8_t _rssi;
+  uint8_t _batteryLevel;
+  BatteryType _batteryType;
+  std::string _hubName = "myEmuatedHub";
+  HubType _hubType;
+  Version _firmwareVersion;
+  Version _hardwareVersion;
+
+  void writeValue(MessageType messageType, std::string payload, bool notify = true);
+
+public:
+  Lpf2HubEmulation();
+  Lpf2HubEmulation(std::string hubName, HubType hubType);
+  void start();
+  void initializePorts();
+  void setWritePortCallback(WritePortCallback callback);
+  void setHubRssi(int8_t rssi);
+  void setHubBatteryLevel(uint8_t batteryLevel);
+  void setHubBatteryType(BatteryType batteryType);
+  void setHubName(std::string hubName, bool notify = true);
+  std::string getHubName();
+  void setHubFirmwareVersion(Version version);
+  void setHubHardwareVersion(Version version);
+  void setHubButton(bool pressed);
+
+  void attachDevice(byte port, DeviceType deviceType);
+  void detachDevice(byte port);
+
+  bool isConnected = false;
+  bool isPortInitialized = false;
+  BLECharacteristic *pCharacteristic;
+  WritePortCallback writePortCallback = nullptr;
+
+  // int setBatteryLevel(int batteryLevel);
+  // double setHubVoltage(double voltage);
+  // double setHubCurrent(double current);
+};
+
+#endif

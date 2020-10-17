@@ -1,7 +1,7 @@
 /*
  * Lpf2Hub.h - Arduino base class for controlling Powered UP and Boost controllers
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
 */
@@ -11,161 +11,130 @@
 
 #include "Arduino.h"
 #include "NimBLEDevice.h"
-using namespace std::placeholders;
 #include "Lpf2HubConst.h"
+#include "LegoinoCommon.h"
 
-//#define LOGGING_ENABLED
+using namespace std::placeholders;
 
-#ifdef LOGGING_ENABLED
-#define LOGLINE(...) Serial.println(__VA_ARGS__)
-#define LOG(...) Serial.print(__VA_ARGS__)
-#else
-#define LOGLINE(...)
-#define LOG(...)
-#endif
-
-typedef void (*ButtonCallback)(bool isPressed);
+typedef void (*HubPropertyChangeCallback)(void *hub, HubPropertyReference hubProperty, uint8_t *pData);
+typedef void (*PortValueChangeCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
 
 typedef struct Device
 {
   byte PortNumber;
   byte DeviceType;
+  PortValueChangeCallback Callback;
 };
 
 class Lpf2Hub
 {
-private:
-  // Notification callbacks
-  ButtonCallback _buttonCallback = nullptr;
 
 public:
+  // constructor
   Lpf2Hub();
+
+  // initializer methods
   void init();
   void init(uint32_t scanDuration);
   void init(std::string deviceAddress);
   void init(std::string deviceAddress, uint32_t scanDuration);
-  void initConnectedDevices(Device devices[], byte deviceNumbers);
+
+  // hub related methods
   bool connectHub();
   bool isConnected();
   bool isConnecting();
   NimBLEAddress getHubAddress();
-
+  HubType getHubType();
+  std::string getHubName();
   void setHubName(char name[]);
   void shutDownHub();
+  void activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);
+  void deactivateHubPropertyUpdate(HubPropertyReference hubProperty);
+
+  // port and device related methods
+  int getDeviceIndexForPortNumber(byte portNumber);
   byte getDeviceTypeForPortNumber(byte portNumber);
+  byte getPortForDeviceType(byte deviceType);
+  byte getModeForDeviceType(byte deviceType);
+  void registerPortDevice(byte portNumber, byte deviceType);
+  void deregisterPortDevice(byte portNumber);
+  void activatePortDevice(byte portNumber, byte deviceType, PortValueChangeCallback portValueChangeCallback = nullptr);
+  void activatePortDevice(byte portNumber, PortValueChangeCallback portValueChangeCallback = nullptr);
+  void deactivatePortDevice(byte portNumber, byte deviceType);
+  void deactivatePortDevice(byte portNumber);
+
+  // write (set) operations on port devices
+  void WriteValue(byte command[], int size);
+
   void setLedColor(Color color);
   void setLedRGBColor(char red, char green, char blue);
   void setLedHSVColor(int hue, double saturation, double value);
 
-  void registerButtonCallback(ButtonCallback buttonCallback);
-  void WriteValue(byte command[], int size);
-  static byte MapSpeed(int speed);
-  static byte *Int16ToByteArray(int16_t x);
-  static byte *Int32ToByteArray(int32_t x);
-  static unsigned char ReadUInt8(uint8_t *data, int offset);
-  static signed char ReadInt8(uint8_t *data, int offset);
-  static unsigned short ReadUInt16LE(uint8_t *data, int offset);
-  static signed short ReadInt16LE(uint8_t *data, int offset);
-  static unsigned int ReadUInt32LE(uint8_t *data, int offset);
-  static signed int ReadInt32LE(uint8_t *data, int offset);
+  void stopBasicMotor(byte port);
+  void setBasicMotorSpeed(byte port, int speed);
+
+  void setAccelerationProfile(byte port, int16_t time);
+  void setDecelerationProfile(byte port, int16_t time);
+  void stopTachoMotor(byte port);
+  void setTachoMotorSpeed(byte port, int speed, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setTachoMotorSpeedForTime(byte port, int speed, int16_t time, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setTachoMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+
+  void setAbsoluteMotorPosition(byte port, int speed, int32_t position, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+  void setAbsoluteMotorEncoderPosition(byte port, int32_t position);
+
+  void playSound(byte sound);
+  void playTone(byte number);
+
+  // parse methods to read in the message content of the charachteristic value
   void parseDeviceInfo(uint8_t *pData);
   void parsePortMessage(uint8_t *pData);
   void parseSensorMessage(uint8_t *pData);
-  void parseBoostDistanceAndColor(uint8_t *data);
-  void parseBoostTachoMotor(uint8_t *data);
-  void parseBoostHubMotor(uint8_t *pData);
-  void parseBoostTiltSensor(uint8_t *data);
-  void parseControlPlusHubTiltSensor(uint8_t *pData);
-  void parsePoweredUpRemote(uint8_t *pData);
+  double parseVoltageSensor(uint8_t *pData);
+  double parseCurrentSensor(uint8_t *pData);
+  double parseDistance(uint8_t *data);
+  int parseColor(uint8_t *data);
+  int parseReflectivity(uint8_t *pData);
+  int parseTachoMotor(uint8_t *data);
+  int parseSpeedometer(uint8_t *pData);
+  int parseBoostTiltSensorX(uint8_t *data);
+  int parseBoostTiltSensorY(uint8_t *data);
+  int parseControlPlusHubTiltSensorX(uint8_t *pData);
+  int parseControlPlusHubTiltSensorY(uint8_t *pData);
+  int parseControlPlusHubTiltSensorZ(uint8_t *pData);
+  ButtonState parseRemoteButton(uint8_t *pData);
   void parsePortAction(uint8_t *pData);
-  byte getModeForDeviceType(byte deviceType);
-  void registerPortDevice(byte portNumber, byte deviceType);
-  void deregisterPortDevice(byte portNumber);
-  void activatePortDevice(byte portNumber, byte deviceType);
-  void activatePortDevice(byte portNumber);
-  void deactivatePortDevice(byte portNumber, byte deviceType);
-  void deactivatePortDevice(byte portNumber);
-  void activateButtonReports();
-  void notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
-  void activateHubUpdates();
-  int getTachoMotorRotation();
-  double getDistance();
-  int getColor();
-  int getRssi();
-  int getBatteryLevel();
-  double getHubVoltage();
-  double getHubCurrent();
-  int getBoostHubMotorRotation();
-  int getTiltX();
-  int getTiltY();
-  int getTiltZ();
-  int getFirmwareVersionBuild();
-  int getFirmwareVersionBugfix();
-  int getFirmwareVersionMajor();
-  int getFirmwareVersionMinor();
-  int getHardwareVersionBuild();
-  int getHardwareVersionBugfix();
-  int getHardwareVersionMajor();
-  int getHardwareVersionMinor();
-  HubType getHubType();
-  bool isButtonPressed();
-  bool isLeftRemoteUpButtonPressed();
-  bool isLeftRemoteDownButtonPressed();
-  bool isLeftRemoteStopButtonPressed();
-  bool isLeftRemoteButtonReleased();
-  bool isRightRemoteUpButtonPressed();
-  bool isRightRemoteDownButtonPressed();
-  bool isRightRemoteStopButtonPressed();
-  bool isRightRemoteButtonReleased();
+  uint8_t parseSystemTypeId(uint8_t *pData);
+  byte parseBatteryType(uint8_t *pData);
+  uint8_t parseBatteryLevel(uint8_t *pData);
+  int parseRssi(uint8_t *pData);
+  Version parseVersion(uint8_t *pData);
+  ButtonState parseHubButton(uint8_t *pData);
+  std::string parseHubAdvertisingName(uint8_t *pData);
 
+  // BLE specific stuff
+  void notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;
   BLEAddress *_pServerAddress;
   BLEAddress *_requestedDeviceAddress = nullptr;
   BLERemoteCharacteristic *_pRemoteCharacteristic;
+  HubType _hubType;
+  std::string _hubName;
   boolean _isConnecting;
   boolean _isConnected;
-  HubType _hubType;
 
 private:
+  // Notification callbacks
+  HubPropertyChangeCallback _hubPropertyChangeCallback = nullptr;
+
+  // List of connected devices
   Device connectedDevices[13];
   int numberOfConnectedDevices = 0;
 
   //BLE settings
-  uint32_t _scanDuration = 1;
-  // Hub information values
-  int _lpf2HubRssi;
-  uint8_t _lpf2HubBatteryLevel;
-  int _lpf2HubHubMotorRotation;
-  bool _lpf2HubHubButtonPressed;
-  double _lpf2HubVoltage; //V
-  double _lpf2HubCurrent; //mA
-
-  int _lpf2HubFirmwareVersionBuild;
-  int _lpf2HubFirmwareVersionBugfix;
-  int _lpf2HubFirmwareVersionMajor;
-  int _lpf2HubFirmwareVersionMinor;
-
-  int _lpf2HubHardwareVersionBuild;
-  int _lpf2HubHardwareVersionBugfix;
-  int _lpf2HubHardwareVersionMajor;
-  int _lpf2HubHardwareVersionMinor;
-
-  // PoweredUp Remote
-  bool _lpf2HubRemoteLeftUpButtonPressed;
-  bool _lpf2HubRemoteLeftDownButtonPressed;
-  bool _lpf2HubRemoteLeftStopButtonPressed;
-  bool _lpf2HubRemoteLeftButtonReleased;
-
-  bool _lpf2HubRemoteRightUpButtonPressed;
-  bool _lpf2HubRemoteRightDownButtonPressed;
-  bool _lpf2HubRemoteRightStopButtonPressed;
-  bool _lpf2HubRemoteRightButtonReleased;
-
-  // Hub orientation
-  int _lpf2HubTiltX;
-  int _lpf2HubTiltY;
-  int _lpf2HubTiltZ;
+  uint32_t _scanDuration = 10;
 };
 
 #endif

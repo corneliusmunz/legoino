@@ -2,16 +2,16 @@
  * A Legoino example to control a train which has a motor connected
  * to the Port A of the Hub
  * 
- * (c) Copyright 2019 - Cornelius Munz
+ * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
  */
 
-#include "PoweredUpHub.h"
+#include "Lpf2Hub.h"
 
 // create a hub instance
-PoweredUpHub myTrainHub;
-PoweredUpHub::Port _port = PoweredUpHub::Port::A;
+Lpf2Hub myTrainHub;
+byte port = (byte)PoweredUpHubPort::A;
 
 void setup() {
     Serial.begin(115200);
@@ -34,6 +34,8 @@ void loop() {
       Serial.println("Connected to HUB");
       Serial.print("Hub address: ");
       Serial.println(myTrainHub.getHubAddress().toString().c_str());
+      Serial.print("Hub name: ");
+      Serial.println(myTrainHub.getHubName().c_str());
     } else {
       Serial.println("Failed to connect to HUB");
     }
@@ -49,13 +51,13 @@ void loop() {
     delay(1000);
     myTrainHub.setLedColor(RED);
     delay(1000);
-    myTrainHub.setMotorSpeed(_port, 35);
+    myTrainHub.setBasicMotorSpeed(port, 35);
     delay(1000);
-    myTrainHub.stopMotor(_port);
+    myTrainHub.stopBasicMotor(port);
     delay(1000);
-    myTrainHub.setMotorSpeed(_port, -35);
+    myTrainHub.setBasicMotorSpeed(port, -35);
     delay(1000);
-    myTrainHub.stopMotor(_port);
+    myTrainHub.stopBasicMotor(port);
     delay(1000);
 
   } else {
