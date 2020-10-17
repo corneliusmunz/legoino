@@ -69,11 +69,11 @@ void loop()
   {
     delay(1000);
     myEmulatedHub.isPortInitialized = true;
-    myEmulatedHub.attachDevice(0x00, DeviceType::MEDIUM_LINEAR_MOTOR);
+    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::A, DeviceType::MEDIUM_LINEAR_MOTOR);
     delay(1000);
-    myEmulatedHub.attachDevice(0x32, DeviceType::HUB_LED);
+    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::LED, DeviceType::HUB_LED);
     delay(1000);
-    myEmulatedHub.attachDevice(0x01, DeviceType::MEDIUM_LINEAR_MOTOR);
+    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::B, DeviceType::MEDIUM_LINEAR_MOTOR);
     delay(1000);
   }
 

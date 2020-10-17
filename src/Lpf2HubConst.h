@@ -265,7 +265,7 @@ enum struct PoweredUpHubPort
 {
   A = 0x00,
   B = 0x01,
-  LED = 0x34,
+  LED = 0x32,
   CURRENT = 0x3B,
   VOLTAGE = 0x3C
 };
