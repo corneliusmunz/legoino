@@ -4,7 +4,7 @@
 
 *Disclaimer*: LEGO® is a trademark of the LEGO Group of companies which does not sponsor, authorize or endorse this project.
 
-Arduino Library for controlling all kinds of *LEGO* Powered UP devices. From the two port hub, move hub (e.g. boost), duplo train hub, technic hub to several devices like distance and color sensor, tilt sensor, train motor, remote control, speedometer, etc. you can control almost everthing with that library and your Arduino sketch. 
+**Legoino** is an Arduino Library for controlling all kinds of *LEGO* Powered UP devices. From the two port hub, move hub (e.g. boost), duplo train hub, technic hub to several devices like distance and color sensor, tilt sensor, train motor, remote control, speedometer, etc. you can control almost everthing with that library and your Arduino sketch. 
 
 It is also possible to use the "old" Power Function IR Modules and control them via an IR LED connected to a PIN of your ESP32 device. With the Hub emulation function you can even control an "old" Power Function Light or Motor with the Powered Up App.
 
@@ -12,10 +12,12 @@ It is also possible to use the "old" Power Function IR Modules and control them 
 You can find a step by step instruction to your first Legoino project on the following link: [Quickstart Tutorial](doc/QUICKSTART.md)
 
 ## Breaking Changes
-Starting from version 1.0.0 many functions have been renamed and the global variables have been removed and are replaced by callback functions. In former versions the reading of sensor values of single or multiple sensors and even reading sensors from different hubs was not working properly. Due to the change to the NimBLE-Arduino library the callbacks could now be part of member functions and has not to be globally defined. 
+Starting from version 1.0.0 many functions have been renamed and the global variables have been removed and are replaced by callback functions. In former versions the reading of sensor values of single or multiple sensors and even reading sensors from different hubs, was not working properly. Due to the change to the NimBLE-Arduino library the callbacks could now be part of member functions and has not to be globally defined. 
 
 So have a look on the changes and adapt your sketches to the new callbacks. You can find a migration guide here: 
 [Migration Guide](doc/MIGRATION.md)
+
+If you have questions regarding the migration of your sketches, don't hesitate to use the [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/legoinochat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) chat.
 
 ## Usage Videos
 
@@ -33,22 +35,25 @@ Simple Boost movement example (just click the image to see the video)
 
 [![Legoino BoostHub simple movements example](http://img.youtube.com/vi/VgWObhyUmi0/mqdefault.jpg)](http://www.youtube.com/watch?v=VgWObhyUmi0 "Legoino BoostHub simple movements example")
 
-ToDo: Add PowerFunction Adapter to show Hub Emulation
+Simple Hub Emulation example as Bridge from PoweredUp to PowerFunction. With this you have an upgrade of your PowerFunction system and it works like a two Port PoweredUp hub.
+[![Legoino Hub Emulation example](http://img.youtube.com/vi/RTNexxT4-yQ/mqdefault.jpg)](https://www.youtube.com/watch?v=RTNexxT4-yQ "Legoino Hub Emulation example")
 
 
 # Examples
 All the included examples are a great source to find a solution or pattern for your problem you want to solve with your Arduino sketch.
 
 You can find different Examples in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". Just have a look on the videos to see the examples running :smiley: 
-* **BoostHub.ino:** Example who uses the basic boost moovements (feasable for M.T.R.4 or Vernie model). http://www.youtube.com/watch?v=VgWObhyUmi0 
-* **BoostHubColorSensor.ino:** Example which reads in the color Sensor value on port C and uses the detected color to set the Hub LED accordingly. https://youtu.be/_xCd9Owy1nk
-* **BoostHubDeviceInfo.ino:** Example which displays the various device infos (firmware version, battery level, rssi, hardwar version, tilt) in the serial monitor
-* **BoostHubDistanceSensor.ino:** Example which reads in the input of the distance sencor and set the Hub LED color dependent on the distance. https://youtu.be/TOAQtGGjZ6c 
-* **BoostHubRotationSensor.ino:** Example which reads in the input of the Tacho motor angle to set the Hub LED dependent on the angle to the scale of rainbow colors. https://youtu.be/c3DHpX55uN0
+* **Boost.ino:** Example who uses the basic boost moovements (feasable for M.T.R.4 or Vernie model). http://www.youtube.com/watch?v=VgWObhyUmi0 
+* **MoveHubColorSensor.ino:** Example which reads in the color Sensor value on port C and uses the detected color to set the Hub LED accordingly. https://youtu.be/_xCd9Owy1nk
+* **MoveHubDeviceInfo.ino:** Example which displays the various device infos (firmware version, battery level, rssi, hardwar version, tilt) in the serial monitor
+* **MoveHubDistanceSensor.ino:** Example which reads in the input of the distance sencor and set the Hub LED color dependent on the distance. https://youtu.be/TOAQtGGjZ6c 
+* **MoveHubRotationSensor.ino:** Example which reads in the input of the Tacho motor angle to set the Hub LED dependent on the angle to the scale of rainbow colors. https://youtu.be/c3DHpX55uN0
 * **TrainHub.ino:** Example for a PowererdUp Hub to set the speed of a train model. http://www.youtube.com/watch?v=o1hgZQz3go4 
 * **TrainColor.ino:** Example of PoweredUp Hub combined with color sensor to control the speed of the train dependent on the detected color. https://youtu.be/GZ0fqe3-Bhw
+* **HubEmulation.ino:** Example of an emulated PoweredUp Hub two port hub (train hub) which could receive signals from the PoweredUp app and will send out the signals as IR commands to a Powerfunction remote receiver. https://www.youtube.com/watch?v=RTNexxT4-yQ
 * **PoweredUpRemoteAutoDetection.ino:** Example of connection of PoweredUp and PoweredUpRemote where the device type is fetched automatically and the order in which you switched on the hubs is no longer relevant. 
 * **ControlPlusHub.ino:** Example of connection of ControlPlusHub (TechnicHub) where a Tacho Motor on Port D is controlled.
+
 
 # Setup and Usage
 Just install the Library via the Arduino Library Manager.
@@ -98,9 +103,12 @@ There are different types of motors in the *LEGO* ecosystem. The Basic Motor (e.
   void setTachoMotorSpeedForTime(byte port, int speed, int16_t time, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
   void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
   void setTachoMotorSpeedsForDegrees(int speedLeft, int speedRight, int32_t degrees, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
+```
+
+```c++
   void setAbsoluteMotorPosition(byte port, int speed, int32_t position, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
   void setAbsoluteMotorEncoderPosition(byte port, int32_t position);
-```
+  ```
 
 
 ## Hub Commands
