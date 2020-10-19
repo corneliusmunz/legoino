@@ -52,11 +52,17 @@ enum struct MessageHeader
   MESSAGE_TYPE = 0x02
 };
 
-enum struct PortOutputCommand
+enum struct PortOutputMessage
 {
   PORT_ID = 0x03,
   STARTUP_AND_COMPLETION = 0x04,
   SUB_COMMAND = 0x05
+};
+
+enum struct HubPropertyMessage {
+  PROPERTY = 0x03,
+  OPERATION = 0x04,
+  PAYLOAD = 0x05
 };
 
 enum struct DeviceType

@@ -50,6 +50,7 @@ public:
   void shutDownHub();
   void activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);
   void deactivateHubPropertyUpdate(HubPropertyReference hubProperty);
+  void requestHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);
 
   // port and device related methods
   int getDeviceIndexForPortNumber(byte portNumber);

@@ -41,8 +41,6 @@ private:
   Version _firmwareVersion;
   Version _hardwareVersion;
 
-  void writeValue(MessageType messageType, std::string payload, bool notify = true);
-
 public:
   Lpf2HubEmulation();
   Lpf2HubEmulation(std::string hubName, HubType hubType);
@@ -60,6 +58,9 @@ public:
 
   void attachDevice(byte port, DeviceType deviceType);
   void detachDevice(byte port);
+
+  void writeValue(MessageType messageType, std::string payload, bool notify = true);
+  std::string getPortModeInformationRequestPayload(DeviceType deviceType, byte port, byte mode, byte modeInformationType);
 
   bool isConnected = false;
   bool isPortInitialized = false;
