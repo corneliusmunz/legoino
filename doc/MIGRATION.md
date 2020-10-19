@@ -178,19 +178,3 @@ if (portForDevice == 1)
 ## Debugging
 
 All debug logs where restructured and now the standard `log_d`, `log_w`, `log_xx` messages could be used. The log levels could be set via the arduino environment.
-
-## New functions
-
-* Duplo Train support
-* Enriched Motor commands (maxPower, brakingStyle)
-* Callbacks for changes on hub properties and sensor values
-* PowerFunction (IR) functions included
-* Hub Emulation (powered up to powerfunction translator)
-* Support of `setAbsoluteMotorPosition`, `setAbsoluteMotorEncoderPosition`
-* Adding of `getHubName`
-
-* thanks to @carlalldis for the addition of the absolute motor commands
-* thanks to @giancann and @marcrupprath for the first super implementations of the hub emulation idea
-
-
-
