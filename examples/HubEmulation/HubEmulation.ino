@@ -67,14 +67,14 @@ void loop()
   // the app that values could be received/written to that ports
   if (myEmulatedHub.isConnected && !myEmulatedHub.isPortInitialized)
   {
-    delay(100);
+    delay(1000);
     myEmulatedHub.isPortInitialized = true;
     myEmulatedHub.attachDevice((byte)PoweredUpHubPort::A, DeviceType::TRAIN_MOTOR);
-    delay(100);
+    delay(1000);
     myEmulatedHub.attachDevice((byte)PoweredUpHubPort::LED, DeviceType::HUB_LED);
-    delay(100);
+    delay(1000);
     myEmulatedHub.attachDevice((byte)PoweredUpHubPort::B, DeviceType::TRAIN_MOTOR);
-    delay(100);
+    delay(1000);
   }
 
 } // End of loop
