@@ -250,10 +250,9 @@ if (portForDevice == 1)
 
 The Hub emulation feature is in *BETA* mode. You can test it and if you find any issues or needed new requirements, just open an [issue](https://github.com/corneliusmunz/legoino/issues/new/choose) in github project
 
-The basic idea is that the ESP32 controller acts like an hub and could be controlled via the PoweredUp, Control+ or Boost App. 
+The basic idea is that the ESP32 controller acts like an hub and could be controlled via the PoweredUp App. 
 
-
-First you have to create an instance of a hub where you can define the Name of the Hub which will be advertised and the type of the hub. In the current implementation only the `POWERED_UP_HUB` and the `CONTROL_PLUS_HUB` type is supported. 
+First you have to create an instance of a hub where you can define the Name of the Hub which will be advertised and the type of the hub. In the current implementation only the `POWERED_UP_HUB` type is supported and only a connected `TRAIN_MOTOR` and `HUB_LED` will work. 
 
 ```c++
 #include "Lpf2HubEmulation.h"
@@ -304,11 +303,11 @@ To signalize the app which devices are connected you have to send some commands 
   {
     delay(1000);
     myEmulatedHub.isPortInitialized = true;
-    myEmulatedHub.attachDevice(0x00, DeviceType::MEDIUM_LINEAR_MOTOR);
+    myEmulatedHub.attachDevice(0x00, DeviceType::TRAIN_MOTOR);
     delay(1000);
     myEmulatedHub.attachDevice(0x32, DeviceType::HUB_LED);
     delay(1000);
-    myEmulatedHub.attachDevice(0x01, DeviceType::MEDIUM_LINEAR_MOTOR);
+    myEmulatedHub.attachDevice(0x01, DeviceType::TRAIN_MOTOR);
     delay(1000);
   }
 ```

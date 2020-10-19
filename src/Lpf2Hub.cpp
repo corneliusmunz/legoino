@@ -947,6 +947,23 @@ void Lpf2Hub::activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPro
 }
 
 /**
+ * @brief Request a hub specific property value (battery level, rssi, ...)
+ * @param [in] hubProperty for which the value should be requested
+ * @param [in] optional callback function which will be called if a value has changed
+ */
+void Lpf2Hub::requestHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback)
+{
+    if (hubPropertyChangeCallback != nullptr)
+    {
+        _hubPropertyChangeCallback = hubPropertyChangeCallback;
+    }
+
+    // Activate reports
+    byte notifyPropertyCommand[3] = {0x01, (byte)hubProperty, (byte)HubPropertyOperation::REQUEST_UPDATE_DOWNSTREAM};
+    WriteValue(notifyPropertyCommand, 3);
+}
+
+/**
  * @brief Deactivate the update/notification of hub specific property changes (battery level, rssi, ...)
  * @param [in] hubProperty for which updates should be activated
  */

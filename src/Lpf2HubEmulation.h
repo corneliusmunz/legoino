@@ -20,6 +20,12 @@
 
 typedef void (*WritePortCallback)(byte port, byte value);
 
+typedef struct Device
+{
+  byte PortNumber;
+  byte DeviceType;
+};
+
 class Lpf2HubEmulation
 {
 private:
@@ -36,39 +42,46 @@ private:
   int8_t _rssi;
   uint8_t _batteryLevel;
   BatteryType _batteryType;
-  std::string _hubName = "myEmuatedHub";
+  std::string _hubName = "hub";
   HubType _hubType;
   Version _firmwareVersion;
   Version _hardwareVersion;
 
-  void writeValue(MessageType messageType, std::string payload, bool notify = true);
+    // List of connected devices
+  Device connectedDevices[13];
+  int numberOfConnectedDevices = 0;
 
 public:
   Lpf2HubEmulation();
   Lpf2HubEmulation(std::string hubName, HubType hubType);
   void start();
-  void initializePorts();
   void setWritePortCallback(WritePortCallback callback);
   void setHubRssi(int8_t rssi);
   void setHubBatteryLevel(uint8_t batteryLevel);
   void setHubBatteryType(BatteryType batteryType);
   void setHubName(std::string hubName, bool notify = true);
+
+
   std::string getHubName();
+  BatteryType getBatteryType();
+
   void setHubFirmwareVersion(Version version);
   void setHubHardwareVersion(Version version);
   void setHubButton(bool pressed);
 
   void attachDevice(byte port, DeviceType deviceType);
   void detachDevice(byte port);
+  byte getDeviceTypeForPort(byte port);
+
+  void writeValue(MessageType messageType, std::string payload, bool notify = true);
+  std::string getPortModeInformationRequestPayload(DeviceType deviceType, byte port, byte mode, byte modeInformationType);
+  std::string getPortInformationPayload(DeviceType deviceType, byte port, byte informationType);
 
   bool isConnected = false;
   bool isPortInitialized = false;
   BLECharacteristic *pCharacteristic;
   WritePortCallback writePortCallback = nullptr;
 
-  // int setBatteryLevel(int batteryLevel);
-  // double setHubVoltage(double voltage);
-  // double setHubCurrent(double current);
 };
 
 #endif
