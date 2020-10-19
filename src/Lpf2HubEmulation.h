@@ -55,13 +55,16 @@ public:
   Lpf2HubEmulation();
   Lpf2HubEmulation(std::string hubName, HubType hubType);
   void start();
-  void initializePorts();
   void setWritePortCallback(WritePortCallback callback);
   void setHubRssi(int8_t rssi);
   void setHubBatteryLevel(uint8_t batteryLevel);
   void setHubBatteryType(BatteryType batteryType);
   void setHubName(std::string hubName, bool notify = true);
+
+
   std::string getHubName();
+  BatteryType getBatteryType();
+
   void setHubFirmwareVersion(Version version);
   void setHubHardwareVersion(Version version);
   void setHubButton(bool pressed);
@@ -79,9 +82,6 @@ public:
   BLECharacteristic *pCharacteristic;
   WritePortCallback writePortCallback = nullptr;
 
-  // int setBatteryLevel(int batteryLevel);
-  // double setHubVoltage(double voltage);
-  // double setHubCurrent(double current);
 };
 
 #endif
