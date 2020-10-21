@@ -8,6 +8,9 @@
 
 It is also possible to use the "old" Power Function IR Modules and control them via an IR LED connected to a PIN of your ESP32 device. With the Hub emulation function you can even control an "old" Power Function Light or Motor with the Powered Up App.
 
+## Arduino Hardware and dependent libraries
+The library is implemented for **ESP32** Boards and does use the ESP32 [NimBLE-Arduino](https://github.com/h2zero/NimBLE-Arduino) Library as dependency. This should be installed via the Arduino library manager before using legoino.
+
 ## Quickstart
 You can find a step by step instruction to your first Legoino project on the following link: [Quickstart Tutorial](doc/QUICKSTART.md)
 
@@ -387,10 +390,6 @@ myBoostHub.moveArcRight(90) // move with an arc for 90 degrees to the right
 myBoostHub.moveArc(270) // move with an arc for 270 degrees to the right (positive angles means right, negative means left)
 myBoostHub.moveArc(-90) // move with an arc for 90 degrees to the left (positive angles means right, negative means left)
 ```
-
-# Arduino Hardware
-The library is implemented for the ESP32 Boards and does use the ESP32 NimBLE-Arduino Library.
-
 # Connection to more than 3 hubs
 It is possible to connect to up to 9 hubs in parallel with an common ESP32 board. To enable the connection to more than 3 hubs, you have to change a single configuration of the NimBLE library. Just open the ```nimconfig.h``` file located in your arduino library folder in the directory ```NimBLE-Arduino/src```. Open the file with an editor and change the following settings to your demands
 ```

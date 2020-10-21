@@ -209,8 +209,6 @@ public:
   void onRead(NimBLECharacteristic *pCharacteristic)
   {
     log_d("read request");
-    uint8_t CharTemp[] = {0x0F, 0x00, 0x04};
-    //_lpf2HubEmulation, 0x>_pCharacteristic, 0x>setValue(CharTemp,3);
   }
 };
 
@@ -362,11 +360,10 @@ std::string Lpf2HubEmulation::getHubName()
   return _hubName;
 }
 
-BatteryType Lpf2HubEmulation::getBatteryType() {
+BatteryType Lpf2HubEmulation::getBatteryType()
+{
   return _batteryType;
 }
-
-
 
 void Lpf2HubEmulation::setHubFirmwareVersion(Version version)
 {
@@ -380,11 +377,10 @@ void Lpf2HubEmulation::setHubHardwareVersion(Version version)
 
 void Lpf2HubEmulation::start()
 {
-  log_d("Starting BLE work!");
+  log_d("Starting BLE");
 
-  uint8_t newMACAddress[] = {0x91, 0x84, 0x2B, 0x4A, 0x3A, 0x0A};
-  esp_base_mac_addr_set(&newMACAddress[0]);
   NimBLEDevice::init(_hubName);
+  NimBLEDevice::setPower(ESP_PWR_LVL_N0, ESP_BLE_PWR_TYPE_ADV); // 0dB, Advertisment
 
   log_d("Create server");
   _pServer = NimBLEDevice::createServer();
@@ -410,16 +406,14 @@ void Lpf2HubEmulation::start()
 
   _pAdvertising->addServiceUUID(LPF2_UUID);
   _pAdvertising->setScanResponse(true);
+  _pAdvertising->setMinInterval(32);//0.625ms units -> 20ms
+  _pAdvertising->setMaxInterval(64);//0.625ms units -> 40ms
 
-  //Techinc HUB
-  //const char  ArrManufacturerData[8] = {0x97,0x03,0x00,0x80,0x06,0x00,0x41,0x00};
-
-  //City HUB
   std::string manufacturerData;
   if (_hubType == HubType::POWERED_UP_HUB)
   {
     log_d("PoweredUp Hub");
-    const char poweredUpHub[8] = {0x97, 0x03, 0x00, 0x41, 0x07, 0x00, 0x43, 0x00};
+    const char poweredUpHub[8] = {0x97, 0x03, 0x00, 0x41, 0x07, 0x1D, 0x63, 0x00};
     manufacturerData = std::string(poweredUpHub, sizeof(poweredUpHub));
   }
   else if (_hubType == HubType::CONTROL_PLUS_HUB)
@@ -429,24 +423,28 @@ void Lpf2HubEmulation::start()
     manufacturerData = std::string(controlPlusHub, sizeof(controlPlusHub));
   }
   NimBLEAdvertisementData advertisementData = NimBLEAdvertisementData();
-
-  // Not needed because the name is already part of the device
-  // if it is added, the max length of 31 bytes is reached and the Service UUID or Manufacturer Data is then missing
-  // because of a lenght check in addData to the payload structure
-  //  advertisementData.setName("Fake Hub");
   advertisementData.setManufacturerData(manufacturerData);
   advertisementData.setCompleteServices(NimBLEUUID(LPF2_UUID));
+  // scan response data is needed because the uuid128 and manufacturer data takes almost all space in the advertisement data
+  // the name is therefore stored in the scan response data
+  NimBLEAdvertisementData scanResponseData = NimBLEAdvertisementData();
+  scanResponseData.setName(_hubName);
+  // set the advertisment flags to 0x06
+  scanResponseData.setFlags(BLE_HS_ADV_F_DISC_GEN);
+  // set the power level to 0dB
+  scanResponseData.addData(std::string{0x02, 0x0A, 0x00});
+  // set the slave connection interval range to 20-40ms
+  scanResponseData.addData(std::string{0x05, 0x12, 0x10, 0x00, 0x20, 0x00});
 
-  std::string payload = advertisementData.getPayload();
-  log_d("advertisment data payload: %s", payload);
+  log_d("advertisment data payload(%d): %s", advertisementData.getPayload().length(), advertisementData.getPayload().c_str());
+  log_d("scan response data payload(%d): %s", scanResponseData.getPayload().length(), scanResponseData.getPayload().c_str());
 
-  // scan response data is not needed. It could be used to add some more data but it seems that it is not requested by
-  // the Lego apps
   _pAdvertising->setAdvertisementData(advertisementData);
+  _pAdvertising->setScanResponseData(scanResponseData);
 
-  log_d("start advertising");
+  log_d("Start advertising");
   NimBLEDevice::startAdvertising();
-  log_d("characteristic defined! Now you can read it in your phone!");
+  log_d("Characteristic defined! Now you can connect with your PoweredUp App!");
 }
 
 std::string Lpf2HubEmulation::getPortInformationPayload(DeviceType deviceType, byte port, byte informationType)
@@ -456,10 +454,6 @@ std::string Lpf2HubEmulation::getPortInformationPayload(DeviceType deviceType, b
   payload.push_back(port);
   payload.push_back(informationType);
 
-  // TrainMotor
-  // ##################################################
-  // 0B-00-43-00-01-01-01-00-00-01-00
-  // 05-00-43-00-02
   if (deviceType == DeviceType::TRAIN_MOTOR)
   {
     switch (informationType)
@@ -473,10 +467,6 @@ std::string Lpf2HubEmulation::getPortInformationPayload(DeviceType deviceType, b
       break;
     }
   }
-  // LED Light
-  // ##################################################
-  // 0B-00-43-32-01-01-02-00-00-03-00
-  // 05-00-43-32-02
   else if (deviceType == DeviceType::HUB_LED)
   {
     switch (informationType)
