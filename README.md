@@ -8,7 +8,7 @@
 
 It is also possible to use the "old" Power Function IR Modules and control them via an IR LED connected to a PIN of your ESP32 device. With the Hub emulation function you can even control an "old" Power Function Light or Motor with the Powered Up App.
 
-# Arduino Hardware and dependent libraries
+## Arduino Hardware and dependent libraries
 The library is implemented for **ESP32** Boards and does use the ESP32 [NimBLE-Arduino](https://github.com/h2zero/NimBLE-Arduino) Library as dependency. This should be installed via the Arduino library manager before using legoino.
 
 ## Quickstart
