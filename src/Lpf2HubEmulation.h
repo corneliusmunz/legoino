@@ -20,7 +20,7 @@
 
 typedef void (*WritePortCallback)(byte port, byte value);
 
-typedef struct Device
+struct Device
 {
   byte PortNumber;
   byte DeviceType;
