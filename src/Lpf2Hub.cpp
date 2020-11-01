@@ -103,7 +103,7 @@ public:
  */
 void Lpf2Hub::WriteValue(byte command[], int size)
 {
-    byte commandWithCommonHeader[size + 2] = {size + 2, 0x00};
+    byte commandWithCommonHeader[size + 2] = {(byte)(size + 2), 0x00};
     memcpy(commandWithCommonHeader + 2, command, size);
     _pRemoteCharacteristic->writeValue(commandWithCommonHeader, sizeof(commandWithCommonHeader), false);
 }
