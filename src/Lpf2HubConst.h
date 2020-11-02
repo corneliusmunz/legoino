@@ -208,11 +208,12 @@ enum Color
   ORANGE = 8,
   RED = 9,
   WHITE = 10,
+  NUM_COLORS,
   NONE = 255
 };
 
-static const char *COLOR_STRING[] = {
-    "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white"};
+static const char *COLOR_STRING[NUM_COLORS+1] = {
+    "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white", "none"};
 
 enum struct DuploTrainBaseSound
 {
