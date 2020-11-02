@@ -47,7 +47,7 @@ void writeValueCallback(byte port, byte value)
   if (port == 0x32)
   {
     Serial.print("Hub LED command received with color: ");
-    Serial.println(COLOR_STRING[value]);
+    Serial.println(LegoinoCommon::ColorStringFromColor(value).c_str());
   }
 }
 

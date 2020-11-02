@@ -27,6 +27,7 @@ deactivateHubPropertyUpdate	KEYWORD2
 setLedColor	KEYWORD2
 setLedRGBColor	KEYWORD2
 setLedHSVColor	KEYWORD2
+ColorStringFromColor KEYWORD2
 
 playSound	KEYWORD2
 playTone	KEYWORD2
