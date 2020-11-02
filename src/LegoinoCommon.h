@@ -10,6 +10,7 @@
 #define LegoinoCommon_h
 
 #include "Arduino.h"
+#include "Lpf2HubConst.h"
 
 class LegoinoCommon
 {
@@ -23,6 +24,8 @@ public:
   static signed short ReadInt16LE(uint8_t *data, int offset);
   static unsigned int ReadUInt32LE(uint8_t *data, int offset);
   static signed int ReadInt32LE(uint8_t *data, int offset);
+  static std::string ColorStringFromColor(Color color);
+  static std::string ColorStringFromColor(int color);
 };
 
 #endif

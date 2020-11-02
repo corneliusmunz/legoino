@@ -45,7 +45,7 @@ void colorDistanceSensorCallback(void *hub, byte portNumber, DeviceType deviceTy
   {
     int color = myHub->parseColor(pData);
     Serial.print("Color: ");
-    Serial.println(COLOR_STRING[color]);
+    Serial.println(LegoinoCommon::ColorStringFromColor(color).c_str());
 
     // set hub LED color to detected color of sensor and set motor speed dependent on color
     if (color == (byte)Color::RED)

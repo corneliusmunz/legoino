@@ -18,7 +18,7 @@
 #define LPF2_CURRENT_MAX 2444
 #define LPF2_CURRENT_MAX_RAW 4095
 
-typedef struct Version
+struct Version
 {
   int Build;
   int Major;
@@ -36,7 +36,7 @@ enum struct HubType
   CONTROL_PLUS_HUB = 6
 };
 
-typedef enum BLEManufacturerData
+enum BLEManufacturerData
 {
   DUPLO_TRAIN_HUB_ID = 32,   //0x20
   BOOST_MOVE_HUB_ID = 64,    //0x40
@@ -174,7 +174,7 @@ enum struct HubPropertyOperation
   UPDATE_UPSTREAM = 0x06,
 };
 
-typedef enum ActionType
+enum ActionType
 {
   SWITCH_OFF_HUB = 0x01,
   DISCONNECT = 0x02,
@@ -188,14 +188,14 @@ typedef enum ActionType
   HUB_WILL_GO_INTO_BOOT_MODE = 0x32,
 };
 
-typedef enum Event
+enum Event
 {
   DETACHED_IO = 0x00,
   ATTACHED_IO = 0x01,
   ATTACHED_VIRTUAL_IO = 0x02,
 };
 
-typedef enum Color
+enum Color
 {
   BLACK = 0,
   PINK = 1,
@@ -208,11 +208,12 @@ typedef enum Color
   ORANGE = 8,
   RED = 9,
   WHITE = 10,
+  NUM_COLORS,
   NONE = 255
 };
 
-static const char *COLOR_STRING[] = {
-    "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white"};
+static const char *COLOR_STRING[NUM_COLORS+1] = {
+    "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white", "none"};
 
 enum struct DuploTrainBaseSound
 {

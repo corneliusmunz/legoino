@@ -103,7 +103,7 @@ public:
  */
 void Lpf2Hub::WriteValue(byte command[], int size)
 {
-    byte commandWithCommonHeader[size + 2] = {size + 2, 0x00};
+    byte commandWithCommonHeader[size + 2] = {(byte)(size + 2), 0x00};
     memcpy(commandWithCommonHeader + 2, command, size);
     _pRemoteCharacteristic->writeValue(commandWithCommonHeader, sizeof(commandWithCommonHeader), false);
 }
@@ -146,7 +146,10 @@ void Lpf2Hub::deregisterPortDevice(byte portNumber)
             hasReachedRemovedIndex = true;
         }
     }
-    numberOfConnectedDevices--;
+    if (numberOfConnectedDevices > 0)
+    {
+        numberOfConnectedDevices--;
+    }
 }
 
 /**
@@ -394,9 +397,9 @@ int Lpf2Hub::parseSpeedometer(uint8_t *pData)
 }
 
 /**
- * @brief Parse distance value [centimeters] of a distance sensor
+ * @brief Parse distance value [millimeters] of a distance sensor
  * @param [in] pData The pointer to the received data
- * @return distance in unit centimeters
+ * @return distance in unit millimeters
  */
 double Lpf2Hub::parseDistance(uint8_t *pData)
 {
@@ -419,14 +422,7 @@ double Lpf2Hub::parseDistance(uint8_t *pData)
 int Lpf2Hub::parseColor(uint8_t *pData)
 {
     int color = pData[4];
-    if (color > 10)
-    {
-        log_e("undefined color (%d)", color);
-    }
-    else
-    {
-        log_d("color: %s (%d)", COLOR_STRING[color], color);
-    }
+    log_d("color: %s (%d)", LegoinoCommon::ColorStringFromColor(color).c_str(), color);
     return color;
 }
 
@@ -571,6 +567,10 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
     case (byte)DeviceType::TECHNIC_MEDIUM_ANGULAR_MOTOR:
         return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
     case (byte)DeviceType::TECHNIC_LARGE_ANGULAR_MOTOR:
+        return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
+    case (byte)DeviceType::TECHNIC_LARGE_LINEAR_MOTOR:
+        return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
+    case (byte)DeviceType::TECHNIC_XLARGE_LINEAR_MOTOR:
         return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
     default:
         return 0x00;

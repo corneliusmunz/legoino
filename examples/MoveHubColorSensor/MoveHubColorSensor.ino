@@ -31,7 +31,7 @@ void colorDistanceSensorCallback(void *hub, byte portNumber, DeviceType deviceTy
     int color = myHub->parseColor(pData);
     double distance = myHub->parseDistance(pData);
     Serial.print("Color: ");
-    Serial.print(COLOR_STRING[color]);
+    Serial.print(LegoinoCommon::ColorStringFromColor(color).c_str());
     Serial.print(" Distance: ");
     Serial.println(distance, DEC);
     myHub->setLedColor((Color)color);
