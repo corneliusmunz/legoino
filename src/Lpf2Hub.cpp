@@ -103,7 +103,7 @@ public:
  */
 void Lpf2Hub::WriteValue(byte command[], int size)
 {
-    byte commandWithCommonHeader[size + 2] = {size + 2, 0x00};
+    byte commandWithCommonHeader[size + 2] = {(byte)(size + 2), 0x00};
     memcpy(commandWithCommonHeader + 2, command, size);
     _pRemoteCharacteristic->writeValue(commandWithCommonHeader, sizeof(commandWithCommonHeader), false);
 }
@@ -146,7 +146,18 @@ void Lpf2Hub::deregisterPortDevice(byte portNumber)
             hasReachedRemovedIndex = true;
         }
     }
-    numberOfConnectedDevices--;
+    if (numberOfConnectedDevices > 0)
+    {
+        numberOfConnectedDevices--;
+    }
+}
+
+void Lpf2Hub::subscribePortOutputCommandFeedback(byte portNumber, PortOutputCommandFeedbackCallback portOutputCommandFeedbackCallback)
+{
+	byte deviceType = getDeviceTypeForPortNumber(portNumber);
+	log_d("port: %x, device type: %x, callback: %x", portNumber, deviceType, portOutputCommandFeedbackCallback);
+	int deviceIndex = getDeviceIndexForPortNumber(portNumber);
+	connectedDevices[deviceIndex].portOutputCommandFeedbackCallback = portOutputCommandFeedbackCallback;
 }
 
 /**
@@ -178,7 +189,7 @@ void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, PortValueChan
     byte mode = getModeForDeviceType(deviceType);
     log_d("port: %x, device type: %x, callback: %x, mode: %x", portNumber, deviceType, portValueChangeCallback, mode);
     int deviceIndex = getDeviceIndexForPortNumber(portNumber);
-    connectedDevices[deviceIndex].Callback = portValueChangeCallback;
+    connectedDevices[deviceIndex].portValueChangeCallback = portValueChangeCallback;
     byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(activatePortDeviceMessage, 8);
 }
@@ -394,9 +405,9 @@ int Lpf2Hub::parseSpeedometer(uint8_t *pData)
 }
 
 /**
- * @brief Parse distance value [centimeters] of a distance sensor
+ * @brief Parse distance value [millimeters] of a distance sensor
  * @param [in] pData The pointer to the received data
- * @return distance in unit centimeters
+ * @return distance in unit millimeters
  */
 double Lpf2Hub::parseDistance(uint8_t *pData)
 {
@@ -419,14 +430,7 @@ double Lpf2Hub::parseDistance(uint8_t *pData)
 int Lpf2Hub::parseColor(uint8_t *pData)
 {
     int color = pData[4];
-    if (color > 10)
-    {
-        log_e("undefined color (%d)", color);
-    }
-    else
-    {
-        log_d("color: %s (%d)", COLOR_STRING[color], color);
-    }
+    log_d("color: %s (%d)", LegoinoCommon::ColorStringFromColor(color).c_str(), color);
     return color;
 }
 
@@ -463,7 +467,7 @@ std::string Lpf2Hub::parseHubAdvertisingName(uint8_t *pData)
 {
     int charArrayLength = min(pData[0] - 5, 14);
     char name[charArrayLength + 1];
-    for (int i; i < charArrayLength; i++)
+    for (int i = 0; i < charArrayLength; i++)
     {
         name[i] = pData[5 + i];
     }
@@ -572,6 +576,10 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
         return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
     case (byte)DeviceType::TECHNIC_LARGE_ANGULAR_MOTOR:
         return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
+    case (byte)DeviceType::TECHNIC_LARGE_LINEAR_MOTOR:
+        return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
+    case (byte)DeviceType::TECHNIC_XLARGE_LINEAR_MOTOR:
+        return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
     default:
         return 0x00;
     }
@@ -588,9 +596,9 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 
     byte deviceType = connectedDevices[deviceIndex].DeviceType;
 
-    if (connectedDevices[deviceIndex].Callback != nullptr)
+    if (connectedDevices[deviceIndex].portValueChangeCallback != nullptr)
     {
-        connectedDevices[deviceIndex].Callback(this, pData[3], (DeviceType)deviceType, pData);
+        connectedDevices[deviceIndex].portValueChangeCallback(this, pData[3], (DeviceType)deviceType, pData);
         return;
     }
 
@@ -653,6 +661,16 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 void Lpf2Hub::parsePortAction(uint8_t *pData)
 {
     log_d("parsePortAction");
+		
+	int deviceIndex = getDeviceIndexForPortNumber(pData[3]);
+
+    byte deviceType = connectedDevices[deviceIndex].DeviceType;
+
+    if (connectedDevices[deviceIndex].portOutputCommandFeedbackCallback != nullptr)
+    {
+        connectedDevices[deviceIndex].portOutputCommandFeedbackCallback(this, pData[3], (DeviceType)deviceType, pData);
+        return;
+    }
 }
 
 /**
@@ -672,26 +690,51 @@ void Lpf2Hub::notifyCallback(
 
     switch (pData[2])
     {
-    case (byte)MessageType::HUB_PROPERTIES:
-    {
-        parseDeviceInfo(pData);
-        break;
-    }
-    case (byte)MessageType::HUB_ATTACHED_IO:
-    {
-        parsePortMessage(pData);
-        break;
-    }
-    case (byte)MessageType::PORT_VALUE_SINGLE:
-    {
-        parseSensorMessage(pData);
-        break;
-    }
-    case (byte)MessageType::PORT_OUTPUT_COMMAND_FEEDBACK:
-    {
-        parsePortAction(pData);
-        break;
-    }
+      case (byte)MessageType::HUB_PROPERTIES:
+      {
+          parseDeviceInfo(pData);
+          break;
+      }
+      case (byte)MessageType::HUB_ATTACHED_IO:
+      {
+          parsePortMessage(pData);
+          break;
+      }
+      case (byte)MessageType::PORT_INFORMATION:
+      {
+          // do some stuff here
+          break;
+      }
+      case (byte)MessageType::PORT_MODE_INFORMATION:
+      {
+          // do some stuff here
+          break;
+      }
+      case (byte)MessageType::PORT_VALUE_SINGLE:
+      {
+          parseSensorMessage(pData); // Here we have the callback example
+          break;
+      }
+      case (byte)MessageType::PORT_VALUE_COMBINEDMODE:
+      {
+          // do some stuff here
+          break;
+      }
+      case (byte)MessageType::PORT_INPUT_FORMAT_SINGLE:
+      {
+          // do some stuff here
+          break;
+      }
+      case (byte)MessageType::PORT_INPUT_FORMAT_COMBINEDMODE:
+      {
+          // do some stuff here
+          break;
+      }
+      case (byte)MessageType::PORT_OUTPUT_COMMAND_FEEDBACK:
+      {
+          parsePortAction(pData);
+          break;
+      }
     }
 }
 
@@ -781,6 +824,7 @@ int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber)
     }
     log_w("no device found for port number %x", portNumber);
     //ToDo: What happens if the device could not be found
+	return(-1); // TODO
 }
 
 /**
