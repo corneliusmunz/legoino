@@ -109,6 +109,41 @@ void Lpf2Hub::WriteValue(byte command[], int size)
 }
 
 /**
+ * @brief Enable virtual port for port1 and port2. Devices related to this port must be the same
+ * @param [in] port number 1
+ * @param [in] port number 2
+ *
+ * @return true is port 1 == port 2, false if !=
+ */
+bool Lpf2Hub::enableVirtualPort(byte portNumber1, byte portNumber2)
+{
+	bool result = false;
+    log_d("port1: %x, port2: %x", portNumber1, portNumber2);
+    byte deviceType1 = getDeviceTypeForPortNumber(portNumber1);
+	byte deviceType2 = getDeviceTypeForPortNumber(portNumber2);
+	
+	if(deviceType1 == deviceType2) // Motor must be the same, TODO: check that are motor
+	{
+		byte enableVirtualPortMessage[4] = {0x61, 0x01, portNumber1, portNumber2};
+		WriteValue(enableVirtualPortMessage, 4);
+		result = true;
+	}
+	
+	return(result);
+}
+
+/**
+ * @brief Disable virtual port for combined port
+ * @param [in] virtual port number
+ */
+void Lpf2Hub::disableVirtualPort(byte portNumber)
+{
+    log_d("port: %x", portNumber);
+	byte disableVirtualPortMessage[3] = {0x61, 0x00, portNumber};
+	WriteValue(disableVirtualPortMessage, 3);
+}
+
+/**
  * @brief Register a device on a defined port. This will store the device
  * in the connectedDevices array. This method will be called if a port connection
  * event is triggered by the hub
@@ -152,6 +187,12 @@ void Lpf2Hub::deregisterPortDevice(byte portNumber)
     }
 }
 
+/**
+ * @brief Register a callback function for PortOutputCommandFeedback command
+ * 
+ * @param [in] port number where the device is connected
+ * @param [in] function callback
+ */
 void Lpf2Hub::subscribePortOutputCommandFeedback(byte portNumber, PortOutputCommandFeedbackCallback portOutputCommandFeedbackCallback)
 {
 	byte deviceType = getDeviceTypeForPortNumber(portNumber);
