@@ -18,12 +18,23 @@ using namespace std::placeholders;
 
 typedef void (*HubPropertyChangeCallback)(void *hub, HubPropertyReference hubProperty, uint8_t *pData);
 typedef void (*PortValueChangeCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
+// TODO
+typedef void (*PortModeInformationCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
+typedef void (*PortValueCombinedCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
+typedef void (*PortInputCommandSingleCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
+typedef void (*PortInputCommandCombinedCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
+typedef void (*PortOutputCommandFeedbackCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
 
-typedef struct Device
+struct Device
 {
   byte PortNumber;
   byte DeviceType;
-  PortValueChangeCallback Callback;
+  PortValueChangeCallback portValueChangeCallback; // TODO: modify name to portValueChangeCallback
+  PortModeInformationCallback portModeInformationCallback;
+  PortValueCombinedCallback portValueCombinedCallback;
+  PortInputCommandSingleCallback portInputCommandSingleCallback;
+  PortInputCommandCombinedCallback portInputCommandCombinedCallback;
+  PortOutputCommandFeedbackCallback portOutputCommandFeedbackCallback;
 };
 
 class Lpf2Hub
@@ -63,6 +74,8 @@ public:
   void activatePortDevice(byte portNumber, PortValueChangeCallback portValueChangeCallback = nullptr);
   void deactivatePortDevice(byte portNumber, byte deviceType);
   void deactivatePortDevice(byte portNumber);
+
+  void subscribePortOutputCommandFeedback(byte portNumber, PortOutputCommandFeedbackCallback portOutputCommandFeedbackCallback = nullptr);
 
   // write (set) operations on port devices
   void WriteValue(byte command[], int size);
