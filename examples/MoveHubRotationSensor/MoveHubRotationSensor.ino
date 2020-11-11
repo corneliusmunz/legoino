@@ -9,10 +9,45 @@
  */
 
 #include "Lpf2Hub.h"
+#include <map>
 
 // create a hub instance
 Lpf2Hub myMoveHub;
 byte portD = (byte)MoveHubPort::D;
+
+std::map<byte, std::map<byte, std::string>> deviceInfo{
+    {0, {
+        {0, std::string{0x01, 0x01, 0x00, 0x00, 0x01, 0x00}},
+        {1, std::string{0x02, 0x01, 0x00, 0x00, 0x01, 0x00}}
+    }},
+    {1, {
+        {0, std::string{0x03, 0x01, 0x00, 0x00, 0x01, 0x00}},
+        {1, std::string{0x04, 0x01, 0x00, 0x00, 0x01, 0x00}}
+    }}
+};
+// map_type someMap{
+//     {'m', {
+//         {'e', 1},
+//         {'f', 2}
+//     }},
+//     {'a', {
+//         {'b', 5}
+//     }}
+// };
+
+    // std::map<std::string, int> mapOfWords;
+    // mapOfWords.insert(std::make_pair("earth", 1));
+    // mapOfWords.insert(std::make_pair("moon", 2));
+
+//  = {
+//   { 0, { 0, "Hallo"}},
+//   { 0, { 1, "Welt"}}
+// };
+
+    std::map<std::string, std::vector<int> > exampleMap =     {
+                                { "Riti", { 3, 4, 5, 6 } },
+                                { "Jack", { 1, 2, 3, 5 } }
+                                };
 
 
 void buttonCallback(void *hub, HubPropertyReference hubProperty, uint8_t *pData)
@@ -47,7 +82,21 @@ void tachoMotorCallback(void *hub, byte portNumber, DeviceType deviceType, uint8
 void setup()
 {
   Serial.begin(115200);
+  delay(200);
   myMoveHub.init(); // initalize the MoveHub instance
+  
+  // deviceInfo.insert( std::make_pair(0, std::make_pair(0, "Hallo") ) );
+  // deviceInfo.insert( std::make_pair(0, std::make_pair(1, "Welt") ) );
+
+// deviceInfo.insert(std::make_pair(1, "Welt"));
+
+
+  Serial.print("deviceInfo[0x00][0x00]: ");
+  // Serial.println(exampleMap["Riti"][0], DEC);
+    Serial.println(deviceInfo[0][1].c_str());
+  Serial.print("deviceInfo[0x00][0x01]: ");
+  Serial.println(exampleMap["Jack"][0], DEC);
+
 }
 
 // main loop
