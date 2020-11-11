@@ -1,0 +1,17 @@
+name: BuildExampleSketches
+on: [push, pull_request]
+jobs:
+  build:
+    name: Test compiling examples for esp32
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Compile all examples
+      uses: ArminJo/arduino-test-compile@v3
+      with:
+        arduino-board-fqbn: esp32:esp32:pico32:PartitionScheme=default,UploadSpeed=115200,DebugLevel=none
+        platform-url: https://dl.espressif.com/dl/package_esp32_index.json
+        required-libraries: NimBLE-Arduino@1.0.2
