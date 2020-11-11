@@ -5,13 +5,13 @@ on:
     - '**.ino'
     - '**.cpp'
     - '**.h'
-    - '**LibraryBuild.yml'
+    - '.github/workflows/*.yml'
   pull_request:
     paths: 
     - '**.ino'
     - '**.cpp'
     - '**.h'
-    - '**LibraryBuild.yml'
+    - '.github/workflows/*.yml'
 jobs:
   build:
     name: Test compiling examples for esp32
@@ -26,4 +26,4 @@ jobs:
       with:
         arduino-board-fqbn: esp32:esp32:pico32:PartitionScheme=default,UploadSpeed=115200,DebugLevel=none
         platform-url: https://dl.espressif.com/dl/package_esp32_index.json
-        required-libraries: NimBLE-Arduino #use latest
+        required-libraries: NimBLE-Arduino # use latest version
