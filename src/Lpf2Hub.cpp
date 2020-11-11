@@ -459,7 +459,7 @@ std::string Lpf2Hub::parseHubAdvertisingName(uint8_t *pData)
 {
     int charArrayLength = min(pData[0] - 5, 14);
     char name[charArrayLength + 1];
-    for (int i; i < charArrayLength; i++)
+    for (int i=0; i < charArrayLength; i++)
     {
         name[i] = pData[5 + i];
     }
@@ -781,6 +781,7 @@ int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber)
     }
     log_w("no device found for port number %x", portNumber);
     //ToDo: What happens if the device could not be found
+    return -1;
 }
 
 /**
