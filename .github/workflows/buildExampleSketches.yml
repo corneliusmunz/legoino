@@ -12,8 +12,13 @@ on:
     - '**.cpp'
     - '**.h'
     - '.github/workflows/*.yml'
-
-strategy:
+      
+jobs:
+  build:
+    name: ${{ matrix.arduino-boards-fqbn }}
+    runs-on: ubuntu-latest
+    
+    strategy:
       matrix:
         # The matrix will produce one job for each configuration parameter of type `arduino-boards-fqbn`
         arduino-boards-fqbn:
@@ -23,11 +28,6 @@ strategy:
 
       # Do not cancel all jobs / architectures if one job fails
       fail-fast: false
-
-jobs:
-  build:
-    name: Test compiling examples for esp32
-    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
