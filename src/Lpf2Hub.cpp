@@ -181,6 +181,9 @@ void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, PortValueChan
     byte mode = getModeForDeviceType(deviceType);
     log_d("port: %x, device type: %x, callback: %x, mode: %x", portNumber, deviceType, portValueChangeCallback, mode);
     int deviceIndex = getDeviceIndexForPortNumber(portNumber);
+    if (deviceIndex < 0) {
+        return;
+    }
     connectedDevices[deviceIndex].Callback = portValueChangeCallback;
     byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(activatePortDeviceMessage, 8);
@@ -585,6 +588,9 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
 void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 {
     int deviceIndex = getDeviceIndexForPortNumber(pData[3]);
+    if (deviceIndex < 0) {
+        return;
+    }
 
     byte deviceType = connectedDevices[deviceIndex].DeviceType;
 
@@ -780,8 +786,7 @@ int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber)
         }
     }
     log_w("no device found for port number %x", portNumber);
-    //ToDo: What happens if the device could not be found
-    return -1;
+    return -1; 
 }
 
 /**
