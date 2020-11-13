@@ -406,8 +406,8 @@ void Lpf2HubEmulation::start()
 
   _pAdvertising->addServiceUUID(LPF2_UUID);
   _pAdvertising->setScanResponse(true);
-  _pAdvertising->setMinInterval(32);//0.625ms units -> 20ms
-  _pAdvertising->setMaxInterval(64);//0.625ms units -> 40ms
+  _pAdvertising->setMinInterval(32); //0.625ms units -> 20ms
+  _pAdvertising->setMaxInterval(64); //0.625ms units -> 40ms
 
   std::string manufacturerData;
   if (_hubType == HubType::POWERED_UP_HUB)
@@ -447,127 +447,8 @@ void Lpf2HubEmulation::start()
   log_d("Characteristic defined! Now you can connect with your PoweredUp App!");
 }
 
-
-// std::map<byte, std::map<byte, std::string>> deviceInfo{
-//     {0, {
-//         {0, std::string{0x01, 0x01, 0x00, 0x00, 0x01, 0x00}},
-//         {1, std::string{0x02, 0x01, 0x00, 0x00, 0x01, 0x00}}
-//     }},
-//     {1, {
-//         {0, std::string{0x03, 0x01, 0x00, 0x00, 0x01, 0x00}},
-//         {1, std::string{0x04, 0x01, 0x00, 0x00, 0x01, 0x00}}
-//     }}
-// };
-
-// Selected MoveHub with key 1
-// Discover Port 58. Receiving Messages ...
-// ...........................................................
-// Discover Ports Function: 58 / 58
-// ##################################################
-
-//  PORT_INFORMATION = 0x43,
-// len-00-messagetype-port-informationtype-payload
-// 0B-00-43-3A-01-06-08-FF-00-00-00
-// 07-00-43-3A-02-1F-00
-
-// std::map<byte, std::string> trainMotorPortInformation{
-//     {
-//         {0x01, std::string0x01, 0x01, 0x00, 0x00, 0x01, 0x00}}
-//     }
-// };
-
-// std::map<byte, std::map<byte, std::string>> trainMotorPortModeInformation{
-//     {0, {
-//         {0x00, std::string{0x4C, 0x50, 0x46, 0x32, 0x2D, 0x54, 0x52, 0x41, 0x49, 0x4E, 0x00, 0x00}},
-//         {0x01, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
-//         {0x02, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
-//         {0x03, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
-//         {0x04, std::string{0x00, 0x00, 0x00, 0x00, 0x00}},
-//         {0x05, std::string{0x00, 0x18}},
-//         {0x80, std::string{0x01, 0x00, 0x04, 0x00}}
-//     }}
-// };
-
-
-//  PORT_MODE_INFORMATION = 0x44
-//len-00-messagetype-port-mode-informationtype-payload
-
-// 00-00-41-4E-47-4C-45-00-00-00-00-00-00
-// 00-01-00-00-B4-C2-00-00-B4-42
-// 00-02-00-00-C8-C2-00-00-C8-42
-// 00-03-00-00-B4-C2-00-00-B4-42
-// 00-04-44-45-47-00
-// 00-05-50-00
-// 00-80-02-00-03-00
-
-// 01-00-54-49-4C-54-00-00-00-00-00-00-00
-// 01-01-00-00-00-00-00-00-20-41
-// 01-02-00-00-00-00-00-00-C8-42
-// 01-03-00-00-00-00-00-00-20-41
-// 01-04-44-49-52-00
-// 01-05-44-00
-// 01-80-01-00-01-00
-
-// 02-00-4F-52-49-4E-54-00-00-00-00-00-00
-// 02-01-00-00-00-00-00-00-A0-40
-// 02-02-00-00-00-00-00-00-C8-42
-// 02-03-00-00-00-00-00-00-A0-40
-// 02-04-44-49-52-00
-// 02-05-10-00
-// 02-80-01-00-01-00
-
-// 03-00-49-4D-50-43-54-00-00-00-00-00-00
-// 03-01-00-00-00-00-00-00-C8-42
-// 03-02-00-00-00-00-00-00-C8-42
-// 03-03-00-00-00-00-00-00-C8-42
-// 03-04-49-4D-50-00
-// 03-05-08-00
-// 03-80-01-02-04-00
-
-// 04-00-41-43-43-45-4C-00-00-00-00-00-00
-// 04-01-00-00-82-C2-00-00-82-42
-// 04-02-00-00-C8-C2-00-00-C8-42
-// 04-03-00-00-82-C2-00-00-82-42
-// 04-04-41-43-43-00
-// 04-05-10-00
-// 04-80-03-00-03-00
-
-// 05-00-4F-52-5F-43-46-00-00-00-00-00-00
-// 05-01-00-00-00-00-00-00-C0-40
-// 05-02-00-00-00-00-00-00-C8-42
-// 05-03-00-00-00-00-00-00-C0-40
-// 05-04-53-49-44-00
-// 05-05-10-00
-// 05-80-01-00-01-00
-
-// 06-00-49-4D-5F-43-46-00-00-00-00-00-00
-// 06-01-00-00-00-00-00-00-7F-43
-// 06-02-00-00-00-00-00-00-C8-42
-// 06-03-00-00-00-00-00-00-7F-43
-// 06-04-53-45-4E-00
-// 06-05-10-00
-// 06-80-02-00-03-00
-
-// 07-00-43-41-4C-49-42-00-00-00-00-00-00
-// 07-01-00-00-00-00-00-00-7F-43
-// 07-02-00-00-00-00-00-00-C8-42
-// 07-03-00-00-00-00-00-00-7F-43
-// 07-04-43-41-4C-00
-// 07-05-10-00
-// 07-80-03-00-03-00
-// ##################################################
-
-
 std::string Lpf2HubEmulation::getPortInformationPayload(DeviceType deviceType, byte port, byte informationType)
 {
-
-  std::map<byte, std::string> trainMotorPortInformation{
-    {
-        {0x01, std::string{0x01, 0x01, 0x00, 0x00, 0x01, 0x00}}
-    }
-};
-
-
 
   std::string payload;
   payload.push_back(port);
@@ -575,53 +456,28 @@ std::string Lpf2HubEmulation::getPortInformationPayload(DeviceType deviceType, b
 
   if (deviceType == DeviceType::TRAIN_MOTOR)
   {
+    std::map<byte, std::string> trainMotorPortInformation{
+        {
+            {0x01, std::string{0x01, 0x01, 0x00, 0x00, 0x01, 0x00}},
+            {0x02, std::string{}},
+        }};
     payload.append(trainMotorPortInformation[informationType]);
-    // switch (informationType)
-    // {
-    // case 0x01:
-    //   payload.append(std::string{0x01, 0x01, 0x00, 0x00, 0x01, 0x00});
-    //   break;
-    // case 0x02:
-    //   break;
-    // default:
-    //   break;
-    // }
   }
   else if (deviceType == DeviceType::HUB_LED)
   {
-    switch (informationType)
-    {
-    case 0x01:
-      payload.append(std::string{0x01, 0x02, 0x00, 0x00, 0x03, 0x00});
-      break;
-    case 0x02:
-      break;
-    default:
-      break;
-    }
+    std::map<byte, std::string> rgbLightPortInformation{
+        {
+            {0x01, std::string{0x01, 0x02, 0x00, 0x00, 0x03, 0x00}},
+            {0x02, std::string{}},
+        }};
+    payload.append(rgbLightPortInformation[informationType]);
   }
 
   return payload;
 }
 
-
-
-
-
 std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType deviceType, byte port, byte mode, byte modeInformationType)
 {
-
-std::map<byte, std::map<byte, std::string>> trainMotorPortModeInformation{
-    {0, {
-        {0x00, std::string{0x4C, 0x50, 0x46, 0x32, 0x2D, 0x54, 0x52, 0x41, 0x49, 0x4E, 0x00, 0x00}},
-        {0x01, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
-        {0x02, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
-        {0x03, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
-        {0x04, std::string{0x00, 0x00, 0x00, 0x00, 0x00}},
-        {0x05, std::string{0x00, 0x18}},
-        {0x80, std::string{0x01, 0x00, 0x04, 0x00}}
-    }}
-};
 
   std::string payload;
   payload.push_back(port);
@@ -630,100 +486,45 @@ std::map<byte, std::map<byte, std::string>> trainMotorPortModeInformation{
 
   if (deviceType == DeviceType::TRAIN_MOTOR)
   {
+    std::map<byte, std::map<byte, std::string>> trainMotorPortModeInformation{
+        {0x00, {
+                   {0x00, std::string{0x4C, 0x50, 0x46, 0x32, 0x2D, 0x54, 0x52, 0x41, 0x49, 0x4E, 0x00, 0x00}},
+                   {0x01, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x02, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x03, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x04, std::string{0x00, 0x00, 0x00, 0x00, 0x00}},
+                   {0x05, std::string{0x00, 0x18}},
+                   {0x80, std::string{0x01, 0x00, 0x04, 0x00}},
+               }},
+    };
 
     payload.append(trainMotorPortModeInformation[mode][modeInformationType]);
-
-    // if (mode == 0x00)
-    // {
-    //   switch (modeInformationType)
-    //   {
-    //   case 0x00:
-    //     payload.append(std::string{0x4C, 0x50, 0x46, 0x32, 0x2D, 0x54, 0x52, 0x41, 0x49, 0x4E, 0x00, 0x00});
-    //     break;
-    //   case 0x01:
-    //     payload.append(std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42});
-    //     break;
-    //   case 0x02:
-    //     payload.append(std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42});
-    //     break;
-    //   case 0x03:
-    //     payload.append(std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42});
-    //     break;
-    //   case 0x04:
-    //     payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00});
-    //     break;
-    //   case 0x05:
-    //     payload.append(std::string{0x00, 0x18});
-    //     break;
-    //   case 0x80:
-    //     payload.append(std::string{0x01, 0x00, 0x04, 0x00});
-    //     break;
-    //   default:
-    //     break;
-    //   }
-    // }
   }
 
   if (deviceType == DeviceType::HUB_LED)
   {
-    if (mode == 0x00)
-    {
-      switch (modeInformationType)
-      {
-      case 0x00:
-        payload.append(std::string{0x43, 0x4F, 0x4C, 0x20, 0x4F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
-        break;
-      case 0x01:
-        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x41});
-        break;
-      case 0x02:
-        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC8, 0x42});
-        break;
-      case 0x03:
-        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x41});
-        break;
-      case 0x04:
-        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00});
-        break;
-      case 0x05:
-        payload.append(std::string{0x00, 0x44});
-        break;
-      case 0x80:
-        payload.append(std::string{0x01, 0x00, 0x01, 0x00});
-        break;
-      default:
-        break;
-      }
-    }
-    else if (mode == 0x01)
-    {
-      switch (modeInformationType)
-      {
-      case 0x00:
-        payload.append(std::string{0x52, 0x47, 0x42, 0x20, 0x4F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
-        break;
-      case 0x01:
-        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F, 0x43});
-        break;
-      case 0x02:
-        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC8, 0x42});
-        break;
-      case 0x03:
-        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F, 0x43});
-        break;
-      case 0x04:
-        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00});
-        break;
-      case 0x05:
-        payload.append(std::string{0x00, 0x10});
-        break;
-      case 0x80:
-        payload.append(std::string{0x03, 0x00, 0x03, 0x00});
-        break;
-      default:
-        break;
-      }
-    }
+    std::map<byte, std::map<byte, std::string>> rgbLightPortModeInformation{
+        {0x00, {
+                   {0x00, std::string{0x43, 0x4F, 0x4C, 0x20, 0x4F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
+                   {0x01, std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x41}},
+                   {0x02, std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x03, std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x41}},
+                   {0x04, std::string{0x00, 0x00, 0x00, 0x00}},
+                   {0x05, std::string{0x00, 0x44}},
+                   {0x80, std::string{0x01, 0x00, 0x01, 0x00}},
+               }},
+        {0x01, {
+                   {0x00, std::string{0x52, 0x47, 0x42, 0x20, 0x4F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
+                   {0x01, std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F, 0x43}},
+                   {0x02, std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x03, std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F, 0x43}},
+                   {0x04, std::string{0x00, 0x00, 0x00, 0x00}},
+                   {0x05, std::string{0x00, 0x10}},
+                   {0x80, std::string{0x03, 0x00, 0x03, 0x00}},
+               }},
+    };
+
+    payload.append(rgbLightPortModeInformation[mode][modeInformationType]);
   }
 
   return payload;
