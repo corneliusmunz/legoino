@@ -17,6 +17,8 @@
 #include "Arduino.h"
 #include <NimBLEDevice.h>
 #include "Lpf2HubConst.h"
+#include "LegoinoCommon.h"
+
 
 typedef void (*WritePortCallback)(byte port, byte value);
 
@@ -64,6 +66,8 @@ public:
 
   std::string getHubName();
   BatteryType getBatteryType();
+  Version getFirmwareVersion();
+  Version getHardwareVersion();
 
   void setHubFirmwareVersion(Version version);
   void setHubHardwareVersion(Version version);

@@ -26,6 +26,7 @@ public:
   static signed int ReadInt32LE(uint8_t *data, int offset);
   static std::string ColorStringFromColor(Color color);
   static std::string ColorStringFromColor(int color);
+  static byte *VersionToByteArray(Version version);
 };
 
 #endif

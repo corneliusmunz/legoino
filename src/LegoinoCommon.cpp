@@ -30,6 +30,16 @@ byte LegoinoCommon::MapSpeed(int speed)
     return rawSpeed;
 }
 
+byte *LegoinoCommon::VersionToByteArray(Version version)
+{
+    int32_t intVersion = int32_t(
+        version.Major << 28 |
+        version.Minor << 24 |
+        version.Bugfix << 16 |
+        version.Build);
+    return Int32ToByteArray(intVersion);
+}
+
 /**
  * @brief return string value of color enum
  * @param [in] Color enum
@@ -45,10 +55,11 @@ std::string LegoinoCommon::ColorStringFromColor(Color color)
  */
 std::string LegoinoCommon::ColorStringFromColor(int color)
 {
-    if (color > Color::NUM_COLORS) {
+    if (color > Color::NUM_COLORS)
+    {
         return std::string(COLOR_STRING[Color::NUM_COLORS]);
-    } 
-    else 
+    }
+    else
     {
         return std::string(COLOR_STRING[color]);
     }
