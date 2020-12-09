@@ -41,6 +41,7 @@ public:
   }
 
   // This is required to make it working with BLE Scanner and PoweredUp on devices with Android <6.
+  // This seems to be not needed for Android >=6
   // TODO: find out why this method helps. Maybe it goes about timeout?
   void onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc)
   {
@@ -435,6 +436,9 @@ void Lpf2HubEmulation::start()
     manufacturerData = std::string(controlPlusHub, sizeof(controlPlusHub));
   }
   NimBLEAdvertisementData advertisementData = NimBLEAdvertisementData();
+  // flags must be present to make PoweredUp working on devices with Android >=6
+  // (however it seems to be not needed for devices with Android <6)
+  advertisementData.setFlags(BLE_HS_ADV_F_DISC_GEN);
   advertisementData.setManufacturerData(manufacturerData);
   advertisementData.setCompleteServices(NimBLEUUID(LPF2_UUID));
   // scan response data is needed because the uuid128 and manufacturer data takes almost all space in the advertisement data
