@@ -8,6 +8,8 @@
  * 
 */
 
+#if defined(ESP32)
+
 #include "Boost.h"
 
 Boost::Boost(){};
@@ -104,3 +106,5 @@ void Boost::moveArcRight(int degrees = 90)
 {
     moveArc(degrees);
 }
+
+#endif // ESP32

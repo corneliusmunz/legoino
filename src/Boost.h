@@ -8,6 +8,8 @@
  * 
 */
 
+#if defined(ESP32)
+
 #ifndef Boost_h
 #define Boost_h
 
@@ -30,4 +32,6 @@ public:
   void moveArcRight(int degrees);
 };
 
-#endif
+#endif // Boost_h
+
+#endif // ESP32
