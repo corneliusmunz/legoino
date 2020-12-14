@@ -44,3 +44,4 @@ jobs:
         arduino-board-fqbn: ${{ matrix.arduino-boards-fqbn }}
         sketch-names: "PowerFunctions.ino"
         platform-url: https://dl.espressif.com/dl/package_esp32_index.json,https://arduino.esp8266.com/stable/package_esp8266com_index.json
+        required-libraries: NimBLE-Arduino # use latest version
