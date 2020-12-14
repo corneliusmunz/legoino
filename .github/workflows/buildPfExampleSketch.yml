@@ -13,7 +13,12 @@ on:
     - '**.h'
     - '.github/workflows/*.yml'
 
-strategy:
+jobs:
+  build:
+    name: ${{ matrix.arduino-boards-fqbn }}
+    runs-on: ubuntu-latest
+    
+    strategy:
       matrix:
         # The matrix will produce one job for each configuration parameter of type `arduino-boards-fqbn`
         arduino-boards-fqbn:
@@ -25,22 +30,17 @@ strategy:
           - esp8266:esp8266:huzzah:xtal=80,vt=flash,exception=legacy,ssl=all,eesz=4M2M,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
           - arduino:avr:uno
           - arduino:avr:nano:cpu=atmega328      
+
       # Do not cancel all jobs / architectures if one job fails
       fail-fast: false
-
-jobs:
-  build:
-    name: Test compiling power functions example for different platforms (esp32, esp8266, avr)
-    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Compile only power function example
+    - name: Compile only power function example for different platforms
       uses: ArminJo/arduino-test-compile@v3
       with:
         arduino-board-fqbn: ${{ matrix.arduino-boards-fqbn }}
         sketch-names: "PowerFunctions.ino"
-        platform-url: https://dl.espressif.com/dl/package_esp32_index.json
         platform-url: https://dl.espressif.com/dl/package_esp32_index.json,https://arduino.esp8266.com/stable/package_esp8266com_index.json

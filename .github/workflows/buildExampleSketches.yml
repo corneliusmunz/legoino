@@ -36,6 +36,7 @@ jobs:
     - name: Compile all examples
       uses: ArminJo/arduino-test-compile@v3
       with:
+        sketches-exclude: PowerFunctions
         arduino-board-fqbn: ${{ matrix.arduino-boards-fqbn }}
         platform-url: https://dl.espressif.com/dl/package_esp32_index.json
         required-libraries: NimBLE-Arduino # use latest version
