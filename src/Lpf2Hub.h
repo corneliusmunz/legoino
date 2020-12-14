@@ -6,6 +6,8 @@
  * 
 */
 
+#if defined(ESP32)
+
 #ifndef Lpf2Hub_h
 #define Lpf2Hub_h
 
@@ -138,4 +140,6 @@ private:
   uint32_t _scanDuration = 10;
 };
 
-#endif
+#endif // Lpf2Hub_h
+
+#endif // ESP32

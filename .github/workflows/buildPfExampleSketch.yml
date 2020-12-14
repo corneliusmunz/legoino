@@ -1,4 +1,4 @@
-name: BuildExampleSketches
+name: BuildPfExampleSketch
 on: 
   push:
     paths: 
@@ -12,7 +12,7 @@ on:
     - '**.cpp'
     - '**.h'
     - '.github/workflows/*.yml'
-      
+
 jobs:
   build:
     name: ${{ matrix.arduino-boards-fqbn }}
@@ -25,6 +25,11 @@ jobs:
           - esp32:esp32:pico32:PartitionScheme=default,UploadSpeed=115200,DebugLevel=none # e.g. M5 Atom
           - esp32:esp32:heltec_wifi_kit_32:PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=40,FlashSize=4M,UploadSpeed=921600,DebugLevel=none
           - esp32:esp32:esp32wrover:PartitionScheme=default,FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none
+          - esp8266:esp8266:nodemcuv2:xtal=80,vt=flash,exception=legacy,ssl=all,eesz=4M2M,led=2,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 
+          - esp8266:esp8266:d1:xtal=80,vt=flash,exception=legacy,ssl=all,eesz=4M2M,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=921600 
+          - esp8266:esp8266:huzzah:xtal=80,vt=flash,exception=legacy,ssl=all,eesz=4M2M,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
+          - arduino:avr:uno
+          - arduino:avr:nano:cpu=atmega328      
 
       # Do not cancel all jobs / architectures if one job fails
       fail-fast: false
@@ -33,10 +38,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Compile all examples
+    - name: Compile only power function example for different platforms
       uses: ArminJo/arduino-test-compile@v3
       with:
-        sketches-exclude: PowerFunctions
         arduino-board-fqbn: ${{ matrix.arduino-boards-fqbn }}
-        platform-url: https://dl.espressif.com/dl/package_esp32_index.json
+        sketch-names: "PowerFunctions.ino"
+        platform-url: https://dl.espressif.com/dl/package_esp32_index.json,https://arduino.esp8266.com/stable/package_esp8266com_index.json
         required-libraries: NimBLE-Arduino # use latest version

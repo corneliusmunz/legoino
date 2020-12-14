@@ -6,6 +6,8 @@
  * 
 */
 
+#if defined(ESP32)
+
 #include "Lpf2Hub.h"
 
 /**
@@ -1276,3 +1278,6 @@ void Lpf2Hub::playTone(byte number)
     byte playTone[6] = {0x81, 0x01, 0x11, 0x51, 0x02, number};
     WriteValue(playTone, 6);
 }
+
+
+#endif // ESP32
