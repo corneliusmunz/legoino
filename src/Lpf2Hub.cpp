@@ -425,6 +425,11 @@ double Lpf2Hub::parseDistance(uint8_t *pData)
 int Lpf2Hub::parseColor(uint8_t *pData)
 {
     int color = pData[4];
+    // fix mapping of sensor color data to lego color data 
+    // this is only needed for green and purple
+    if (pData[4] == 1 || pData[4] == 5) {
+        color = color + 1;
+    }
     log_d("color: %s (%d)", LegoinoCommon::ColorStringFromColor(color).c_str(), color);
     return color;
 }
