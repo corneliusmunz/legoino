@@ -12,6 +12,8 @@
  * 
 */
 
+#if defined(ESP32)
+
 #include "Lpf2HubEmulation.h"
 
 class Lpf2HubServerCallbacks : public NimBLEServerCallbacks
@@ -37,6 +39,14 @@ public:
     _lpf2HubEmulation->isConnected = false;
     _lpf2HubEmulation->isPortInitialized = false;
   }
+
+  // This is required to make it working with BLE Scanner and PoweredUp on devices with Android <6.
+  // This seems to be not needed for Android >=6
+  // TODO: find out why this method helps. Maybe it goes about timeout?
+  void onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc)
+  {
+    pServer->updateConnParams(desc->conn_handle, 24, 48, 0, 60);
+  };
 };
 
 class Lpf2HubCharacteristicCallbacks : public NimBLECharacteristicCallbacks
@@ -413,7 +423,10 @@ void Lpf2HubEmulation::start()
   if (_hubType == HubType::POWERED_UP_HUB)
   {
     log_d("PoweredUp Hub");
-    const char poweredUpHub[8] = {0x97, 0x03, 0x00, 0x41, 0x07, 0x1D, 0x63, 0x00};
+    // this is the minimal change that makes PoweredUp working on devices with Android <6
+    // https://lego.github.io/lego-ble-wireless-protocol-docs/index.html#last-network-id
+    // set Last Network ID to UNKNOWN (0x00)
+    const char poweredUpHub[8] = {0x97, 0x03, 0x00, 0x41, 0x07, 0x00, 0x63, 0x00};
     manufacturerData = std::string(poweredUpHub, sizeof(poweredUpHub));
   }
   else if (_hubType == HubType::CONTROL_PLUS_HUB)
@@ -423,6 +436,9 @@ void Lpf2HubEmulation::start()
     manufacturerData = std::string(controlPlusHub, sizeof(controlPlusHub));
   }
   NimBLEAdvertisementData advertisementData = NimBLEAdvertisementData();
+  // flags must be present to make PoweredUp working on devices with Android >=6
+  // (however it seems to be not needed for devices with Android <6)
+  advertisementData.setFlags(BLE_HS_ADV_F_DISC_GEN);
   advertisementData.setManufacturerData(manufacturerData);
   advertisementData.setCompleteServices(NimBLEUUID(LPF2_UUID));
   // scan response data is needed because the uuid128 and manufacturer data takes almost all space in the advertisement data
@@ -590,3 +606,5 @@ std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType de
 
   return payload;
 }
+
+#endif // ESP32

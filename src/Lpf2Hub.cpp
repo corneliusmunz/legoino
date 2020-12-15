@@ -6,6 +6,8 @@
  * 
 */
 
+#if defined(ESP32)
+
 #include "Lpf2Hub.h"
 
 /**
@@ -181,6 +183,9 @@ void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, PortValueChan
     byte mode = getModeForDeviceType(deviceType);
     log_d("port: %x, device type: %x, callback: %x, mode: %x", portNumber, deviceType, portValueChangeCallback, mode);
     int deviceIndex = getDeviceIndexForPortNumber(portNumber);
+    if (deviceIndex < 0) {
+        return;
+    }
     connectedDevices[deviceIndex].Callback = portValueChangeCallback;
     byte activatePortDeviceMessage[8] = {0x41, portNumber, mode, 0x01, 0x00, 0x00, 0x00, 0x01};
     WriteValue(activatePortDeviceMessage, 8);
@@ -422,6 +427,11 @@ double Lpf2Hub::parseDistance(uint8_t *pData)
 int Lpf2Hub::parseColor(uint8_t *pData)
 {
     int color = pData[4];
+    // fix mapping of sensor color data to lego color data 
+    // this is only needed for green and purple
+    if (pData[4] == 1 || pData[4] == 5) {
+        color = color + 1;
+    }
     log_d("color: %s (%d)", LegoinoCommon::ColorStringFromColor(color).c_str(), color);
     return color;
 }
@@ -585,6 +595,9 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
 void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 {
     int deviceIndex = getDeviceIndexForPortNumber(pData[3]);
+    if (deviceIndex < 0) {
+        return;
+    }
 
     byte deviceType = connectedDevices[deviceIndex].DeviceType;
 
@@ -780,8 +793,7 @@ int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber)
         }
     }
     log_w("no device found for port number %x", portNumber);
-    //ToDo: What happens if the device could not be found
-    return -1;
+    return -1; 
 }
 
 /**
@@ -1266,3 +1278,6 @@ void Lpf2Hub::playTone(byte number)
     byte playTone[6] = {0x81, 0x01, 0x11, 0x51, 0x02, number};
     WriteValue(playTone, 6);
 }
+
+
+#endif // ESP32

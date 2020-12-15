@@ -6,6 +6,8 @@
  *
 */
 
+#if defined(ESP32)
+
 #include "LegoinoCommon.h"
 
 /**
@@ -107,3 +109,5 @@ int32_t LegoinoCommon::ReadInt32LE(uint8_t *data, int offset = 0)
     int32_t value = data[0 + offset] | (int16_t)(data[1 + offset] << 8) | (uint32_t)(data[2 + offset] << 16) | (uint32_t)(data[3 + offset] << 24);
     return value;
 }
+
+#endif // ESP32

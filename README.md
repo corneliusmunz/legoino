@@ -49,10 +49,10 @@ All the included examples are a great source to find a solution or pattern for y
 
 You can find different Examples in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". Just have a look on the videos to see the examples running :smiley: 
 * **Boost.ino:** Example who uses the basic boost moovements (feasable for M.T.R.4 or Vernie model). http://www.youtube.com/watch?v=VgWObhyUmi0 
-* **MoveHubColorSensor.ino:** Example which reads in the color Sensor value on port C and uses the detected color to set the Hub LED accordingly. https://youtu.be/_xCd9Owy1nk
+* **ColorSensor.ino:** Example which reads in the color Sensor value (attached to an abritary port) and uses the detected color to set the Hub LED accordingly. https://youtu.be/_xCd9Owy1nk
 * **MoveHubDeviceInfo.ino:** Example which displays the various device infos (firmware version, battery level, rssi, hardwar version, tilt) in the serial monitor
-* **MoveHubDistanceSensor.ino:** Example which reads in the input of the distance sencor and set the Hub LED color dependent on the distance. https://youtu.be/TOAQtGGjZ6c 
-* **MoveHubRotationSensor.ino:** Example which reads in the input of the Tacho motor angle to set the Hub LED dependent on the angle to the scale of rainbow colors. https://youtu.be/c3DHpX55uN0
+* **DistanceSensor.ino:** Example which reads in the input of the distance sencor and set the Hub LED color dependent on the distance. https://youtu.be/TOAQtGGjZ6c 
+* **RotationSensor.ino:** Example which reads in the input of the Tacho motor angle to set the Hub LED dependent on the angle to the scale of rainbow colors. https://youtu.be/c3DHpX55uN0
 * **TrainHub.ino:** Example for a PowererdUp Hub to set the speed of a train model. http://www.youtube.com/watch?v=o1hgZQz3go4 
 * **TrainColor.ino:** Example of PoweredUp Hub combined with color sensor to control the speed of the train dependent on the detected color. https://youtu.be/GZ0fqe3-Bhw
 * **HubEmulation.ino:** Example of an emulated PoweredUp Hub two port hub (train hub) which could receive signals from the PoweredUp app and will send out the signals as IR commands to a Powerfunction remote receiver. https://www.youtube.com/watch?v=RTNexxT4-yQ
@@ -327,7 +327,7 @@ To signalize the app which devices are connected you have to send some commands 
 
 ## PowerFunction IR
 
-To use the PowerFunction Infrared library you have to connect a IR-LED to your ESP32 controller. To instanciate a new object, you have to define on which pin the IR Led is connected. Additionally you can define the Power function channel which should be used. 
+To use the PowerFunction Infrared library you have to connect a IR-LED to your controller. The PowerFunction part of the legoino library will work on different hardware architectures (AVR, ESP8266, ESP32). To instanciate a new object, you have to define on which pin the IR Led is connected. Additionally you can define the Power function channel which should be used. Pay attention, that the channel in the library starts with 0 and on the physical IR Lego controller it starts with 1. So if you want to control channel 1 of your physical device, you have to use channel 0 in the PowerFunction part of the library. 
 
 ```c++
 #include "PowerFunctions.h"
@@ -425,6 +425,8 @@ Thanks to [@giancann](https://github.com/giancann), [@marcrupprath](https://gith
 Thanks to [@fvanroie](https://github.com/fvanroie) for his contribution about callbacks.
 
 Thanks for the original [PowerFunctions](https://github.com/jurriaan/Arduino-PowerFunctions) Library by [@jurriaan](https://github.com/jurriaan)
+
+Thanks to [@wmarkow](https://github.com/wmarkow) for his detailed input about hub emulation issues on Android devices and his proposals.
 
 # Remarks
 Prerequisite of that library is the NimBLE-Arduino library (https://github.com/h2zero/NimBLE-Arduino) with at least version 1.0.1 Otherwise the notifcations of changed charachteristic values will not work. So just install as a prerequesite the version 1.0.1 of that library via the Arduino Library manager or the platform.io library manager (https://www.arduinolibraries.info/libraries/nim-ble-arduino)
