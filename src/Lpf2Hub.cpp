@@ -10,6 +10,19 @@
 
 #include "Lpf2Hub.h"
 
+/** 
+ * Callback if a scan has ended with the results of found devices 
+ * only needed to enforce the non blocking scan start
+ */
+void scanEndedCallback(NimBLEScanResults results)
+{
+    log_d("Number of devices: %d", results.getCount());
+    for (int i = 0; i < results.getCount(); i++)
+    {
+        log_d("device[%d]: %s", i, results.getDevice(i).toString().c_str());
+    }
+}
+
 /**
  * Derived class which could be added as an instance to the BLEClient for callback handling
  * The current hub is given as a parameter in the constructor to be able to set the 
@@ -183,7 +196,8 @@ void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, PortValueChan
     byte mode = getModeForDeviceType(deviceType);
     log_d("port: %x, device type: %x, callback: %x, mode: %x", portNumber, deviceType, portValueChangeCallback, mode);
     int deviceIndex = getDeviceIndexForPortNumber(portNumber);
-    if (deviceIndex < 0) {
+    if (deviceIndex < 0)
+    {
         return;
     }
     connectedDevices[deviceIndex].Callback = portValueChangeCallback;
@@ -427,9 +441,10 @@ double Lpf2Hub::parseDistance(uint8_t *pData)
 int Lpf2Hub::parseColor(uint8_t *pData)
 {
     int color = pData[4];
-    // fix mapping of sensor color data to lego color data 
+    // fix mapping of sensor color data to lego color data
     // this is only needed for green and purple
-    if (pData[4] == 1 || pData[4] == 5) {
+    if (pData[4] == 1 || pData[4] == 5)
+    {
         color = color + 1;
     }
     log_d("color: %s (%d)", LegoinoCommon::ColorStringFromColor(color).c_str(), color);
@@ -469,7 +484,7 @@ std::string Lpf2Hub::parseHubAdvertisingName(uint8_t *pData)
 {
     int charArrayLength = min(pData[0] - 5, 14);
     char name[charArrayLength + 1];
-    for (int i=0; i < charArrayLength; i++)
+    for (int i = 0; i < charArrayLength; i++)
     {
         name[i] = pData[5 + i];
     }
@@ -595,7 +610,8 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
 void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 {
     int deviceIndex = getDeviceIndexForPortNumber(pData[3]);
-    if (deviceIndex < 0) {
+    if (deviceIndex < 0)
+    {
         return;
     }
 
@@ -730,7 +746,9 @@ void Lpf2Hub::init()
     pBLEScan->setAdvertisedDeviceCallbacks(new Lpf2HubAdvertisedDeviceCallbacks(this));
 
     pBLEScan->setActiveScan(true);
-    pBLEScan->start(_scanDuration);
+    // start method with callback function to enforce the non blocking scan. If no callback function is used,
+    // the scan starts in a blocking manner
+    pBLEScan->start(_scanDuration, scanEndedCallback);
 }
 
 /**
@@ -793,7 +811,7 @@ int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber)
         }
     }
     log_w("no device found for port number %x", portNumber);
-    return -1; 
+    return -1;
 }
 
 /**
@@ -1278,6 +1296,5 @@ void Lpf2Hub::playTone(byte number)
     byte playTone[6] = {0x81, 0x01, 0x11, 0x51, 0x02, number};
     WriteValue(playTone, 6);
 }
-
 
 #endif // ESP32
