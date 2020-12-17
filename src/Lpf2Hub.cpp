@@ -47,6 +47,11 @@ public:
     {
         _lpf2Hub->_isConnecting = false;
         _lpf2Hub->_isConnected = false;
+
+        if (_connectionChangeCallback != nullptr) {
+            _connectionChangeCallback(false);
+        }
+
         log_d("disconnected client");
     }
 };
@@ -107,6 +112,9 @@ public:
                 }
             }
             _lpf2Hub->_isConnecting = true;
+            if (_lpf2Hub->_autoConnect) {
+                _lpf2Hub->connectHub();
+            }
         }
     }
 };
@@ -751,6 +759,12 @@ void Lpf2Hub::init()
     pBLEScan->start(_scanDuration, scanEndedCallback);
 }
 
+void Lpf2Hub::init(bool autoConnect, ConnectionChangeCallback callback) {
+    _autoConnect = autoConnect;
+    _connectionChangeCallback = callback;
+    init();
+}
+
 /**
  * @brief Init function set the UUIDs and scan for the Hub
  * @param [in] deviceAddress to which the arduino should connect represented by a hex string of the format: 00:00:00:00:00:00
@@ -1090,6 +1104,11 @@ bool Lpf2Hub::connectHub()
     // Set states
     _isConnected = true;
     _isConnecting = false;
+    
+    if (_connectionChangeCallback != nullptr) {
+        _connectionChangeCallback(true);
+    }
+
     return true;
 }
 

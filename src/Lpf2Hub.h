@@ -20,6 +20,7 @@ using namespace std::placeholders;
 
 typedef void (*HubPropertyChangeCallback)(void *hub, HubPropertyReference hubProperty, uint8_t *pData);
 typedef void (*PortValueChangeCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
+typedef void (*ConnectionChangeCallback)(bool isConnected);
 
 struct Device
 {
@@ -40,6 +41,7 @@ public:
   void init(uint32_t scanDuration);
   void init(std::string deviceAddress);
   void init(std::string deviceAddress, uint32_t scanDuration);
+  void init(bool autoConnect, ConnectionChangeCallback callback);
 
   // hub related methods
   bool connectHub();
@@ -138,6 +140,8 @@ private:
 
   //BLE settings
   uint32_t _scanDuration = 10;
+  bool _autoConnect = false;
+  ConnectionChangeCallback _connectionChangeCallback = nullptr;
 };
 
 #endif // Lpf2Hub_h
