@@ -45,6 +45,7 @@ public:
 
   // hub related methods
   bool connectHub();
+  // bool connectHub(BLEAddress address);
   bool isConnected();
   bool isConnecting();
   NimBLEAddress getHubAddress();
@@ -129,8 +130,12 @@ public:
   std::string _hubName;
   boolean _isConnecting;
   boolean _isConnected;
+  bool _autoConnect = false;
+  ConnectionChangeCallback _connectionChangeCallback = nullptr;
 
 private:
+  friend class HubManager;
+
   // Notification callbacks
   HubPropertyChangeCallback _hubPropertyChangeCallback = nullptr;
 
@@ -140,8 +145,6 @@ private:
 
   //BLE settings
   uint32_t _scanDuration = 10;
-  bool _autoConnect = false;
-  ConnectionChangeCallback _connectionChangeCallback = nullptr;
 };
 
 #endif // Lpf2Hub_h

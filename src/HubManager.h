@@ -13,29 +13,29 @@
 
 #include "Lpf2Hub.h"
 
-// abstraction to lpf2hub only with the information which is relevant for the hub manager
-class ManagedHub
-{
-public:
-  ManagedHub(HubType type, std::string name = null, std::string address = null);
+// // abstraction to lpf2hub only with the information which is relevant for the hub manager
+// class ManagedHub
+// {
+// public:
+//   ManagedHub(HubType type, std::string name = null, std::string address = null);
 
-  void Connect();
-  void AddHubProperty(HubPropertyReference[] properties, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);
-  void AddDevice(DeviceType type, byte port = null, PortValueChangeCallback valueChangeCallback = nullptr);
+//   void Connect();
+//   //void AddHubProperty(HubPropertyReference[] properties, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);
+//   //void AddDevice(DeviceType type, byte port = null, PortValueChangeCallback valueChangeCallback = nullptr);
 
-  std::vector<Device *> *GetDevices();
-  std::string GetName();
-  HubType GetType();
-  std::string GetAddress();
-  bool IsConnected();
+//   //std::vector<Device *> *GetDevices();
+//   std::string GetName();
+//   HubType GetType();
+//   std::string GetAddress();
+//   bool IsConnected();
 
-private:
-  bool _isConnected;
-  HubType _hubType;
-  std::string _name;
-  std::string _address;
-  Lpf2Hub _hub;
-}
+// private:
+//   bool _isConnected;
+//   HubType _hubType;
+//   std::string _name;
+//   std::string _address;
+//   Lpf2Hub _hub;
+// }
 
 // manages a set of hubs as a system which could be started and the hub manager takes care
 // of connecting/reconnecting all attached hubs
@@ -43,12 +43,15 @@ class HubManager
 {
 
 public:
-  HubManager(bool automaticReconnect = true);
-  void AddHub(ManagedHub hub);
-  std::vector<ManagedHub *> ManagedHubs;
-  void Start();
-  void Stop();
-  bool IsSystemReady();
+  HubManager();
+  void AddHub(Lpf2Hub hub, std::string address);
+  std::vector<Lpf2Hub *> ManagedHubs;
+  void StartDiscovery(uint32_t scanDuration = 10, bool nonBlocking = true);
+  void StartConnection();
+  //void Stop();
+  Lpf2Hub* GetHubByAddress(NimBLEAddress address);
+  bool IsConnectionFinished();
+  bool IsDiscoveryFinished();
 };
 
 #endif // HubManager_h

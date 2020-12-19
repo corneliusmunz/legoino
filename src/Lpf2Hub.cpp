@@ -6,7 +6,6 @@
  * 
 */
 
-#if defined(ESP32)
 
 #include "Lpf2Hub.h"
 
@@ -48,8 +47,8 @@ public:
         _lpf2Hub->_isConnecting = false;
         _lpf2Hub->_isConnected = false;
 
-        if (_connectionChangeCallback != nullptr) {
-            _connectionChangeCallback(false);
+        if (_lpf2Hub->_connectionChangeCallback != nullptr) {
+            _lpf2Hub->_connectionChangeCallback(false);
         }
 
         log_d("disconnected client");
@@ -1020,11 +1019,14 @@ void Lpf2Hub::deactivateHubPropertyUpdate(HubPropertyReference hubProperty)
     WriteValue(notifyPropertyCommand, 3);
 }
 
+
+
 /**
  * @brief Connect to the HUB, get a reference to the characteristic and register for notifications
  */
 bool Lpf2Hub::connectHub()
 {
+    Serial.println("ConnectHub");
     BLEAddress pAddress = *_pServerAddress;
     NimBLEClient *pClient = nullptr;
 
@@ -1055,7 +1057,7 @@ bool Lpf2Hub::connectHub()
             pClient = NimBLEDevice::getDisconnectedClient();
         }
     }
-
+    Serial.println("Client reuse");
     /** No client to reuse? Create a new one. */
     if (!pClient)
     {
@@ -1067,16 +1069,17 @@ bool Lpf2Hub::connectHub()
 
         pClient = NimBLEDevice::createClient();
     }
-
+    Serial.println("before connect");
     if (!pClient->isConnected())
     {
         if (!pClient->connect(pAddress))
         {
+            Serial.println("connection failed");
             log_e("failed to connect");
             return false;
         }
     }
-
+    Serial.println("connected");
     log_d("connected to: %s, RSSI: %d", pClient->getPeerAddress().toString().c_str(), pClient->getRssi());
     BLERemoteService *pRemoteService = pClient->getService(_bleUuid);
     if (pRemoteService == nullptr)
@@ -1104,7 +1107,7 @@ bool Lpf2Hub::connectHub()
     // Set states
     _isConnected = true;
     _isConnecting = false;
-    
+    Serial.println("before connectionChangeCallback");
     if (_connectionChangeCallback != nullptr) {
         _connectionChangeCallback(true);
     }
@@ -1315,5 +1318,3 @@ void Lpf2Hub::playTone(byte number)
     byte playTone[6] = {0x81, 0x01, 0x11, 0x51, 0x02, number};
     WriteValue(playTone, 6);
 }
-
-#endif // ESP32
