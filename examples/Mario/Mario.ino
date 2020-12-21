@@ -9,9 +9,8 @@
 #include "Lpf2Hub.h"
 
 DeviceType pantSensor = DeviceType::MARIO_HUB_PANT_SENSOR;
-DeviceType gestureSensor = DeviceType::MARIO_HUB_GESTURE;
+DeviceType gestureSensor = DeviceType::MARIO_HUB_GESTURE_SENSOR;
 DeviceType barcodeSensor = DeviceType::MARIO_HUB_BARCODE_SENSOR;
-
 
 // create a hub instance
 Lpf2Hub myHub;
@@ -37,6 +36,15 @@ void MarioCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *p
     MarioColor color = myHub->parseMarioColor(pData);
     Serial.print("Mario Color: ");
     Serial.println((byte)color, HEX);
+  }
+  if (deviceType == DeviceType::MARIO_HUB_GESTURE_SENSOR)
+  {
+    MarioGesture gesture = myHub->parseMarioGesture(pData);
+    if (gesture != MarioGesture::NONE)
+    {
+      Serial.print("Mario Gesture: ");
+      Serial.println((int)gesture, HEX);
+    }
   }
 }
 
@@ -68,7 +76,7 @@ void loop()
   {
     delay(200);
     Serial.print("check ports... if needed sensor is already connected: ");
-    byte portForDevice = myHub.getPortForDeviceType((byte)barcodeSensor);
+    byte portForDevice = myHub.getPortForDeviceType((byte)gestureSensor);
     Serial.println(portForDevice, DEC);
     if (portForDevice != 255)
     {

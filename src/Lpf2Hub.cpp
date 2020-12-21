@@ -327,9 +327,9 @@ MarioPant Lpf2Hub::parseMarioPant(uint8_t *pData)
  */
 MarioGesture Lpf2Hub::parseMarioGesture(uint8_t *pData)
 {
-    int value = LegoinoCommon::ReadInt8(pData, 4);
+    int value = LegoinoCommon::ReadInt16LE(pData, 4);
     log_d("Mario Gesture: %d", value);
-    return MarioGesture::NONE;
+    return (MarioGesture)value;
 }
 
 /**
@@ -648,6 +648,8 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
         return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
     case (byte)DeviceType::TECHNIC_XLARGE_LINEAR_MOTOR:
         return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
+    case (byte)DeviceType::MARIO_HUB_GESTURE_SENSOR:
+        return 0x01;
     default:
         return 0x00;
     }
@@ -724,7 +726,7 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
         parseRemoteButton(pData);
         return;
     }
-    else if (deviceType == (byte)DeviceType::MARIO_HUB_GESTURE)
+    else if (deviceType == (byte)DeviceType::MARIO_HUB_GESTURE_SENSOR)
     {
         int port = pData[3];
         parseMarioGesture(pData);
@@ -743,7 +745,6 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
         parseMarioPant(pData);
         return;
     }
-
 }
 
 /**
