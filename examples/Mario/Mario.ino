@@ -1,6 +1,8 @@
 /**
- *  TODO
  * 
+ * A basic example which will connect to a Mario hub and request updates for 
+ * the Pant, Color/Barcode and Gesture sensor. 
+ *  
  * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License
  * 
@@ -12,9 +14,12 @@ DeviceType pantSensor = DeviceType::MARIO_HUB_PANT_SENSOR;
 DeviceType gestureSensor = DeviceType::MARIO_HUB_GESTURE_SENSOR;
 DeviceType barcodeSensor = DeviceType::MARIO_HUB_BARCODE_SENSOR;
 
+bool isPantSensorInitialized = false;
+bool isGestureSensorInitialized = false;
+bool isBarcodeSensorInitialized = false;
+
 // create a hub instance
 Lpf2Hub myHub;
-bool isInitialized = false;
 
 void MarioCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData)
 {
@@ -40,7 +45,7 @@ void MarioCallback(void *hub, byte portNumber, DeviceType deviceType, uint8_t *p
   if (deviceType == DeviceType::MARIO_HUB_GESTURE_SENSOR)
   {
     MarioGesture gesture = myHub->parseMarioGesture(pData);
-    if (gesture != MarioGesture::NONE)
+    if (gesture != MarioGesture::NONE) // filter out NONE values
     {
       Serial.print("Mario Gesture: ");
       Serial.println((int)gesture, HEX);
@@ -58,7 +63,7 @@ void setup()
 void loop()
 {
 
-  // connect flow. Search for BLE services and try to connect if the uuid of the hub is found
+  // connect flow. Search for BLE services and try to connect
   if (myHub.isConnecting())
   {
     myHub.connectHub();
@@ -72,7 +77,7 @@ void loop()
     }
   }
 
-  if (myHub.isConnected() && !isInitialized)
+  if (myHub.isConnected() && !isGestureSensorInitialized)
   {
     delay(200);
     Serial.print("check ports... if needed sensor is already connected: ");
@@ -83,8 +88,38 @@ void loop()
       Serial.println("activatePortDevice");
       myHub.activatePortDevice(portForDevice, MarioCallback);
       delay(200);
-      isInitialized = true;
+      isGestureSensorInitialized = true;
     };
   }
+
+  if (myHub.isConnected() && !isPantSensorInitialized)
+  {
+    delay(200);
+    Serial.print("check ports... if needed sensor is already connected: ");
+    byte portForDevice = myHub.getPortForDeviceType((byte)pantSensor);
+    Serial.println(portForDevice, DEC);
+    if (portForDevice != 255)
+    {
+      Serial.println("activatePortDevice");
+      myHub.activatePortDevice(portForDevice, MarioCallback);
+      delay(200);
+      isPantSensorInitialized = true;
+    };
+  }
+
+  if (myHub.isConnected() && !isBarcodeSensorInitialized)
+  {
+    delay(200);
+    Serial.print("check ports... if needed sensor is already connected: ");
+    byte portForDevice = myHub.getPortForDeviceType((byte)barcodeSensor);
+    Serial.println(portForDevice, DEC);
+    if (portForDevice != 255)
+    {
+      Serial.println("activatePortDevice");
+      myHub.activatePortDevice(portForDevice, MarioCallback);
+      delay(200);
+      isBarcodeSensorInitialized = true;
+    };
+  }  
 
 } // End of loop
