@@ -100,6 +100,9 @@ public:
                     case CONTROL_PLUS_HUB_ID:
                         _lpf2Hub->_hubType = HubType::CONTROL_PLUS_HUB;
                         break;
+                    case MARIO_HUB_ID:
+                        _lpf2Hub->_hubType = HubType::MARIO_HUB;
+                        break;
                     default:
                         _lpf2Hub->_hubType = HubType::UNKNOWNHUB;
                         break;
@@ -303,6 +306,54 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
         log_d("port %x is disconnected", port);
         deregisterPortDevice(port);
     }
+}
+
+/**
+ * @brief Parse Mario pant sensor 
+ * @param [in] pData The pointer to the received data
+ * @return Pant type
+ */
+MarioPant Lpf2Hub::parseMarioPant(uint8_t *pData)
+{
+    int value = LegoinoCommon::ReadInt8(pData, 4);
+    log_d("Mario Pant: %d", value);
+    return (MarioPant)value;
+}
+
+/**
+ * @brief Parse Mario gesture sensor 
+ * @param [in] pData The pointer to the received data
+ * @return Gesture
+ */
+MarioGesture Lpf2Hub::parseMarioGesture(uint8_t *pData)
+{
+    int value = LegoinoCommon::ReadInt16LE(pData, 4);
+    log_d("Mario Gesture: %d", value);
+    return (MarioGesture)value;
+}
+
+/**
+ * @brief Parse Mario barcode  sensor 
+ * @param [in] pData The pointer to the received data
+ * @return MarioBarcode
+ */
+MarioBarcode Lpf2Hub::parseMarioBarcode(uint8_t *pData)
+{
+    int value = LegoinoCommon::ReadInt16LE(pData, 4);
+    log_d("Mario Barcode: %d", value);
+    return MarioBarcode(value);
+}
+
+/**
+ * @brief Parse Mario color sensor 
+ * @param [in] pData The pointer to the received data
+ * @return MarioColor
+ */
+MarioColor Lpf2Hub::parseMarioColor(uint8_t *pData)
+{
+    int value = LegoinoCommon::ReadInt16LE(pData, 6);
+    log_d("Mario Color: %d", value);
+    return (MarioColor)value;
 }
 
 /**
@@ -597,6 +648,8 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
         return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
     case (byte)DeviceType::TECHNIC_XLARGE_LINEAR_MOTOR:
         return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
+    case (byte)DeviceType::MARIO_HUB_GESTURE_SENSOR:
+        return 0x01;
     default:
         return 0x00;
     }
@@ -671,6 +724,25 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     {
         int port = pData[3];
         parseRemoteButton(pData);
+        return;
+    }
+    else if (deviceType == (byte)DeviceType::MARIO_HUB_GESTURE_SENSOR)
+    {
+        int port = pData[3];
+        parseMarioGesture(pData);
+        return;
+    }
+    else if (deviceType == (byte)DeviceType::MARIO_HUB_BARCODE_SENSOR)
+    {
+        int port = pData[3];
+        parseMarioBarcode(pData);
+        parseMarioColor(pData);
+        return;
+    }
+    else if (deviceType == (byte)DeviceType::MARIO_HUB_PANT_SENSOR)
+    {
+        int port = pData[3];
+        parseMarioPant(pData);
         return;
     }
 }

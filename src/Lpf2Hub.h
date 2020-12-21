@@ -106,6 +106,10 @@ public:
   int parseControlPlusHubTiltSensorX(uint8_t *pData);
   int parseControlPlusHubTiltSensorY(uint8_t *pData);
   int parseControlPlusHubTiltSensorZ(uint8_t *pData);
+  MarioPant parseMarioPant(uint8_t *pData);
+  MarioGesture parseMarioGesture(uint8_t *pData);
+  MarioBarcode parseMarioBarcode(uint8_t *pData);
+  MarioColor parseMarioColor(uint8_t *pData);
   ButtonState parseRemoteButton(uint8_t *pData);
   void parsePortAction(uint8_t *pData);
   uint8_t parseSystemTypeId(uint8_t *pData);
