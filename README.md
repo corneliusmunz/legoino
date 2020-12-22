@@ -58,6 +58,7 @@ You can find different Examples in the "examples" folder. You can select the exa
 * **HubEmulation.ino:** Example of an emulated PoweredUp Hub two port hub (train hub) which could receive signals from the PoweredUp app and will send out the signals as IR commands to a Powerfunction remote receiver. https://www.youtube.com/watch?v=RTNexxT4-yQ
 * **PoweredUpRemoteAutoDetection.ino:** Example of connection of PoweredUp and PoweredUpRemote where the device type is fetched automatically and the order in which you switched on the hubs is no longer relevant. 
 * **ControlPlusHub.ino:** Example of connection of ControlPlusHub (TechnicHub) where a Tacho Motor on Port D is controlled.
+* **Mario.ino** Example of connection to a Mario Hub to read in sensor notifications about the Barcode/Tag sensor, Color sensor, Pants sensor and Gesture sensor. 
 
 
 # Setup and Usage
@@ -392,6 +393,16 @@ myBoostHub.moveArcRight(90) // move with an arc for 90 degrees to the right
 myBoostHub.moveArc(270) // move with an arc for 270 degrees to the right (positive angles means right, negative means left)
 myBoostHub.moveArc(-90) // move with an arc for 90 degrees to the left (positive angles means right, negative means left)
 ```
+
+## Mario Hub (#71360)
+With legoino it is possible to connect to the Mario Hub and read out sensor values from the 
+* Pant Sensor
+* Color and Tag/Barcode Sensor
+* Gesture Sensor
+* Voltage Sensor
+
+You can do this via the standard "sensor notification" procedure. Just have a look into the **Mario.ino** example sketch.
+
 # Connection to more than 3 hubs
 It is possible to connect to up to 9 hubs in parallel with an common ESP32 board. To enable the connection to more than 3 hubs, you have to change a single configuration of the NimBLE library. Just open the ```nimconfig.h``` file located in your arduino library folder in the directory ```NimBLE-Arduino/src```. Open the file with an editor and change the following settings to your demands
 ```
@@ -431,11 +442,9 @@ Thanks to [@wmarkow](https://github.com/wmarkow) for his detailed input about hu
 # Remarks
 Prerequisite of that library is the NimBLE-Arduino library (https://github.com/h2zero/NimBLE-Arduino) with at least version 1.0.1 Otherwise the notifcations of changed charachteristic values will not work. So just install as a prerequesite the version 1.0.1 of that library via the Arduino Library manager or the platform.io library manager (https://www.arduinolibraries.info/libraries/nim-ble-arduino)
 
-Up to now the Library is only teseted for a Powered Up Train controllers, Boost controllers, Control+ Hubs, PoweredUp Remote and Duplo Train Hub. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. You also are able to read in hub device infos (rssi, battery level, tilt) and sensor values (color, distance, rotation angle). 
+Up to now the Library is only teseted for a Powered Up Train controllers, Boost controllers, Control+ Hubs, PoweredUp Remote, Duplo Train Hub and Mario Hub. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. You also are able to read in hub device infos (rssi, battery level, tilt) and sensor values (color, distance, rotation angle). 
 
 
 # ToDo
 * Virtual Ports
 * HW Families
-* Mario Hub
-
