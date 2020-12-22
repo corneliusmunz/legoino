@@ -1369,4 +1369,14 @@ void Lpf2Hub::playTone(byte number)
     WriteValue(playTone, 6);
 }
 
+/**
+ * @brief Set volume of Mario Hub 
+ * @param [in] volume value in % 0..100
+ */
+void Lpf2Hub::setMarioVolume(byte volume)
+{
+    byte setVolume[4] = {0x01, 0x12, 0x01, volume};
+    WriteValue(setVolume, 4);
+}
+
 #endif // ESP32
