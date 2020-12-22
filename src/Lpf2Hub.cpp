@@ -47,7 +47,8 @@ public:
         _lpf2Hub->_isConnecting = false;
         _lpf2Hub->_isConnected = false;
 
-        if (_lpf2Hub->_connectionChangeCallback != nullptr) {
+        if (_lpf2Hub->_connectionChangeCallback != nullptr)
+        {
             _lpf2Hub->_connectionChangeCallback(false);
         }
 
@@ -111,7 +112,8 @@ public:
                 }
             }
             _lpf2Hub->_isConnecting = true;
-            if (_lpf2Hub->_autoConnect) {
+            if (_lpf2Hub->_autoConnect)
+            {
                 _lpf2Hub->connectHub();
             }
         }
@@ -758,7 +760,8 @@ void Lpf2Hub::init()
     pBLEScan->start(_scanDuration, scanEndedCallback);
 }
 
-void Lpf2Hub::init(bool autoConnect, ConnectionChangeCallback callback) {
+void Lpf2Hub::init(bool autoConnect, ConnectionChangeCallback callback)
+{
     _autoConnect = autoConnect;
     _connectionChangeCallback = callback;
     init();
@@ -952,6 +955,21 @@ void Lpf2Hub::shutDownHub()
     WriteValue(shutdownCommand, 2);
 }
 
+// /**
+//  * @brief Set name of the HUB
+//  * @param [in] name character as std::string which contains the name (max 14 characters are supported)
+//  */
+// void Lpf2Hub::setHubName(std::string name)
+// {
+//     // char *charArray = new char[name.length() + 1];
+//     // strcpy(charArray, name.c_str());
+//     // setHubName(charArray);
+
+// char charArray[name.length()];
+// strcpy(charArray, name.data());
+// setHubName(charArray);
+// }
+
 /**
  * @brief Set name of the HUB
  * @param [in] name character array which contains the name (max 14 characters are supported)
@@ -1018,8 +1036,6 @@ void Lpf2Hub::deactivateHubPropertyUpdate(HubPropertyReference hubProperty)
     byte notifyPropertyCommand[3] = {0x01, (byte)hubProperty, (byte)HubPropertyOperation::DISABLE_UPDATES_DOWNSTREAM};
     WriteValue(notifyPropertyCommand, 3);
 }
-
-
 
 /**
  * @brief Connect to the HUB, get a reference to the characteristic and register for notifications
@@ -1108,7 +1124,8 @@ bool Lpf2Hub::connectHub()
     _isConnected = true;
     _isConnecting = false;
     Serial.println("before connectionChangeCallback");
-    if (_connectionChangeCallback != nullptr) {
+    if (_connectionChangeCallback != nullptr)
+    {
         _connectionChangeCallback(true);
     }
 

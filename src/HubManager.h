@@ -44,14 +44,14 @@ class HubManager
 
 public:
   HubManager();
-  void AddHub(Lpf2Hub hub, std::string address);
-  std::vector<Lpf2Hub *> ManagedHubs;
-  void StartDiscovery(uint32_t scanDuration = 10, bool nonBlocking = true);
-  void StartConnection();
-  //void Stop();
-  Lpf2Hub* GetHubByAddress(NimBLEAddress address);
-  bool IsConnectionFinished();
-  bool IsDiscoveryFinished();
+  void AddHub(Lpf2Hub hub, std::string address, std::string name);
+  std::vector<Lpf2Hub> ManagedHubs;
+  void Start();
+  void Stop();
+  Lpf2Hub GetHubByAddress(NimBLEAddress address);
+  Lpf2Hub GetHubByAddress(std::string address);
+  Lpf2Hub GetHubByName(std::string name);
+  //bool IsConnectionFinished();
 };
 
 #endif // HubManager_h

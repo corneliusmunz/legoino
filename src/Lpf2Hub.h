@@ -52,6 +52,7 @@ public:
   HubType getHubType();
   std::string getHubName();
   void setHubName(char name[]);
+  //void setHubName(std::string name);
   void shutDownHub();
   void activateHubPropertyUpdate(HubPropertyReference hubProperty, HubPropertyChangeCallback hubPropertyChangeCallback = nullptr);
   void deactivateHubPropertyUpdate(HubPropertyReference hubProperty);
