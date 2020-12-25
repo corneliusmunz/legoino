@@ -6,7 +6,6 @@
  * 
 */
 
-
 #include "Lpf2Hub.h"
 
 /** 
@@ -741,7 +740,7 @@ Lpf2Hub::Lpf2Hub(){};
 /**
  * @brief Init function set the UUIDs and scan for the Hub
  */
-void Lpf2Hub::init()
+void Lpf2Hub::init(bool withScan)
 {
     _isConnected = false;
     _isConnecting = false;
@@ -750,41 +749,49 @@ void Lpf2Hub::init()
     _hubType = HubType::UNKNOWNHUB;
 
     BLEDevice::init("");
-    BLEScan *pBLEScan = BLEDevice::getScan();
 
-    pBLEScan->setAdvertisedDeviceCallbacks(new Lpf2HubAdvertisedDeviceCallbacks(this));
+    NimBLEDevice::setPower(ESP_PWR_LVL_P9, ESP_BLE_PWR_TYPE_ADV);
+    NimBLEDevice::setPower(ESP_PWR_LVL_P9, ESP_BLE_PWR_TYPE_SCAN);
+    NimBLEDevice::setPower(ESP_PWR_LVL_P9, ESP_BLE_PWR_TYPE_DEFAULT);
 
-    pBLEScan->setActiveScan(true);
-    // start method with callback function to enforce the non blocking scan. If no callback function is used,
-    // the scan starts in a blocking manner
-    pBLEScan->start(_scanDuration, scanEndedCallback);
+    if (withScan)
+    {
+        BLEScan *pBLEScan = BLEDevice::getScan();
+
+        pBLEScan->setAdvertisedDeviceCallbacks(new Lpf2HubAdvertisedDeviceCallbacks(this));
+
+        pBLEScan->setActiveScan(true);
+        // start method with callback function to enforce the non blocking scan. If no callback function is used,
+        // the scan starts in a blocking manner
+        pBLEScan->start(_scanDuration, scanEndedCallback);
+    }
 }
 
-void Lpf2Hub::init(bool autoConnect, ConnectionChangeCallback callback)
+void Lpf2Hub::init(bool autoConnect, ConnectionChangeCallback callback, bool withScan)
 {
     _autoConnect = autoConnect;
     _connectionChangeCallback = callback;
-    init();
+    init(withScan);
 }
 
 /**
  * @brief Init function set the UUIDs and scan for the Hub
  * @param [in] deviceAddress to which the arduino should connect represented by a hex string of the format: 00:00:00:00:00:00
  */
-void Lpf2Hub::init(std::string deviceAddress)
+void Lpf2Hub::init(std::string deviceAddress, bool withScan)
 {
     _requestedDeviceAddress = new BLEAddress(deviceAddress);
-    init();
+    init(withScan);
 }
 
 /**
  * @brief Init function set the BLE scan duration (default value 5s)
  * @param [in] BLE scan durtation in unit seconds
  */
-void Lpf2Hub::init(uint32_t scanDuration)
+void Lpf2Hub::init(uint32_t scanDuration, bool withScan)
 {
     _scanDuration = scanDuration;
-    init();
+    init(withScan);
 }
 
 /**
@@ -792,7 +799,7 @@ void Lpf2Hub::init(uint32_t scanDuration)
  * @param [in] deviceAddress to which the arduino should connect represented by a hex string of the format: 00:00:00:00:00:00
  * @param [in] BLE scan durtation in unit seconds
  */
-void Lpf2Hub::init(std::string deviceAddress, uint32_t scanDuration)
+void Lpf2Hub::init(std::string deviceAddress, uint32_t scanDuration, bool withScan)
 {
     _requestedDeviceAddress = new BLEAddress(deviceAddress);
     _scanDuration = scanDuration;
@@ -1046,6 +1053,9 @@ bool Lpf2Hub::connectHub()
     BLEAddress pAddress = *_pServerAddress;
     NimBLEClient *pClient = nullptr;
 
+    Serial.print("Server address: ");
+    Serial.println(pAddress.toString().c_str());
+
     log_d("number of ble clients: %d", NimBLEDevice::getClientListSize());
 
     /** Check if we have a client we should reuse first **/
@@ -1073,7 +1083,7 @@ bool Lpf2Hub::connectHub()
             pClient = NimBLEDevice::getDisconnectedClient();
         }
     }
-    Serial.println("Client reuse");
+    Serial.println("No Client reuse");
     /** No client to reuse? Create a new one. */
     if (!pClient)
     {
@@ -1088,12 +1098,14 @@ bool Lpf2Hub::connectHub()
     Serial.println("before connect");
     if (!pClient->isConnected())
     {
+        Serial.println("is not connected");
         if (!pClient->connect(pAddress))
         {
             Serial.println("connection failed");
             log_e("failed to connect");
             return false;
         }
+        Serial.println("after connect");
     }
     Serial.println("connected");
     log_d("connected to: %s, RSSI: %d", pClient->getPeerAddress().toString().c_str(), pClient->getRssi());

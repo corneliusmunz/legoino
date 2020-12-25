@@ -37,11 +37,11 @@ public:
   Lpf2Hub();
 
   // initializer methods
-  void init();
-  void init(uint32_t scanDuration);
-  void init(std::string deviceAddress);
-  void init(std::string deviceAddress, uint32_t scanDuration);
-  void init(bool autoConnect, ConnectionChangeCallback callback);
+  void init(bool withScan = true);
+  void init(uint32_t scanDuration, bool withScan = true);
+  void init(std::string deviceAddress, bool withScan = true);
+  void init(std::string deviceAddress, uint32_t scanDuration, bool withScan = true);
+  void init(bool autoConnect, ConnectionChangeCallback callback, bool withScan = true);
 
   // hub related methods
   bool connectHub();

@@ -10,7 +10,6 @@
 
 #include "HubManager.h"
 
-
 void HubManagerScanEndedCallback(NimBLEScanResults results)
 {
   Serial.print("Number of Devices: ");
@@ -43,15 +42,19 @@ public:
     if (advertisedDevice->haveServiceUUID() && advertisedDevice->getServiceUUID().equals(BLEUUID(LPF2_UUID)))
     {
       Serial.println("Lego device found");
-      advertisedDevice->getScan()->stop();
 
       // check if the device is contained in the defined hubs of the hub manager
       Serial.print("Address: ");
       Serial.println(advertisedDevice->getAddress().toString().c_str());
-      Lpf2Hub discoveredHub = _hubManager->GetHubByAddress(advertisedDevice->getAddress());
-      Serial.println("found hub");
-      if (&discoveredHub != nullptr)
+      Lpf2Hub* discoveredHub = _hubManager->GetHubByAddress(advertisedDevice->getAddress());
+      if (discoveredHub == nullptr)
       {
+        discoveredHub = _hubManager->GetHubByName(advertisedDevice->getName());
+      }
+      if (discoveredHub != nullptr)
+      {
+        Serial.println("found hub - stop scan");
+        advertisedDevice->getScan()->stop();
         // set hub type
         if (advertisedDevice->haveManufacturerData())
         {
@@ -64,26 +67,30 @@ public:
             switch (manufacturerData[3])
             {
             case DUPLO_TRAIN_HUB_ID:
-              discoveredHub._hubType = HubType::DUPLO_TRAIN_HUB;
+              discoveredHub->_hubType = HubType::DUPLO_TRAIN_HUB;
               break;
             case BOOST_MOVE_HUB_ID:
-              discoveredHub._hubType = HubType::BOOST_MOVE_HUB;
+              discoveredHub->_hubType = HubType::BOOST_MOVE_HUB;
               break;
             case POWERED_UP_HUB_ID:
-              discoveredHub._hubType = HubType::POWERED_UP_HUB;
+              discoveredHub->_hubType = HubType::POWERED_UP_HUB;
               break;
             case POWERED_UP_REMOTE_ID:
-              discoveredHub._hubType = HubType::POWERED_UP_REMOTE;
+              discoveredHub->_hubType = HubType::POWERED_UP_REMOTE;
               break;
             case CONTROL_PLUS_HUB_ID:
-              discoveredHub._hubType = HubType::CONTROL_PLUS_HUB;
+              discoveredHub->_hubType = HubType::CONTROL_PLUS_HUB;
               break;
             default:
-              discoveredHub._hubType = HubType::UNKNOWNHUB;
+              discoveredHub->_hubType = HubType::UNKNOWNHUB;
               break;
             }
           }
         }
+        discoveredHub->_isConnecting = true;
+        discoveredHub->_pServerAddress = new BLEAddress(advertisedDevice->getAddress());
+        discoveredHub->_hubName = advertisedDevice->getName();
+        //discoveredHub.connectHub();
       }
 
       //   // start connection of hub
@@ -100,10 +107,9 @@ public:
       //   {
       //     _hubManager->StartConnection();
       //   }
-        
-      }
     }
-  };
+  }
+};
 
 /**
  * @brief Constructor
@@ -122,7 +128,7 @@ void HubManager::Start()
   // start method with callback function to enforce the non blocking scan. If no callback function is used,
   // the scan starts in a blocking manner
   Serial.println("Start scan");
-  pBLEScan->start(10, HubManagerScanEndedCallback);
+  pBLEScan->start(10);
 
   // if (nonBlocking)
   // {
@@ -157,22 +163,27 @@ void HubManager::AddHub(Lpf2Hub hub, std::string address, std::string name)
 {
   hub._requestedDeviceAddress = new BLEAddress(address);
   hub._hubName = name;
+  hub._isConnected = false;
+  hub._isConnecting = false;
+  hub._bleUuid = BLEUUID(LPF2_UUID);
+  hub._charachteristicUuid = BLEUUID(LPF2_CHARACHTERISTIC);
+  hub._hubType = HubType::UNKNOWNHUB;
   //hub.setHubName(name); // ToDo: DOES NOT WORK
-  ManagedHubs.push_back(hub);
+  ManagedHubs.push_back(&hub);
 }
 
-Lpf2Hub HubManager::GetHubByAddress(std::string address)
+Lpf2Hub* HubManager::GetHubByAddress(std::string address)
 {
-  GetHubByAddress(NimBLEAddress(address));
+  return GetHubByAddress(NimBLEAddress(address));
 }
 
-Lpf2Hub HubManager::GetHubByAddress(NimBLEAddress address)
+Lpf2Hub* HubManager::GetHubByAddress(NimBLEAddress address)
 {
   Serial.println("GetHubByAddress");
   for (int i = 0; i < ManagedHubs.size(); i++)
   {
     Serial.println(address.toString().c_str());
-    NimBLEAddress hubAddress = *ManagedHubs[i]._requestedDeviceAddress;
+    NimBLEAddress hubAddress = *ManagedHubs[i]->_requestedDeviceAddress;
     if (address.equals(hubAddress))
     {
       Serial.println("found hub with requested address");
@@ -181,16 +192,17 @@ Lpf2Hub HubManager::GetHubByAddress(NimBLEAddress address)
   }
   Serial.print("No hub found with address: ");
   Serial.println(address.toString().c_str());
+  return nullptr;
 }
 
-Lpf2Hub HubManager::GetHubByName(std::string name)
+Lpf2Hub* HubManager::GetHubByName(std::string name)
 {
   Serial.println("GetHubByName");
   for (int i = 0; i < ManagedHubs.size(); i++)
   {
     Serial.print("Hub name: ");
-    Serial.println(ManagedHubs[i].getHubName().c_str());
-    if (ManagedHubs[i].getHubName() == name)
+    Serial.println(ManagedHubs[i]->getHubName().c_str());
+    if (ManagedHubs[i]->getHubName() == name)
     {
       Serial.println("found hub with requested name");
       return ManagedHubs[i];
@@ -198,6 +210,7 @@ Lpf2Hub HubManager::GetHubByName(std::string name)
   }
   Serial.print("No hub found with name: ");
   Serial.println(name.c_str());
+  return nullptr;
 }
 
 //#endif // ESP32
