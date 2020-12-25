@@ -20,7 +20,7 @@ using namespace std::placeholders;
 
 typedef void (*HubPropertyChangeCallback)(void *hub, HubPropertyReference hubProperty, uint8_t *pData);
 typedef void (*PortValueChangeCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
-typedef void (*ConnectionChangeCallback)(bool isConnected);
+typedef void (*ConnectionChangeCallback)(void *hub, bool isConnected);
 
 struct Device
 {
@@ -45,6 +45,7 @@ public:
 
   // hub related methods
   bool connectHub();
+  void disconnectHub();
   // bool connectHub(BLEAddress address);
   bool isConnected();
   bool isConnecting();

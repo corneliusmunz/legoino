@@ -39,6 +39,7 @@ public:
 
     void onConnect(BLEClient *bleClient)
     {
+        _lpf2Hub->_connectionChangeCallback(_lpf2Hub, true);
     }
 
     void onDisconnect(BLEClient *bleClient)
@@ -48,7 +49,7 @@ public:
 
         if (_lpf2Hub->_connectionChangeCallback != nullptr)
         {
-            _lpf2Hub->_connectionChangeCallback(false);
+            _lpf2Hub->_connectionChangeCallback(_lpf2Hub, false);
         }
 
         log_d("disconnected client");
@@ -1044,6 +1045,22 @@ void Lpf2Hub::deactivateHubPropertyUpdate(HubPropertyReference hubProperty)
     WriteValue(notifyPropertyCommand, 3);
 }
 
+void Lpf2Hub::disconnectHub()
+{
+    Serial.println("disconnect Hub");
+    if (isConnected())
+    {
+        BLEAddress pAddress = *_pServerAddress;
+        NimBLEClient *pClient = nullptr;
+
+        pClient = NimBLEDevice::getClientByPeerAddress(pAddress);
+        if (pClient)
+        {
+            pClient->disconnect();
+        }
+    }
+}
+
 /**
  * @brief Connect to the HUB, get a reference to the characteristic and register for notifications
  */
@@ -1138,7 +1155,7 @@ bool Lpf2Hub::connectHub()
     Serial.println("before connectionChangeCallback");
     if (_connectionChangeCallback != nullptr)
     {
-        _connectionChangeCallback(true);
+        _connectionChangeCallback(this, true);
     }
 
     return true;

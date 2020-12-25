@@ -46,7 +46,7 @@ public:
       // check if the device is contained in the defined hubs of the hub manager
       Serial.print("Address: ");
       Serial.println(advertisedDevice->getAddress().toString().c_str());
-      Lpf2Hub* discoveredHub = _hubManager->GetHubByAddress(advertisedDevice->getAddress());
+      Lpf2Hub *discoveredHub = _hubManager->GetHubByAddress(advertisedDevice->getAddress());
       if (discoveredHub == nullptr)
       {
         discoveredHub = _hubManager->GetHubByName(advertisedDevice->getName());
@@ -90,6 +90,7 @@ public:
         discoveredHub->_isConnecting = true;
         discoveredHub->_pServerAddress = new BLEAddress(advertisedDevice->getAddress());
         discoveredHub->_hubName = advertisedDevice->getName();
+        _hubManager->ConnectHub(discoveredHub);
         //discoveredHub.connectHub();
       }
 
@@ -114,21 +115,54 @@ public:
 /**
  * @brief Constructor
  */
-HubManager::HubManager(){};
+HubManager::HubManager()
+{
+  State = HubManagerState::STOPPED;
+};
+
+void HubManager::ConnectionChangeCallback(void *hub, bool isConnected)
+{
+  Serial.println("Connection Change callback");
+
+  Lpf2Hub *myHub = (Lpf2Hub *)hub;
+  Serial.print("Hub ");
+  Serial.print(myHub->getHubName().c_str());
+  if (isConnected)
+  {
+    Serial.println(" was connected...");
+  }
+  else
+  {
+    Serial.println(" was disconnected...");
+  }
+  EvaluateInitializationState();
+}
+
+void HubManager::EvaluateInitializationState()
+{
+  // iterate over all hubs
+  Serial.println("EvaluateState");
+
+  // check if system is initialized
+  bool isInitialized = true;
+  for (int i = 0; i < ManagedHubs.size(); i++)
+  {
+    if (!ManagedHubs[i]->isConnected()) {
+      isInitialized = false;
+      break;
+    }
+  }
+
+  if (!isInitialized) {
+    StartScan();
+  }
+
+}
 
 void HubManager::Start()
 {
 
-  BLEDevice::init("");
-  BLEScan *pBLEScan = BLEDevice::getScan();
-
-  pBLEScan->setAdvertisedDeviceCallbacks(new HubManagerAdvertisedDeviceCallbacks(this));
-
-  pBLEScan->setActiveScan(true);
-  // start method with callback function to enforce the non blocking scan. If no callback function is used,
-  // the scan starts in a blocking manner
-  Serial.println("Start scan");
-  pBLEScan->start(10);
+  StartScan();
 
   // if (nonBlocking)
   // {
@@ -140,27 +174,63 @@ void HubManager::Start()
   // }
 }
 
-void HubManager::Stop()
+void HubManager::StopScan()
 {
+  Serial.println("Stop scan");
+
+  BLEDevice::init("");
+  BLEScan *pBLEScan = BLEDevice::getScan();
+  if (pBLEScan->isScanning())
+  {
+    pBLEScan->stop();
+  }
 }
 
-// void HubManager::StartScan(uint32_t scanDuration, bool nonBlocking) {
+void HubManager::StartScan()
+{
+  Serial.println("Start scan");
 
-// }
+  State = HubManagerState::SCAN;
 
-// void HubManager::StartConnection()
-// {
-//   Serial.println("StartConnection");
-//   for (int i = 0; i < ManagedHubs.size(); i++)
-//   {
-//     Serial.print("Connect Hub: ");
-//     Serial.println(i, DEC);
-//     ManagedHubs[i]->connectHub();
-//   }
-// }
+  BLEDevice::init("");
+  BLEScan *pBLEScan = BLEDevice::getScan();
+
+  pBLEScan->setAdvertisedDeviceCallbacks(new HubManagerAdvertisedDeviceCallbacks(this));
+
+  pBLEScan->setActiveScan(true);
+  // start method with callback function to enforce the non blocking scan. If no callback function is used,
+  // the scan starts in a blocking manner
+
+  pBLEScan->start(0, HubManagerScanEndedCallback);
+}
+
+void HubManager::ConnectHub(Lpf2Hub* hub)
+{
+  Serial.println("ConnectHub");
+
+  State = HubManagerState::CONNECT;
+  hub->connectHub();
+}
+
+void HubManager::DisconnectHubs()
+{
+  Serial.println("DisconnectHubs");
+  for (int i = 0; i < ManagedHubs.size(); i++)
+  {
+    ManagedHubs[i]->disconnectHub();
+  }
+}
+
+void HubManager::Stop()
+{
+  StopScan();
+  DisconnectHubs();
+  State = HubManagerState::STOPPED;
+}
 
 void HubManager::AddHub(Lpf2Hub hub, std::string address, std::string name)
 {
+  // add checks to skip address or name if they are empty
   hub._requestedDeviceAddress = new BLEAddress(address);
   hub._hubName = name;
   hub._isConnected = false;
@@ -172,12 +242,12 @@ void HubManager::AddHub(Lpf2Hub hub, std::string address, std::string name)
   ManagedHubs.push_back(&hub);
 }
 
-Lpf2Hub* HubManager::GetHubByAddress(std::string address)
+Lpf2Hub *HubManager::GetHubByAddress(std::string address)
 {
   return GetHubByAddress(NimBLEAddress(address));
 }
 
-Lpf2Hub* HubManager::GetHubByAddress(NimBLEAddress address)
+Lpf2Hub *HubManager::GetHubByAddress(NimBLEAddress address)
 {
   Serial.println("GetHubByAddress");
   for (int i = 0; i < ManagedHubs.size(); i++)
@@ -195,7 +265,7 @@ Lpf2Hub* HubManager::GetHubByAddress(NimBLEAddress address)
   return nullptr;
 }
 
-Lpf2Hub* HubManager::GetHubByName(std::string name)
+Lpf2Hub *HubManager::GetHubByName(std::string name)
 {
   Serial.println("GetHubByName");
   for (int i = 0; i < ManagedHubs.size(); i++)

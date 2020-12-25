@@ -13,6 +13,14 @@
 
 #include "Lpf2Hub.h"
 
+enum struct HubManagerState
+{
+  STOPPED = 0,
+  SCAN = 1,
+  CONNECT = 2,
+  INITIALIZED = 3
+};
+
 // // abstraction to lpf2hub only with the information which is relevant for the hub manager
 // class ManagedHub
 // {
@@ -45,13 +53,22 @@ class HubManager
 public:
   HubManager();
   void AddHub(Lpf2Hub hub, std::string address, std::string name);
-  std::vector<Lpf2Hub*> ManagedHubs;
+  void ConnectionChangeCallback(void *hub, bool isConnected);
+  std::vector<Lpf2Hub *> ManagedHubs;
   void Start();
   void Stop();
-  Lpf2Hub* GetHubByAddress(NimBLEAddress address);
-  Lpf2Hub* GetHubByAddress(std::string address);
-  Lpf2Hub* GetHubByName(std::string name);
+  Lpf2Hub *GetHubByAddress(NimBLEAddress address);
+  Lpf2Hub *GetHubByAddress(std::string address);
+  Lpf2Hub *GetHubByName(std::string name);
+  void ConnectHub(Lpf2Hub *hub);
   //bool IsConnectionFinished();
+  HubManagerState State;
+
+private:
+  void EvaluateInitializationState();
+  void StopScan();
+  void StartScan();
+  void DisconnectHubs();
 };
 
 #endif // HubManager_h

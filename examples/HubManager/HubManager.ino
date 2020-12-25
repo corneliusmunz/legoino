@@ -51,6 +51,11 @@ void loop()
     {
       Serial.println("Failed to connect to HUB");
     }
+  } else {
+
+    delay(1000);
+    myTrainHub1.setLedColor(GREEN);
+
   }
 
   // delay(2000);
