@@ -101,13 +101,21 @@ public:
         }
       }
 
-      // handle port input format setup (respond with 0x47 message)
+      // handle port input format setup (0x41 will respond with 0x47 message)
       else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::PORT_INPUT_FORMAT_SETUP_SINGLE)
       {
-        log_d("input format move tilt sensor");
         //data=0a 00 41 3a 00 01 00 00 00 01
         delay(20);
         byte feedback[] = {0x0A, 0x00, 0x47, msgReceived[0x03], msgReceived[0x04], msgReceived[0x05], msgReceived[0x06], msgReceived[0x07], msgReceived[0x08], msgReceived[0x09]};
+        _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
+        _lpf2HubEmulation->pCharacteristic->notify();
+      }
+
+      // handle port input format setup combined mode (0x42 will respond with 0x48 message)
+      else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::PORT_INPUT_FORMAT_SETUP_COMBINEDMODE)
+      {
+        delay(20);
+        byte feedback[] = {0x0A, 0x00, 0x48, msgReceived[0x03], msgReceived[0x04], msgReceived[0x05], msgReceived[0x06], msgReceived[0x07], msgReceived[0x08], msgReceived[0x09]};
         _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
         _lpf2HubEmulation->pCharacteristic->notify();
       }
@@ -555,6 +563,16 @@ std::string Lpf2HubEmulation::getPortInformationPayload(DeviceType deviceType, b
     payload.append(moveInternalMotorWithTachoPortInformation[informationType]);
   }
 
+  else if (deviceType == DeviceType::MEDIUM_LINEAR_MOTOR)
+  {
+    std::map<byte, std::string> mediumLinearMotorPortInformation{
+        {
+            {0x01, std::string{0x07, 0x03, 0x06, 0x00, 0x07, 0x00}},
+            {0x02, std::string{0x06, 0x00}},
+        }};
+    payload.append(mediumLinearMotorPortInformation[informationType]);
+  }
+
   else if (deviceType == DeviceType::TECHNIC_MEDIUM_HUB_TILT_SENSOR)
   {
     std::map<byte, std::string> technicMediumHubTiltSensorPortInformation{
@@ -888,6 +906,40 @@ std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType de
     };
 
     payload.append(moveInternalMotorWithTachoPortModeInformation[mode][modeInformationType]);
+  }
+
+  else if (deviceType == DeviceType::MEDIUM_LINEAR_MOTOR)
+  {
+    std::map<byte, std::map<byte, std::string>> mediumLinearMotorPortModeInformation{
+        {0x00, {
+                   {0x00, std::string{0x50, 0x4F, 0x57, 0x45, 0x52, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
+                   {0x01, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x02, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x03, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x04, std::string{0x50, 0x43, 0x54, 0x00, 0x00}},
+                   {0x05, std::string{0x00, 0x10}},
+                   {0x80, std::string{0x01, 0x00, 0x01, 0x00}},
+               }},
+        {0x01, {
+                   {0x00, std::string{0x53, 0x50, 0x45, 0x45, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
+                   {0x01, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x02, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x03, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x04, std::string{0x50, 0x43, 0x54, 0x00, 0x00}},
+                   {0x05, std::string{0x10, 0x10}},
+                   {0x80, std::string{0x01, 0x00, 0x04, 0x00}},
+               }},
+        {0x02, {
+                   {0x00, std::string{0x50, 0x4F, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
+                   {0x01, std::string{0x00, 0x00, 0xB4, 0xC3, 0x00, 0x00, 0xB4, 0x43}},
+                   {0x02, std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42}},
+                   {0x03, std::string{0x00, 0x00, 0xB4, 0xC3, 0x00, 0x00, 0xB4, 0x43}},
+                   {0x04, std::string{0x44, 0x45, 0x47, 0x00, 0x00}},
+                   {0x05, std::string{0x08, 0x08}},
+                   {0x80, std::string{0x01, 0x02, 0x04, 0x00}},
+               }},
+    };
+    payload.append(mediumLinearMotorPortModeInformation[mode][modeInformationType]);
   }
 
   else if (deviceType == DeviceType::TECHNIC_MEDIUM_HUB_TILT_SENSOR)
