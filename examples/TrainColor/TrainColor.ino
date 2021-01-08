@@ -1,7 +1,7 @@
 /**
  * A Train hub basic example to connect a PoweredUp hub, and set the speed of the train 
  * motor dependent on the detected color. If the train is stopped, you can start the train by
- * pressing the hub button.
+ * pressing the hub button. The train motor has to be connected to Port A and the Color sensor to Port B
  * 
  * (c) Copyright 2020 - Cornelius Munz
  * Released under MIT License

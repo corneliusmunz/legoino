@@ -6,7 +6,22 @@
  * 
 */
 
+#if defined(ESP32)
+
 #include "Lpf2Hub.h"
+
+/** 
+ * Callback if a scan has ended with the results of found devices 
+ * only needed to enforce the non blocking scan start
+ */
+void scanEndedCallback(NimBLEScanResults results)
+{
+    log_d("Number of devices: %d", results.getCount());
+    for (int i = 0; i < results.getCount(); i++)
+    {
+        log_d("device[%d]: %s", i, results.getDevice(i).toString().c_str());
+    }
+}
 
 /**
  * Derived class which could be added as an instance to the BLEClient for callback handling
@@ -84,6 +99,9 @@ public:
                         break;
                     case CONTROL_PLUS_HUB_ID:
                         _lpf2Hub->_hubType = HubType::CONTROL_PLUS_HUB;
+                        break;
+                    case MARIO_HUB_ID:
+                        _lpf2Hub->_hubType = HubType::MARIO_HUB;
                         break;
                     default:
                         _lpf2Hub->_hubType = HubType::UNKNOWNHUB;
@@ -181,7 +199,8 @@ void Lpf2Hub::activatePortDevice(byte portNumber, byte deviceType, PortValueChan
     byte mode = getModeForDeviceType(deviceType);
     log_d("port: %x, device type: %x, callback: %x, mode: %x", portNumber, deviceType, portValueChangeCallback, mode);
     int deviceIndex = getDeviceIndexForPortNumber(portNumber);
-    if (deviceIndex < 0) {
+    if (deviceIndex < 0)
+    {
         return;
     }
     connectedDevices[deviceIndex].Callback = portValueChangeCallback;
@@ -287,6 +306,54 @@ void Lpf2Hub::parsePortMessage(uint8_t *pData)
         log_d("port %x is disconnected", port);
         deregisterPortDevice(port);
     }
+}
+
+/**
+ * @brief Parse Mario pant sensor 
+ * @param [in] pData The pointer to the received data
+ * @return Pant type
+ */
+MarioPant Lpf2Hub::parseMarioPant(uint8_t *pData)
+{
+    int value = LegoinoCommon::ReadInt8(pData, 4);
+    log_d("Mario Pant: %d", value);
+    return (MarioPant)value;
+}
+
+/**
+ * @brief Parse Mario gesture sensor 
+ * @param [in] pData The pointer to the received data
+ * @return Gesture
+ */
+MarioGesture Lpf2Hub::parseMarioGesture(uint8_t *pData)
+{
+    int value = LegoinoCommon::ReadInt16LE(pData, 4);
+    log_d("Mario Gesture: %d", value);
+    return (MarioGesture)value;
+}
+
+/**
+ * @brief Parse Mario barcode  sensor 
+ * @param [in] pData The pointer to the received data
+ * @return MarioBarcode
+ */
+MarioBarcode Lpf2Hub::parseMarioBarcode(uint8_t *pData)
+{
+    int value = LegoinoCommon::ReadInt16LE(pData, 4);
+    log_d("Mario Barcode: %d", value);
+    return MarioBarcode(value);
+}
+
+/**
+ * @brief Parse Mario color sensor 
+ * @param [in] pData The pointer to the received data
+ * @return MarioColor
+ */
+MarioColor Lpf2Hub::parseMarioColor(uint8_t *pData)
+{
+    int value = LegoinoCommon::ReadInt16LE(pData, 6);
+    log_d("Mario Color: %d", value);
+    return (MarioColor)value;
 }
 
 /**
@@ -425,6 +492,12 @@ double Lpf2Hub::parseDistance(uint8_t *pData)
 int Lpf2Hub::parseColor(uint8_t *pData)
 {
     int color = pData[4];
+    // fix mapping of sensor color data to lego color data
+    // this is only needed for green and purple
+    if (pData[4] == 1 || pData[4] == 5)
+    {
+        color = color + 1;
+    }
     log_d("color: %s (%d)", LegoinoCommon::ColorStringFromColor(color).c_str(), color);
     return color;
 }
@@ -462,7 +535,7 @@ std::string Lpf2Hub::parseHubAdvertisingName(uint8_t *pData)
 {
     int charArrayLength = min(pData[0] - 5, 14);
     char name[charArrayLength + 1];
-    for (int i=0; i < charArrayLength; i++)
+    for (int i = 0; i < charArrayLength; i++)
     {
         name[i] = pData[5 + i];
     }
@@ -575,6 +648,8 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
         return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
     case (byte)DeviceType::TECHNIC_XLARGE_LINEAR_MOTOR:
         return (byte)HubPropertyOperation::ENABLE_UPDATES_DOWNSTREAM;
+    case (byte)DeviceType::MARIO_HUB_GESTURE_SENSOR:
+        return 0x01;
     default:
         return 0x00;
     }
@@ -588,7 +663,8 @@ byte Lpf2Hub::getModeForDeviceType(byte deviceType)
 void Lpf2Hub::parseSensorMessage(uint8_t *pData)
 {
     int deviceIndex = getDeviceIndexForPortNumber(pData[3]);
-    if (deviceIndex < 0) {
+    if (deviceIndex < 0)
+    {
         return;
     }
 
@@ -648,6 +724,25 @@ void Lpf2Hub::parseSensorMessage(uint8_t *pData)
     {
         int port = pData[3];
         parseRemoteButton(pData);
+        return;
+    }
+    else if (deviceType == (byte)DeviceType::MARIO_HUB_GESTURE_SENSOR)
+    {
+        int port = pData[3];
+        parseMarioGesture(pData);
+        return;
+    }
+    else if (deviceType == (byte)DeviceType::MARIO_HUB_BARCODE_SENSOR)
+    {
+        int port = pData[3];
+        parseMarioBarcode(pData);
+        parseMarioColor(pData);
+        return;
+    }
+    else if (deviceType == (byte)DeviceType::MARIO_HUB_PANT_SENSOR)
+    {
+        int port = pData[3];
+        parseMarioPant(pData);
         return;
     }
 }
@@ -723,7 +818,9 @@ void Lpf2Hub::init()
     pBLEScan->setAdvertisedDeviceCallbacks(new Lpf2HubAdvertisedDeviceCallbacks(this));
 
     pBLEScan->setActiveScan(true);
-    pBLEScan->start(_scanDuration);
+    // start method with callback function to enforce the non blocking scan. If no callback function is used,
+    // the scan starts in a blocking manner
+    pBLEScan->start(_scanDuration, scanEndedCallback);
 }
 
 /**
@@ -786,7 +883,7 @@ int Lpf2Hub::getDeviceIndexForPortNumber(byte portNumber)
         }
     }
     log_w("no device found for port number %x", portNumber);
-    return -1; 
+    return -1;
 }
 
 /**
@@ -1271,3 +1368,15 @@ void Lpf2Hub::playTone(byte number)
     byte playTone[6] = {0x81, 0x01, 0x11, 0x51, 0x02, number};
     WriteValue(playTone, 6);
 }
+
+/**
+ * @brief Set volume of Mario Hub 
+ * @param [in] volume value in % 0..100
+ */
+void Lpf2Hub::setMarioVolume(byte volume)
+{
+    byte setVolume[4] = {0x01, 0x12, 0x01, volume};
+    WriteValue(setVolume, 4);
+}
+
+#endif // ESP32

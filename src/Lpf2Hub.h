@@ -6,6 +6,8 @@
  * 
 */
 
+#if defined(ESP32)
+
 #ifndef Lpf2Hub_h
 #define Lpf2Hub_h
 
@@ -87,6 +89,7 @@ public:
 
   void playSound(byte sound);
   void playTone(byte number);
+  void setMarioVolume(byte volume);
 
   // parse methods to read in the message content of the charachteristic value
   void parseDeviceInfo(uint8_t *pData);
@@ -104,6 +107,10 @@ public:
   int parseControlPlusHubTiltSensorX(uint8_t *pData);
   int parseControlPlusHubTiltSensorY(uint8_t *pData);
   int parseControlPlusHubTiltSensorZ(uint8_t *pData);
+  MarioPant parseMarioPant(uint8_t *pData);
+  MarioGesture parseMarioGesture(uint8_t *pData);
+  MarioBarcode parseMarioBarcode(uint8_t *pData);
+  MarioColor parseMarioColor(uint8_t *pData);
   ButtonState parseRemoteButton(uint8_t *pData);
   void parsePortAction(uint8_t *pData);
   uint8_t parseSystemTypeId(uint8_t *pData);
@@ -138,4 +145,6 @@ private:
   uint32_t _scanDuration = 10;
 };
 
-#endif
+#endif // Lpf2Hub_h
+
+#endif // ESP32

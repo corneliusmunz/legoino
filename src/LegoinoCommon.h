@@ -6,6 +6,8 @@
  *
 */
 
+#if defined(ESP32)
+
 #ifndef LegoinoCommon_h
 #define LegoinoCommon_h
 
@@ -29,4 +31,6 @@ public:
   static byte *VersionToByteArray(Version version);
 };
 
-#endif
+#endif // LegoinoCommon_h
+
+#endif // ESP32

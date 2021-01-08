@@ -49,15 +49,16 @@ All the included examples are a great source to find a solution or pattern for y
 
 You can find different Examples in the "examples" folder. You can select the examples in your Arduino IDE via the Menu "File->Examples". Just have a look on the videos to see the examples running :smiley: 
 * **Boost.ino:** Example who uses the basic boost moovements (feasable for M.T.R.4 or Vernie model). http://www.youtube.com/watch?v=VgWObhyUmi0 
-* **MoveHubColorSensor.ino:** Example which reads in the color Sensor value on port C and uses the detected color to set the Hub LED accordingly. https://youtu.be/_xCd9Owy1nk
+* **ColorSensor.ino:** Example which reads in the color Sensor value (attached to an abritary port) and uses the detected color to set the Hub LED accordingly. https://youtu.be/_xCd9Owy1nk
 * **MoveHubDeviceInfo.ino:** Example which displays the various device infos (firmware version, battery level, rssi, hardwar version, tilt) in the serial monitor
-* **MoveHubDistanceSensor.ino:** Example which reads in the input of the distance sencor and set the Hub LED color dependent on the distance. https://youtu.be/TOAQtGGjZ6c 
-* **MoveHubRotationSensor.ino:** Example which reads in the input of the Tacho motor angle to set the Hub LED dependent on the angle to the scale of rainbow colors. https://youtu.be/c3DHpX55uN0
+* **DistanceSensor.ino:** Example which reads in the input of the distance sencor and set the Hub LED color dependent on the distance. https://youtu.be/TOAQtGGjZ6c 
+* **RotationSensor.ino:** Example which reads in the input of the Tacho motor angle to set the Hub LED dependent on the angle to the scale of rainbow colors. https://youtu.be/c3DHpX55uN0
 * **TrainHub.ino:** Example for a PowererdUp Hub to set the speed of a train model. http://www.youtube.com/watch?v=o1hgZQz3go4 
 * **TrainColor.ino:** Example of PoweredUp Hub combined with color sensor to control the speed of the train dependent on the detected color. https://youtu.be/GZ0fqe3-Bhw
 * **HubEmulation.ino:** Example of an emulated PoweredUp Hub two port hub (train hub) which could receive signals from the PoweredUp app and will send out the signals as IR commands to a Powerfunction remote receiver. https://www.youtube.com/watch?v=RTNexxT4-yQ
 * **PoweredUpRemoteAutoDetection.ino:** Example of connection of PoweredUp and PoweredUpRemote where the device type is fetched automatically and the order in which you switched on the hubs is no longer relevant. 
 * **ControlPlusHub.ino:** Example of connection of ControlPlusHub (TechnicHub) where a Tacho Motor on Port D is controlled.
+* **Mario.ino** Example of connection to a Mario Hub to read in sensor notifications about the Barcode/Tag sensor, Color sensor, Pants sensor and Gesture sensor. 
 
 
 # Setup and Usage
@@ -327,7 +328,7 @@ To signalize the app which devices are connected you have to send some commands 
 
 ## PowerFunction IR
 
-To use the PowerFunction Infrared library you have to connect a IR-LED to your ESP32 controller. To instanciate a new object, you have to define on which pin the IR Led is connected. Additionally you can define the Power function channel which should be used. 
+To use the PowerFunction Infrared library you have to connect a IR-LED to your controller. The PowerFunction part of the legoino library will work on different hardware architectures (AVR, ESP8266, ESP32). To instanciate a new object, you have to define on which pin the IR Led is connected. Additionally you can define the Power function channel which should be used. Pay attention, that the channel in the library starts with 0 and on the physical IR Lego controller it starts with 1. So if you want to control channel 1 of your physical device, you have to use channel 0 in the PowerFunction part of the library. 
 
 ```c++
 #include "PowerFunctions.h"
@@ -392,6 +393,18 @@ myBoostHub.moveArcRight(90) // move with an arc for 90 degrees to the right
 myBoostHub.moveArc(270) // move with an arc for 270 degrees to the right (positive angles means right, negative means left)
 myBoostHub.moveArc(-90) // move with an arc for 90 degrees to the left (positive angles means right, negative means left)
 ```
+
+## Mario Hub (#71360)
+With legoino it is possible to connect to the Mario Hub and read out sensor values from the 
+* Pant Sensor
+* Color and Tag/Barcode Sensor
+* Gesture Sensor
+* Voltage Sensor
+
+You can do this via the standard "sensor notification" procedure. Just have a look into the **Mario.ino** example sketch.
+
+There is a not documented hub property `0x12` to control the volume of the hub. This feature could be used with the legoino function `setMarioVolume(volume)` with a volume value from 0..100 in % 
+
 # Connection to more than 3 hubs
 It is possible to connect to up to 9 hubs in parallel with an common ESP32 board. To enable the connection to more than 3 hubs, you have to change a single configuration of the NimBLE library. Just open the ```nimconfig.h``` file located in your arduino library folder in the directory ```NimBLE-Arduino/src```. Open the file with an editor and change the following settings to your demands
 ```
@@ -426,14 +439,14 @@ Thanks to [@fvanroie](https://github.com/fvanroie) for his contribution about ca
 
 Thanks for the original [PowerFunctions](https://github.com/jurriaan/Arduino-PowerFunctions) Library by [@jurriaan](https://github.com/jurriaan)
 
+Thanks to [@wmarkow](https://github.com/wmarkow) for his detailed input about hub emulation issues on Android devices and his proposals.
+
 # Remarks
 Prerequisite of that library is the NimBLE-Arduino library (https://github.com/h2zero/NimBLE-Arduino) with at least version 1.0.1 Otherwise the notifcations of changed charachteristic values will not work. So just install as a prerequesite the version 1.0.1 of that library via the Arduino Library manager or the platform.io library manager (https://www.arduinolibraries.info/libraries/nim-ble-arduino)
 
-Up to now the Library is only teseted for a Powered Up Train controllers, Boost controllers, Control+ Hubs, PoweredUp Remote and Duplo Train Hub. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. You also are able to read in hub device infos (rssi, battery level, tilt) and sensor values (color, distance, rotation angle). 
+Up to now the Library is only teseted for a Powered Up Train controllers, Boost controllers, Control+ Hubs, PoweredUp Remote, Duplo Train Hub and Mario Hub. You can connect to your HUB, set the LED color, set the Hub name, control the motors (speed, port, movements) and shut down the HUB via a Arduino command. You also are able to read in hub device infos (rssi, battery level, tilt) and sensor values (color, distance, rotation angle). 
 
 
 # ToDo
 * Virtual Ports
 * HW Families
-* Mario Hub
-

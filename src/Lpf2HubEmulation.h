@@ -11,6 +11,8 @@
  * 
 */
 
+#if defined(ESP32)
+
 #ifndef Lpf2HubEmulation_h
 #define Lpf2HubEmulation_h
 
@@ -88,4 +90,6 @@ public:
 
 };
 
-#endif
+#endif // Lpf2HubEmulation_h
+
+#endif // ESP32

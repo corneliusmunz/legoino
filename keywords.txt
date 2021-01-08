@@ -31,6 +31,7 @@ ColorStringFromColor KEYWORD2
 
 playSound	KEYWORD2
 playTone	KEYWORD2
+setMarioVolume	KEYWORD2
 
 stopBasicMotor	KEYWORD2
 setBasicMotorSpeed	KEYWORD2
@@ -69,6 +70,10 @@ parseBoostTiltSensor	KEYWORD2
 parseControlPlusHubTiltSensorX	KEYWORD2
 parseControlPlusHubTiltSensorY	KEYWORD2
 parseControlPlusHubTiltSensorZ	KEYWORD2
+parseMarioPant	KEYWORD2
+parseMarioGesture	KEYWORD2
+parseMarioBarcode	KEYWORD2
+parseMarioColor	KEYWORD2
 parseRemoteButton	KEYWORD2
 parsePortAction	KEYWORD2
 parseSystemTypeId	KEYWORD2
