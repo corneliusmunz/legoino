@@ -21,15 +21,27 @@
 #include "LegoinoCommon.h"
 
 // create a hub instance
-Lpf2HubEmulation myEmulatedHub("TrainHub", HubType::POWERED_UP_HUB);
+Lpf2HubEmulation myEmulatedHub("Train1Hub", HubType::POWERED_UP_HUB);
 
-int position = 0;
+int32_t position = 0;
 
 void writeValueCallback(byte port, byte value)
 {
   Serial.println("writeValueCallback: ");
   Serial.println(port, HEX);
   Serial.println(value, HEX);
+
+  if (port == 0x00)
+  {
+    Serial.print("Hub Motor Port A received message: ");
+    Serial.println(value, DEC);
+  }
+
+  if (port == 0x01)
+  {
+    Serial.print("Hub Motor Port B received message: ");
+    Serial.println(value, DEC);
+  }
 
   if (port == 0x32)
   {
@@ -55,36 +67,67 @@ void loop()
   if (myEmulatedHub.isConnected && !myEmulatedHub.isPortInitialized)
   {
     delay(2000);
-    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::A, DeviceType::MOVE_HUB_MEDIUM_LINEAR_MOTOR);
+    myEmulatedHub.isPortInitialized = true;
+    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::A, DeviceType::MEDIUM_LINEAR_MOTOR);
     delay(2000);
     myEmulatedHub.attachDevice((byte)PoweredUpHubPort::LED, DeviceType::HUB_LED);
-    delay(2000);
-    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::B, DeviceType::TRAIN_MOTOR);
+    // delay(2000);
+    // myEmulatedHub.attachDevice((byte)PoweredUpHubPort::B, DeviceType::TRAIN_MOTOR);
     delay(2000);
     myEmulatedHub.isPortInitialized = true;
   }
 
-  if (!myEmulatedHub.isConnected && myEmulatedHub.isPortInitialized)
-  {
-    myEmulatedHub.isPortInitialized = false;
-  }
+  // if (!myEmulatedHub.isConnected && myEmulatedHub.isPortInitialized)
+  // {
+  //   myEmulatedHub.isPortInitialized = false;
+  // }
 
   if (myEmulatedHub.isConnected && myEmulatedHub.isPortInitialized)
   {
-    delay(1000);
-    position++;
-    std::string payload;
+    delay(250);
+    position ++;
     Serial.print("position: ");
     Serial.println(position, DEC);
 
-    byte *positionBytes = LegoinoCommon::Int32ToByteArray(position);
+    byte speed = -127 + (byte)(position % 255);
+    char *positionBytes = static_cast<char *>(static_cast<void *>(&position));
+
+    // combined mode
+    std::string payload;
     payload.push_back((char)PoweredUpHubPort::A);
+    payload.push_back((char)0x00); //0000
+    payload.push_back((char)0x03); // 0011 (first mode 2 second mode 1)
     payload.push_back((char)positionBytes[0]);
     payload.push_back((char)positionBytes[1]);
     payload.push_back((char)positionBytes[2]);
     payload.push_back((char)positionBytes[3]);
+    payload.push_back((char)speed);
+    myEmulatedHub.writeValue(MessageType::PORT_VALUE_COMBINEDMODE, payload);
 
-    myEmulatedHub.writeValue(MessageType::PORT_VALUE_SINGLE, payload);
+
+    // recorded sequence from real motor
+    // char sensorMessage[10][8] = {
+    //     {0x00, 0x00, 0x03, 0x8f, 0x03, 0x00, 0x00, 0x00},
+    //     {0x00, 0x00, 0x03, 0x8c, 0x03, 0x00, 0x00, 0xf8},
+    //     {0x00, 0x00, 0x03, 0x81, 0x03, 0x00, 0x00, 0xed},
+    //     {0x00, 0x00, 0x03, 0x72, 0x03, 0x00, 0x00, 0xea},
+    //     {0x00, 0x00, 0x03, 0x63, 0x03, 0x00, 0x00, 0xee},
+    //     {0x00, 0x00, 0x03, 0x59, 0x03, 0x00, 0x00, 0xf3},
+    //     {0x00, 0x00, 0x03, 0x52, 0x03, 0x00, 0x00, 0xf6},
+    //     {0x00, 0x00, 0x03, 0x4b, 0x03, 0x00, 0x00, 0xf7},
+    //     {0x00, 0x00, 0x03, 0x45, 0x03, 0x00, 0x00, 0xf8},
+    //     {0x00, 0x00, 0x03, 0x40, 0x03, 0x00, 0x00, 0xf8},
+    // };
+
+    // for (size_t i = 0; i < 10; i++)
+    // {
+    //   delay(100);
+    //   std::string payload;
+    //   payload.append(sensorMessage[i], 8);
+    //   myEmulatedHub.writeValue(MessageType::PORT_VALUE_COMBINEDMODE, payload);
+    // }
+
+    
   }
 
 } // End of loop

@@ -68,6 +68,19 @@ public:
     if (msgReceived.length() > 0)
     {
       log_d("message received: %s", msgReceived.c_str());
+      Serial.print("READ message type: ");
+      Serial.print(msgReceived[2], HEX);
+      Serial.print(" payload: ");
+      for (size_t i = 3; i < msgReceived.length(); i++)
+      {
+        /* code */
+        Serial.print(msgReceived[i], HEX);
+        if (i < msgReceived.length() - 1)
+        {
+          Serial.print("-");
+        }
+      }
+      Serial.println(" ");
 
       // handle port mode information requests and respond dependent on the device type
       if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::PORT_MODE_INFORMATION_REQUEST)
@@ -93,31 +106,50 @@ public:
       // handle alert response (respond always with status OK)
       else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::HUB_ALERTS)
       {
-        if (msgReceived[0x04] == 0x03)
+        if (msgReceived[(byte)HubAlertMessage::OPERATION] == (byte)AlertOperation::REQUEST_UPDATES)
         {
-          byte feedback[] = {0x06, 0x00, 0x03, msgReceived[0x03], 0x04, 0x00};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          std::string payload;
+          payload.push_back((char)msgReceived[(byte)HubAlertMessage::TYPE]);
+          payload.push_back((char)AlertOperation::UPDATE);
+          payload.push_back((char)0x00);
+          _lpf2HubEmulation->writeValue(MessageType::HUB_ALERTS, payload);
         }
       }
 
       // handle port input format setup (0x41 will respond with 0x47 message)
       else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::PORT_INPUT_FORMAT_SETUP_SINGLE)
       {
-        //data=0a 00 41 3a 00 01 00 00 00 01
-        delay(20);
-        byte feedback[] = {0x0A, 0x00, 0x47, msgReceived[0x03], msgReceived[0x04], msgReceived[0x05], msgReceived[0x06], msgReceived[0x07], msgReceived[0x08], msgReceived[0x09]};
-        _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-        _lpf2HubEmulation->pCharacteristic->notify();
+        //delay(20);
+        std::string payload;
+        payload.push_back((char)msgReceived[0x03]);
+        payload.push_back((char)msgReceived[0x04]);
+        payload.push_back((char)msgReceived[0x05]);
+        payload.push_back((char)msgReceived[0x06]);
+        payload.push_back((char)msgReceived[0x07]);
+        payload.push_back((char)msgReceived[0x08]);
+        payload.push_back((char)msgReceived[0x09]);
+        _lpf2HubEmulation->writeValue(MessageType::PORT_INPUT_FORMAT_SINGLE, payload);
       }
 
       // handle port input format setup combined mode (0x42 will respond with 0x48 message)
       else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::PORT_INPUT_FORMAT_SETUP_COMBINEDMODE)
       {
-        delay(20);
-        byte feedback[] = {0x0A, 0x00, 0x48, msgReceived[0x03], msgReceived[0x04], msgReceived[0x05], msgReceived[0x06], msgReceived[0x07], msgReceived[0x08], msgReceived[0x09]};
-        _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-        _lpf2HubEmulation->pCharacteristic->notify();
+        //delay(20);
+        // 0x42 0x00 0x01 0x00 0x20 0x10
+        // 0x48 0x00 0x80 0x03 0x00
+        std::string payload;
+        payload.push_back((char)0x00);
+        payload.push_back((char)0x80);
+        payload.push_back((char)0x03);
+        payload.push_back((char)0x00);
+        // payload.push_back((char)msgReceived[0x03]);
+        // payload.push_back((char)msgReceived[0x04]);
+        // payload.push_back((char)msgReceived[0x05]);
+        // payload.push_back((char)msgReceived[0x06]);
+        // payload.push_back((char)msgReceived[0x07]);
+        // payload.push_back((char)msgReceived[0x08]);
+        // payload.push_back((char)msgReceived[0x09]);
+        _lpf2HubEmulation->writeValue(MessageType::PORT_INPUT_FORMAT_COMBINEDMODE, payload);
       }
 
       // handle hub property requests and respond with the values of the member variables
@@ -134,64 +166,99 @@ public:
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::HW_VERSION)
         {
           byte *versionBytes = LegoinoCommon::VersionToByteArray(_lpf2HubEmulation->getHardwareVersion());
-          byte feedback[] = {0x09, 0x00, 0x01, 0x04, 0x06, versionBytes[3], versionBytes[2], versionBytes[3], versionBytes[4]};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          std::string payload;
+          payload.push_back((char)HubPropertyReference::HW_VERSION);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
+          payload.push_back((char)versionBytes[3]);
+          payload.push_back((char)versionBytes[2]);
+          payload.push_back((char)versionBytes[3]);
+          payload.push_back((char)versionBytes[4]);
+          _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::FW_VERSION)
         {
           byte *versionBytes = LegoinoCommon::VersionToByteArray(_lpf2HubEmulation->getFirmwareVersion());
-          byte feedback[] = {0x09, 0x00, 0x01, 0x03, 0x06, versionBytes[3], versionBytes[2], versionBytes[3], versionBytes[4]};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          std::string payload;
+          payload.push_back((char)HubPropertyReference::FW_VERSION);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
+          payload.push_back((char)versionBytes[3]);
+          payload.push_back((char)versionBytes[2]);
+          payload.push_back((char)versionBytes[3]);
+          payload.push_back((char)versionBytes[4]);
+          _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::RADIO_FIRMWARE_VERSION)
         {
-          byte feedback[] = {0x0c, 0x00, 0x01, 0x09, 0x06, 0x32, 0x5f, 0x30, 0x32, 0x5f, 0x30, 0x31};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          std::string payload;
+          payload.push_back((char)HubPropertyReference::RADIO_FIRMWARE_VERSION);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
+          payload.push_back((char)0x32);
+          payload.push_back((char)0x5f);
+          payload.push_back((char)0x30);
+          payload.push_back((char)0x32);
+          payload.push_back((char)0x5f);
+          payload.push_back((char)0x30);
+          payload.push_back((char)0x31);
+          _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::MANUFACTURER_NAME)
         {
-          byte feedback[] = {0x14, 0x00, 0x01, 0x08, 0x06, 0x4c, 0x45, 0x47, 0x4f, 0x20, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x20, 0x41, 0x2f, 0x53};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          char manufacturerName[] = {0x4c, 0x45, 0x47, 0x4f, 0x20, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x20, 0x41, 0x2f, 0x53};
+          std::string payload;
+          payload.push_back((char)HubPropertyReference::MANUFACTURER_NAME);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
+          payload.append(manufacturerName, 15);
+          _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::BATTERY_TYPE)
         {
-          byte feedback[] = {0x06, 0x00, 0x01, 0x07, 0x06, (byte)_lpf2HubEmulation->getBatteryType()};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          std::string payload;
+          payload.push_back((char)HubPropertyReference::BATTERY_TYPE);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
+          payload.push_back((char)_lpf2HubEmulation->getBatteryType());
+          _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::LEGO_WIRELESS_PROTOCOL_VERSION)
         {
-          byte feedback[] = {0x07, 0x00, 0x01, 0x0a, 0x06, 0x00, 0x03};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          std::string payload;
+          payload.push_back((char)HubPropertyReference::LEGO_WIRELESS_PROTOCOL_VERSION);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
+          payload.push_back((char)0x00);
+          payload.push_back((char)0x03);
+          _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::PRIMARY_MAC_ADDRESS)
         {
-          byte feedback[] = {0x0b, 0x00, 0x01, 0x0d, 0x06, 0x90, 0x84, 0x2b, 0x03, 0x19, 0x7f};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          char primaryMacAddress[] = {0x90, 0x84, 0x2b, 0x03, 0x19, 0x7f};
+          std::string payload;
+          payload.push_back((char)HubPropertyReference::PRIMARY_MAC_ADDRESS);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
+          payload.append(primaryMacAddress, 6);
+          _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::BUTTON)
         {
-          byte feedback[] = {0x06, 0x00, 0x01, 0x02, 0x06, 0x00};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          std::string payload;
+          payload.push_back((char)HubPropertyReference::BUTTON);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
+          payload.push_back((char)ButtonState::RELEASED);
+          _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::RSSI)
         {
-          byte feedback[] = {0x06, 0x00, 0x01, 0x05, 0x06, 0xc8};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          std::string payload;
+          payload.push_back((char)HubPropertyReference::RSSI);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
+          payload.push_back((char)0xc8);
+          _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::BATTERY_VOLTAGE)
         {
-          byte feedback[] = {0x06, 0x00, 0x01, 0x06, 0x06, 0x47};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          std::string payload;
+          payload.push_back((char)HubPropertyReference::BATTERY_VOLTAGE);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
+          payload.push_back((char)0x47);
+          _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
       }
       else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (char)MessageType::HUB_PROPERTIES && msgReceived[(byte)HubPropertyMessage::OPERATION] == (byte)HubPropertyOperation::SET_DOWNSTREAM)
@@ -209,10 +276,10 @@ public:
       if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (char)MessageType::PORT_OUTPUT_COMMAND)
       {
         //Reply to the App "Command excecuted"
-        byte msgPortCommandFeedbackReply[] = {0x05, 0x00, 0x82, 0x00, 0x0A};                                           //0x0A Command complete+buffer empty+idle
-        msgPortCommandFeedbackReply[(byte)PortOutputMessage::PORT_ID] = msgReceived[(byte)PortOutputMessage::PORT_ID]; //set the port_id
-        _lpf2HubEmulation->pCharacteristic->setValue(msgPortCommandFeedbackReply, sizeof(msgPortCommandFeedbackReply));
-        _lpf2HubEmulation->pCharacteristic->notify();
+        std::string payload;
+        payload.push_back((char)msgReceived[(byte)PortOutputMessage::PORT_ID]); //port
+        payload.push_back((char)0x0A); //0x0A Command complete+buffer empty+idle
+        _lpf2HubEmulation->writeValue(MessageType::PORT_OUTPUT_COMMAND_FEEDBACK, payload);
 
         if (msgReceived[(byte)PortOutputMessage::SUB_COMMAND] == 0x51) //OUT_PORT_CMD_WRITE_DIRECT
         {
@@ -223,7 +290,8 @@ public:
         }
       }
 
-      if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::HUB_ACTIONS && msgReceived[3] == (byte)ActionType::SWITCH_OFF_HUB)
+      if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::HUB_ACTIONS 
+          && msgReceived[(byte)HubActionMessage::TYPE] == (byte)ActionType::SWITCH_OFF_HUB)
       {
         log_d("disconnect");
         byte msgDisconnectionReply[] = {0x04, 0x00, 0x02, 0x31};
@@ -330,6 +398,20 @@ void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, 
     pCharacteristic->notify();
   }
   log_d("write message (%d): %s", message.length(), message);
+
+  Serial.print("WRITE message type: ");
+  Serial.print(message[2], HEX);
+  Serial.print(" payload: ");
+  for (size_t i = 3; i < message.length(); i++)
+  {
+    /* code */
+    Serial.print(message[i], HEX);
+    if (i < message.length() - 1)
+    {
+      Serial.print("-");
+    }
+  }
+  Serial.println(" ");
 }
 
 void Lpf2HubEmulation::setHubButton(bool pressed)

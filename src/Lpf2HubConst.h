@@ -68,6 +68,17 @@ enum struct HubPropertyMessage
   PAYLOAD = 0x05
 };
 
+enum struct HubAlertMessage
+{
+  TYPE = 0x03,
+  OPERATION = 0x04
+};
+
+enum struct HubActionMessage
+{
+  TYPE = 0x03
+};
+
 enum struct DeviceType
 {
   UNKNOWNDEVICE = 0,
@@ -102,7 +113,7 @@ enum struct DeviceType
   TECHNIC_COLOR_SENSOR = 61,              // Spike Prime
   TECHNIC_DISTANCE_SENSOR = 62,           // Spike Prime
   TECHNIC_FORCE_SENSOR = 63,              // Spike Prime
-  MARIO_HUB_GESTURE_SENSOR = 71,                 // https://github.com/bricklife/LEGO-Mario-Reveng
+  MARIO_HUB_GESTURE_SENSOR = 71,          // https://github.com/bricklife/LEGO-Mario-Reveng
   MARIO_HUB_BARCODE_SENSOR = 73,          // https://github.com/bricklife/LEGO-Mario-Reveng
   MARIO_HUB_PANT_SENSOR = 74,             // https://github.com/bricklife/LEGO-Mario-Reveng
   TECHNIC_MEDIUM_ANGULAR_MOTOR_GREY = 75, // Mindstorms
@@ -199,6 +210,22 @@ enum Event
   DETACHED_IO = 0x00,
   ATTACHED_IO = 0x01,
   ATTACHED_VIRTUAL_IO = 0x02,
+};
+
+enum struct AlertType
+{
+  LOW_VOLTAGE = 0x01,
+  HIGH_CURRENT = 0x02,
+  LOW_SIGNAL_STRENGTH = 0x03,
+  OVER_POWER_CONDITION = 0x04
+};
+
+enum struct AlertOperation
+{
+  ENABLE_UPDATES = 0x01,
+  DISABLE_UPDATES = 0x02,
+  REQUEST_UPDATES = 0x03,
+  UPDATE = 0x04
 };
 
 enum Color
