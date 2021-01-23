@@ -23,7 +23,7 @@
 // create a hub instance
 Lpf2HubEmulation myEmulatedHub("Train1Hub", HubType::POWERED_UP_HUB);
 
-int32_t position = 0;
+int32_t position = -100;
 
 void writeValueCallback(byte port, byte value)
 {
@@ -85,49 +85,15 @@ void loop()
   if (myEmulatedHub.isConnected && myEmulatedHub.isPortInitialized)
   {
     delay(250);
-    position ++;
-    Serial.print("position: ");
-    Serial.println(position, DEC);
-
+    position++;
     byte speed = -127 + (byte)(position % 255);
-    char *positionBytes = static_cast<char *>(static_cast<void *>(&position));
 
-    // combined mode
-    std::string payload;
-    payload.push_back((char)PoweredUpHubPort::A);
-    payload.push_back((char)0x00); //0000
-    payload.push_back((char)0x03); // 0011 (first mode 2 second mode 1)
-    payload.push_back((char)positionBytes[0]);
-    payload.push_back((char)positionBytes[1]);
-    payload.push_back((char)positionBytes[2]);
-    payload.push_back((char)positionBytes[3]);
-    payload.push_back((char)speed);
-    myEmulatedHub.writeValue(MessageType::PORT_VALUE_COMBINEDMODE, payload);
+    Serial.print("position: ");
+    Serial.print(position, DEC);
+    Serial.print(" speed: ");
+    Serial.println(speed, DEC);
 
-
-    // recorded sequence from real motor
-    // char sensorMessage[10][8] = {
-    //     {0x00, 0x00, 0x03, 0x8f, 0x03, 0x00, 0x00, 0x00},
-    //     {0x00, 0x00, 0x03, 0x8c, 0x03, 0x00, 0x00, 0xf8},
-    //     {0x00, 0x00, 0x03, 0x81, 0x03, 0x00, 0x00, 0xed},
-    //     {0x00, 0x00, 0x03, 0x72, 0x03, 0x00, 0x00, 0xea},
-    //     {0x00, 0x00, 0x03, 0x63, 0x03, 0x00, 0x00, 0xee},
-    //     {0x00, 0x00, 0x03, 0x59, 0x03, 0x00, 0x00, 0xf3},
-    //     {0x00, 0x00, 0x03, 0x52, 0x03, 0x00, 0x00, 0xf6},
-    //     {0x00, 0x00, 0x03, 0x4b, 0x03, 0x00, 0x00, 0xf7},
-    //     {0x00, 0x00, 0x03, 0x45, 0x03, 0x00, 0x00, 0xf8},
-    //     {0x00, 0x00, 0x03, 0x40, 0x03, 0x00, 0x00, 0xf8},
-    // };
-
-    // for (size_t i = 0; i < 10; i++)
-    // {
-    //   delay(100);
-    //   std::string payload;
-    //   payload.append(sensorMessage[i], 8);
-    //   myEmulatedHub.writeValue(MessageType::PORT_VALUE_COMBINEDMODE, payload);
-    // }
-
-    
+    myEmulatedHub.updateMotorSensor((byte)PoweredUpHubPort::A, speed, position);
   }
 
 } // End of loop

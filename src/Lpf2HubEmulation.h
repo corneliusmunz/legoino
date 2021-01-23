@@ -21,13 +21,13 @@
 #include "Lpf2HubConst.h"
 #include "LegoinoCommon.h"
 
-
 typedef void (*WritePortCallback)(byte port, byte value);
 
 struct Device
 {
   byte PortNumber;
   byte DeviceType;
+  byte ModeIndex;
 };
 
 class Lpf2HubEmulation
@@ -42,7 +42,7 @@ private:
   BLEAddress *_hubAddress = nullptr;
   BLEAdvertising *_pAdvertising;
 
-    // Hub information values
+  // Hub information values
   int8_t _rssi;
   uint8_t _batteryLevel;
   BatteryType _batteryType;
@@ -51,7 +51,7 @@ private:
   Version _firmwareVersion;
   Version _hardwareVersion;
 
-    // List of connected devices
+  // List of connected devices
   Device connectedDevices[13];
   int numberOfConnectedDevices = 0;
 
@@ -65,7 +65,6 @@ public:
   void setHubBatteryType(BatteryType batteryType);
   void setHubName(std::string hubName, bool notify = true);
 
-
   std::string getHubName();
   BatteryType getBatteryType();
   Version getFirmwareVersion();
@@ -78,6 +77,9 @@ public:
   void attachDevice(byte port, DeviceType deviceType);
   void detachDevice(byte port);
   byte getDeviceTypeForPort(byte port);
+  int getDeviceIndexForPortNumber(byte portNumber);
+
+  void updateMotorSensor(byte port, byte speed, int32_t position);
 
   void writeValue(MessageType messageType, std::string payload, bool notify = true);
   std::string getPortModeInformationRequestPayload(DeviceType deviceType, byte port, byte mode, byte modeInformationType);
@@ -87,7 +89,6 @@ public:
   bool isPortInitialized = false;
   BLECharacteristic *pCharacteristic;
   WritePortCallback writePortCallback = nullptr;
-
 };
 
 #endif // Lpf2HubEmulation_h

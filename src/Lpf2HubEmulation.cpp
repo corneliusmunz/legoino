@@ -278,7 +278,7 @@ public:
         //Reply to the App "Command excecuted"
         std::string payload;
         payload.push_back((char)msgReceived[(byte)PortOutputMessage::PORT_ID]); //port
-        payload.push_back((char)0x0A); //0x0A Command complete+buffer empty+idle
+        payload.push_back((char)0x0A);                                          //0x0A Command complete+buffer empty+idle
         _lpf2HubEmulation->writeValue(MessageType::PORT_OUTPUT_COMMAND_FEEDBACK, payload);
 
         if (msgReceived[(byte)PortOutputMessage::SUB_COMMAND] == 0x51) //OUT_PORT_CMD_WRITE_DIRECT
@@ -290,8 +290,7 @@ public:
         }
       }
 
-      if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::HUB_ACTIONS 
-          && msgReceived[(byte)HubActionMessage::TYPE] == (byte)ActionType::SWITCH_OFF_HUB)
+      if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::HUB_ACTIONS && msgReceived[(byte)HubActionMessage::TYPE] == (byte)ActionType::SWITCH_OFF_HUB)
       {
         log_d("disconnect");
         byte msgDisconnectionReply[] = {0x04, 0x00, 0x02, 0x31};
@@ -382,6 +381,27 @@ byte Lpf2HubEmulation::getDeviceTypeForPort(byte portNumber)
   }
   log_w("no device found for port number %x", portNumber);
   return (byte)DeviceType::UNKNOWNDEVICE;
+}
+
+/**
+ * @brief Get the array index of a specific connected device on a defined port in the connectedDevices array
+ * @param [in] port number
+ * @return array index of the connected device
+ */
+int Lpf2HubEmulation::getDeviceIndexForPortNumber(byte portNumber)
+{
+  log_d("Number of connected devices: %d", numberOfConnectedDevices);
+  for (int idx = 0; idx < numberOfConnectedDevices; idx++)
+  {
+    log_v("device %d, port number: %x, device type: %x, callback address: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType, connectedDevices[idx].Callback);
+    if (connectedDevices[idx].PortNumber == portNumber)
+    {
+      log_d("device on port %x has index %d", portNumber, idx);
+      return idx;
+    }
+  }
+  log_w("no device found for port number %x", portNumber);
+  return -1;
 }
 
 void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, bool notify)
@@ -1256,6 +1276,27 @@ std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType de
   }
 
   return payload;
+}
+
+/**
+ * @brief Set the angular motor sensor values (speed and position)
+ * @param [in] port number where the motor is connected
+ * @param [in] speed speed value -127..128
+ * @param [in] position current angle of the motor -2.147.483.648 .. 2.147.483.647
+ */
+void Lpf2HubEmulation::updateMotorSensor(byte port, byte speed, int32_t position)
+{
+  byte *positionBytes = LegoinoCommon::Int32ToByteArray(position);
+  std::string payload;
+  payload.push_back((char)port);
+  payload.push_back((char)0x00); //0000
+  payload.push_back((char)0x03); //mode index which was set
+  payload.push_back((char)positionBytes[0]);
+  payload.push_back((char)positionBytes[1]);
+  payload.push_back((char)positionBytes[2]);
+  payload.push_back((char)positionBytes[3]);
+  payload.push_back((char)speed);
+  writeValue(MessageType::PORT_VALUE_COMBINEDMODE, payload);
 }
 
 #endif // ESP32
