@@ -119,7 +119,6 @@ public:
       // handle port input format setup (0x41 will respond with 0x47 message)
       else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::PORT_INPUT_FORMAT_SETUP_SINGLE)
       {
-        //delay(20);
         std::string payload;
         payload.push_back((char)msgReceived[0x03]);
         payload.push_back((char)msgReceived[0x04]);
@@ -134,21 +133,13 @@ public:
       // handle port input format setup combined mode (0x42 will respond with 0x48 message)
       else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::PORT_INPUT_FORMAT_SETUP_COMBINEDMODE)
       {
-        //delay(20);
         // 0x42 0x00 0x01 0x00 0x20 0x10
         // 0x48 0x00 0x80 0x03 0x00
         std::string payload;
-        payload.push_back((char)0x00);
+        payload.push_back((char)msgReceived[3]);
         payload.push_back((char)0x80);
         payload.push_back((char)0x03);
         payload.push_back((char)0x00);
-        // payload.push_back((char)msgReceived[0x03]);
-        // payload.push_back((char)msgReceived[0x04]);
-        // payload.push_back((char)msgReceived[0x05]);
-        // payload.push_back((char)msgReceived[0x06]);
-        // payload.push_back((char)msgReceived[0x07]);
-        // payload.push_back((char)msgReceived[0x08]);
-        // payload.push_back((char)msgReceived[0x09]);
         _lpf2HubEmulation->writeValue(MessageType::PORT_INPUT_FORMAT_COMBINEDMODE, payload);
       }
 
@@ -325,14 +316,15 @@ void Lpf2HubEmulation::setWritePortCallback(WritePortCallback callback)
 
 void Lpf2HubEmulation::attachDevice(byte port, DeviceType deviceType)
 {
-  std::string payload = "";
+  std::string versionInformation = {0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10};
+  std::string payload;
   payload.push_back((char)port);
   payload.push_back((char)Event::ATTACHED_IO);
   payload.push_back((char)deviceType);
-  std::string versionInformation = {0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10};
-  payload.append(versionInformation); //version numbers
+  payload.append(versionInformation);
   writeValue(MessageType::HUB_ATTACHED_IO, payload);
 
+  //register device in connectedDevices array
   Device newDevice = {port, (byte)deviceType};
   connectedDevices[numberOfConnectedDevices] = newDevice;
   numberOfConnectedDevices++;
@@ -1297,6 +1289,23 @@ void Lpf2HubEmulation::updateMotorSensor(byte port, byte speed, int32_t position
   payload.push_back((char)positionBytes[3]);
   payload.push_back((char)speed);
   writeValue(MessageType::PORT_VALUE_COMBINEDMODE, payload);
+}
+
+/**
+ * @brief Set the color and distance sensor values (color, distance, reflection)
+ * @param [in] port number where the motor is connected
+ * @param [in] color color value
+ * @param [in] reflection reflection value (white = 10, black = 0)
+ */
+void Lpf2HubEmulation::updateColorDistanceSensor(byte port, byte color, byte distance, byte reflection)
+{
+  std::string payload;
+  payload.push_back((char)port);
+  payload.push_back((char)color);      //color 0..10  255
+  payload.push_back((char)distance);   //distance 0..10
+  payload.push_back((char)0x00);       //??
+  payload.push_back((char)reflection); //reflection 0..10
+  writeValue(MessageType::PORT_VALUE_SINGLE, payload);
 }
 
 #endif // ESP32

@@ -80,6 +80,7 @@ public:
   int getDeviceIndexForPortNumber(byte portNumber);
 
   void updateMotorSensor(byte port, byte speed, int32_t position);
+  void updateColorDistanceSensor(byte port, byte color, byte distance, byte reflectivness);
 
   void writeValue(MessageType messageType, std::string payload, bool notify = true);
   std::string getPortModeInformationRequestPayload(DeviceType deviceType, byte port, byte mode, byte modeInformationType);

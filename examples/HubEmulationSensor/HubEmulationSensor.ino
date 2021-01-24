@@ -21,9 +21,9 @@
 #include "LegoinoCommon.h"
 
 // create a hub instance
-Lpf2HubEmulation myEmulatedHub("Train1Hub", HubType::POWERED_UP_HUB);
+Lpf2HubEmulation myEmulatedHub("PoweredUpHub", HubType::POWERED_UP_HUB);
 
-int32_t position = -100;
+int32_t counter = 0;
 
 void writeValueCallback(byte port, byte value)
 {
@@ -68,32 +68,23 @@ void loop()
   {
     delay(2000);
     myEmulatedHub.isPortInitialized = true;
-    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::A, DeviceType::MEDIUM_LINEAR_MOTOR);
+    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::A, DeviceType::COLOR_DISTANCE_SENSOR);
+    delay(1000);
+    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::B, DeviceType::MEDIUM_LINEAR_MOTOR);
     delay(2000);
     myEmulatedHub.attachDevice((byte)PoweredUpHubPort::LED, DeviceType::HUB_LED);
-    // delay(2000);
-    // myEmulatedHub.attachDevice((byte)PoweredUpHubPort::B, DeviceType::TRAIN_MOTOR);
     delay(2000);
     myEmulatedHub.isPortInitialized = true;
   }
 
-  // if (!myEmulatedHub.isConnected && myEmulatedHub.isPortInitialized)
-  // {
-  //   myEmulatedHub.isPortInitialized = false;
-  // }
-
   if (myEmulatedHub.isConnected && myEmulatedHub.isPortInitialized)
   {
-    delay(250);
-    position++;
-    byte speed = -127 + (byte)(position % 255);
+    delay(1000);
+    counter++;
 
-    Serial.print("position: ");
-    Serial.print(position, DEC);
-    Serial.print(" speed: ");
-    Serial.println(speed, DEC);
+    myEmulatedHub.updateColorDistanceSensor((byte)PoweredUpHubPort::A, (byte)(counter % 10), (byte)(counter + 1) % 10, (byte)(counter + 2) % 10);
+    myEmulatedHub.updateMotorSensor((byte)PoweredUpHubPort::B, (byte)((counter%255)-127), counter);
 
-    myEmulatedHub.updateMotorSensor((byte)PoweredUpHubPort::A, speed, position);
   }
 
 } // End of loop
