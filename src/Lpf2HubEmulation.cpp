@@ -1308,4 +1308,32 @@ void Lpf2HubEmulation::updateColorDistanceSensor(byte port, byte color, byte dis
   writeValue(MessageType::PORT_VALUE_SINGLE, payload);
 }
 
+/**
+ * @brief Set the move hub tilt sensor values
+ * @param [in] roll angle
+ * @param [in] pitch angle
+ * @param [in] yaw angle
+ * @param [in] orientation of the hub (Bottom=0x00, Front=0x01, Back=0x02, Left=0x03, Right=0x04, Top=0x05)
+ * @param [in] impactCounter 
+ */
+void Lpf2HubEmulation::updateMoveTiltSensor(byte roll, byte pitch, byte yaw, byte orientation, int32_t impactCounter)
+{
+  byte *impactCounterBytes = LegoinoCommon::Int32ToByteArray(impactCounter);
+  std::string payload;
+  payload.push_back((char)MoveHubPort::TILT);
+  payload.push_back((char)0x00); //0000
+  payload.push_back((char)0x7f); //mode index which was set
+  payload.push_back((char)roll);
+  payload.push_back((char)impactCounterBytes[0]);
+  payload.push_back((char)impactCounterBytes[1]);
+  payload.push_back((char)impactCounterBytes[2]);
+  payload.push_back((char)impactCounterBytes[3]);
+  payload.push_back((char)pitch);
+  payload.push_back((char)orientation);
+  payload.push_back((char)roll);
+  payload.push_back((char)pitch);
+  payload.push_back((char)yaw);
+  writeValue(MessageType::PORT_VALUE_COMBINEDMODE, payload);
+}
+
 #endif // ESP32

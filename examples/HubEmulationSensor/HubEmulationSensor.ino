@@ -21,7 +21,7 @@
 #include "LegoinoCommon.h"
 
 // create a hub instance
-Lpf2HubEmulation myEmulatedHub("PoweredUpHub", HubType::POWERED_UP_HUB);
+Lpf2HubEmulation myEmulatedHub("BoostHub", HubType::BOOST_MOVE_HUB);
 
 int32_t counter = 0;
 
@@ -68,11 +68,13 @@ void loop()
   {
     delay(2000);
     myEmulatedHub.isPortInitialized = true;
-    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::A, DeviceType::COLOR_DISTANCE_SENSOR);
+    myEmulatedHub.attachDevice((byte)MoveHubPort::C, DeviceType::COLOR_DISTANCE_SENSOR);
     delay(1000);
-    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::B, DeviceType::MEDIUM_LINEAR_MOTOR);
+    myEmulatedHub.attachDevice((byte)MoveHubPort::D, DeviceType::MEDIUM_LINEAR_MOTOR);
     delay(2000);
-    myEmulatedHub.attachDevice((byte)PoweredUpHubPort::LED, DeviceType::HUB_LED);
+    myEmulatedHub.attachDevice((byte)MoveHubPort::LED, DeviceType::HUB_LED);
+    delay(2000);
+    myEmulatedHub.attachDevice((byte)MoveHubPort::TILT, DeviceType::MOVE_HUB_TILT_SENSOR);
     delay(2000);
     myEmulatedHub.isPortInitialized = true;
   }
@@ -81,10 +83,14 @@ void loop()
   {
     delay(1000);
     counter++;
+    byte roll = 45 + (counter % 10);
+    byte pitch = 50 - (counter % 10);
+    byte yaw = (counter % 20) - 10;
+    byte orientation = counter % 6;
 
-    myEmulatedHub.updateColorDistanceSensor((byte)PoweredUpHubPort::A, (byte)(counter % 10), (byte)(counter + 1) % 10, (byte)(counter + 2) % 10);
-    myEmulatedHub.updateMotorSensor((byte)PoweredUpHubPort::B, (byte)((counter%255)-127), counter);
-
+    myEmulatedHub.updateColorDistanceSensor((byte)MoveHubPort::C, (byte)(counter % 10), (byte)(counter + 1) % 10, (byte)(counter + 2) % 10);
+    myEmulatedHub.updateMotorSensor((byte)MoveHubPort::D, (byte)((counter % 255) - 127), counter);
+    myEmulatedHub.updateMoveTiltSensor(roll, pitch, yaw, orientation, counter);
   }
 
 } // End of loop
