@@ -66,6 +66,7 @@ public:
   void setHubName(std::string hubName, bool notify = true);
 
   std::string getHubName();
+  HubType getHubType();
   BatteryType getBatteryType();
   Version getFirmwareVersion();
   Version getHardwareVersion();
@@ -81,7 +82,8 @@ public:
 
   void updateMotorSensor(byte port, byte speed, int32_t position);
   void updateColorDistanceSensor(byte port, byte color, byte distance, byte reflectivness);
-  void updateMoveTiltSensor(byte roll, byte pitch, byte yaw, byte orientation, int32_t impactCounter);
+  void updateMoveHubTiltSensor(byte roll, byte pitch, byte yaw, byte orientation, int32_t impactCounter);
+  void updateTechnicHubTiltSensor(int16_t roll, int16_t pitch, int16_t yaw);
 
   void writeValue(MessageType messageType, std::string payload, bool notify = true);
   std::string getPortModeInformationRequestPayload(DeviceType deviceType, byte port, byte mode, byte modeInformationType);
