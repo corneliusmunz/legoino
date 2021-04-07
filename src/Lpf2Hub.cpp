@@ -813,7 +813,7 @@ void Lpf2Hub::init()
     _hubType = HubType::UNKNOWNHUB;
 
     BLEDevice::init("");
-    BLEScan *pBLEScan = BLEDevice::getScan();
+    pBLEScan = BLEDevice::getScan();
 
     pBLEScan->setAdvertisedDeviceCallbacks(new Lpf2HubAdvertisedDeviceCallbacks(this));
 
