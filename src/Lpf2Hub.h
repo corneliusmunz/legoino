@@ -45,6 +45,7 @@ public:
   bool connectHub();
   bool isConnected();
   bool isConnecting();
+  bool isScanning();
   NimBLEAddress getHubAddress();
   HubType getHubType();
   std::string getHubName();
@@ -127,6 +128,7 @@ public:
   BLEAddress *_pServerAddress;
   BLEAddress *_requestedDeviceAddress = nullptr;
   BLERemoteCharacteristic *_pRemoteCharacteristic;
+  BLEScan *pBLEScan;
   HubType _hubType;
   std::string _hubName;
   boolean _isConnecting;
