@@ -824,6 +824,14 @@ void Lpf2Hub::init()
 }
 
 /**
+ * @brief Determine the scanning status
+ * @return Returns the scanning status
+ */
+bool Lpf2Hub::isScanning() {
+    return pBLEScan->isScanning();
+}
+
+/**
  * @brief Init function set the UUIDs and scan for the Hub
  * @param [in] deviceAddress to which the arduino should connect represented by a hex string of the format: 00:00:00:00:00:00
  */
