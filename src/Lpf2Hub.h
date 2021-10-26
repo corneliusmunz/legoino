@@ -21,7 +21,7 @@ using namespace std::placeholders;
 typedef void (*HubPropertyChangeCallback)(void *hub, HubPropertyReference hubProperty, uint8_t *pData);
 typedef void (*PortValueChangeCallback)(void *hub, byte portNumber, DeviceType deviceType, uint8_t *pData);
 
-struct Device
+struct Lpf2Device
 {
   byte PortNumber;
   byte DeviceType;
@@ -138,7 +138,7 @@ private:
   HubPropertyChangeCallback _hubPropertyChangeCallback = nullptr;
 
   // List of connected devices
-  Device connectedDevices[13];
+  Lpf2Device connectedDevices[13];
   int numberOfConnectedDevices = 0;
 
   //BLE settings

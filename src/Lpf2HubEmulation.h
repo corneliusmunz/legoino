@@ -22,7 +22,7 @@
 
 typedef void (*WritePortCallback)(byte port, byte value);
 
-struct Device
+struct Lpf2HubEmulationDevice
 {
   byte PortNumber;
   byte DeviceType;
@@ -50,12 +50,13 @@ private:
   Version _hardwareVersion;
 
     // List of connected devices
-  Device connectedDevices[13];
+  Lpf2HubEmulationDevice connectedDevices[13];
   int numberOfConnectedDevices = 0;
 
 public:
   Lpf2HubEmulation();
   Lpf2HubEmulation(std::string hubName, HubType hubType);
+  void init();
   void start();
   void setWritePortCallback(WritePortCallback callback);
   void setHubRssi(int8_t rssi);

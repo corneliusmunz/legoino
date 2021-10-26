@@ -230,6 +230,30 @@ Lpf2HubEmulation::Lpf2HubEmulation(std::string hubName, HubType hubType)
   _hubType = hubType;
 }
 
+void Lpf2HubEmulation::init() {
+  log_d("Starting BLE");
+
+  NimBLEDevice::init(_hubName);
+  NimBLEDevice::setPower(ESP_PWR_LVL_N0, ESP_BLE_PWR_TYPE_ADV); // 0dB, Advertisment
+
+  log_d("Create server");
+  _pServer = NimBLEDevice::createServer();
+  _pServer->setCallbacks(new Lpf2HubServerCallbacks(this));
+
+  log_d("Create service");
+  _pService = _pServer->createService(LPF2_UUID);
+
+  // Create a BLE Characteristic
+  pCharacteristic = _pService->createCharacteristic(
+      NimBLEUUID(LPF2_CHARACHTERISTIC),
+      NIMBLE_PROPERTY::READ |
+          NIMBLE_PROPERTY::WRITE |
+          NIMBLE_PROPERTY::NOTIFY |
+          NIMBLE_PROPERTY::WRITE_NR);
+  // Create a BLE Descriptor and set the callback
+  pCharacteristic->setCallbacks(new Lpf2HubCharacteristicCallbacks(this));
+}
+
 void Lpf2HubEmulation::setWritePortCallback(WritePortCallback callback)
 {
   writePortCallback = callback;
@@ -245,7 +269,7 @@ void Lpf2HubEmulation::attachDevice(byte port, DeviceType deviceType)
   payload.append(versionInformation); //version numbers
   writeValue(MessageType::HUB_ATTACHED_IO, payload);
 
-  Device newDevice = {port, (byte)deviceType};
+  Lpf2HubEmulationDevice newDevice = {port, (byte)deviceType};
   connectedDevices[numberOfConnectedDevices] = newDevice;
   numberOfConnectedDevices++;
 }
@@ -387,27 +411,7 @@ void Lpf2HubEmulation::setHubHardwareVersion(Version version)
 
 void Lpf2HubEmulation::start()
 {
-  log_d("Starting BLE");
-
-  NimBLEDevice::init(_hubName);
-  NimBLEDevice::setPower(ESP_PWR_LVL_N0, ESP_BLE_PWR_TYPE_ADV); // 0dB, Advertisment
-
-  log_d("Create server");
-  _pServer = NimBLEDevice::createServer();
-  _pServer->setCallbacks(new Lpf2HubServerCallbacks(this));
-
-  log_d("Create service");
-  _pService = _pServer->createService(LPF2_UUID);
-
-  // Create a BLE Characteristic
-  pCharacteristic = _pService->createCharacteristic(
-      NimBLEUUID(LPF2_CHARACHTERISTIC),
-      NIMBLE_PROPERTY::READ |
-          NIMBLE_PROPERTY::WRITE |
-          NIMBLE_PROPERTY::NOTIFY |
-          NIMBLE_PROPERTY::WRITE_NR);
-  // Create a BLE Descriptor and set the callback
-  pCharacteristic->setCallbacks(new Lpf2HubCharacteristicCallbacks(this));
+  
 
   log_d("Service start");
 

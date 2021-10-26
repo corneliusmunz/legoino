@@ -137,7 +137,7 @@ void Lpf2Hub::WriteValue(byte command[], int size)
 void Lpf2Hub::registerPortDevice(byte portNumber, byte deviceType)
 {
     log_d("port: %x, device type: %x", portNumber, deviceType);
-    Device newDevice = {portNumber, deviceType, nullptr};
+    Lpf2Device newDevice = {portNumber, deviceType, nullptr};
     connectedDevices[numberOfConnectedDevices] = newDevice;
     numberOfConnectedDevices++;
 }
