@@ -40,4 +40,4 @@ jobs:
         sketches-exclude: PowerFunctions
         arduino-board-fqbn: ${{ matrix.arduino-boards-fqbn }}
         platform-url: https://dl.espressif.com/dl/package_esp32_index.json
-        required-libraries: NimBLE-Arduino@1.0.2 # use latest version
+        required-libraries: NimBLE-Arduino # use latest version
