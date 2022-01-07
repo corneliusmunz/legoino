@@ -31,6 +31,7 @@ ColorStringFromColor KEYWORD2
 
 playSound	KEYWORD2
 playTone	KEYWORD2
+setMarioVolume	KEYWORD2
 
 stopBasicMotor	KEYWORD2
 setBasicMotorSpeed	KEYWORD2

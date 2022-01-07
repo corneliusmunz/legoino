@@ -17,6 +17,7 @@ DeviceType barcodeSensor = DeviceType::MARIO_HUB_BARCODE_SENSOR;
 bool isPantSensorInitialized = false;
 bool isGestureSensorInitialized = false;
 bool isBarcodeSensorInitialized = false;
+bool isVolumeSet = false;
 
 // create a hub instance
 Lpf2Hub myHub;
@@ -120,6 +121,13 @@ void loop()
       delay(200);
       isBarcodeSensorInitialized = true;
     };
-  }  
+  }
+
+  if (myHub.isConnected() && !isVolumeSet)
+  {
+    Serial.println("set volume to 50%");
+    myHub.setMarioVolume(0x32);
+    isVolumeSet = true;
+  }
 
 } // End of loop

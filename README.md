@@ -403,6 +403,8 @@ With legoino it is possible to connect to the Mario Hub and read out sensor valu
 
 You can do this via the standard "sensor notification" procedure. Just have a look into the **Mario.ino** example sketch.
 
+There is a not documented hub property `0x12` to control the volume of the hub. This feature could be used with the legoino function `setMarioVolume(volume)` with a volume value from 0..100 in % 
+
 # Connection to more than 3 hubs
 It is possible to connect to up to 9 hubs in parallel with an common ESP32 board. To enable the connection to more than 3 hubs, you have to change a single configuration of the NimBLE library. Just open the ```nimconfig.h``` file located in your arduino library folder in the directory ```NimBLE-Arduino/src```. Open the file with an editor and change the following settings to your demands
 ```
