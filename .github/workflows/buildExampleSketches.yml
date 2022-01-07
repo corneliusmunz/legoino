@@ -25,6 +25,7 @@ jobs:
           - esp32:esp32:pico32:PartitionScheme=default,UploadSpeed=115200,DebugLevel=none # e.g. M5 Atom
           - esp32:esp32:heltec_wifi_kit_32:PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=40,FlashSize=4M,UploadSpeed=921600,DebugLevel=none
           - esp32:esp32:esp32wrover:PartitionScheme=default,FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none
+          - esp32:esp32:m5stack-atom:PartitionScheme=default,UploadSpeed=115200,DebugLevel=none
 
       # Do not cancel all jobs / architectures if one job fails
       fail-fast: false
@@ -39,4 +40,4 @@ jobs:
         sketches-exclude: PowerFunctions
         arduino-board-fqbn: ${{ matrix.arduino-boards-fqbn }}
         platform-url: https://dl.espressif.com/dl/package_esp32_index.json
-        required-libraries: NimBLE-Arduino # use latest version
+        required-libraries: NimBLE-Arduino@1.0.2 # use latest version
