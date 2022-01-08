@@ -22,12 +22,12 @@ jobs:
       matrix:
         # The matrix will produce one job for each configuration parameter of type `arduino-boards-fqbn`
         arduino-boards-fqbn:
-          - esp32:esp32:pico32:PartitionScheme=default,UploadSpeed=115200,DebugLevel=none # e.g. M5 Atom
-          - esp32:esp32:heltec_wifi_kit_32:PSRAM=disabled,CPUFreq=240,UploadSpeed=921600,DebugLevel=none
-          - esp32:esp32:esp32wrover:PartitionScheme=default,FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none
-          - esp8266:esp8266:nodemcuv2:xtal=80,vt=flash,ssl=all,eesz=4M2M,led=2,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 
-          - esp8266:esp8266:d1:xtal=80,vt=flash,ssl=all,eesz=4M2M,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=921600 
-          - esp8266:esp8266:huzzah:xtal=80,vt=flash,ssl=all,eesz=4M2M,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
+          - esp32:esp32:pico32
+          - esp32:esp32:heltec_wifi_kit_32
+          - esp32:esp32:esp32wrover
+          - esp8266:esp8266:nodemcuv2
+          - esp8266:esp8266:d1 
+          - esp8266:esp8266:huzzah
           - arduino:avr:uno
           - arduino:avr:nano:cpu=atmega328      
 
