@@ -813,7 +813,7 @@ void Lpf2Hub::init()
     _hubType = HubType::UNKNOWNHUB;
 
     BLEDevice::init("");
-    BLEScan *pBLEScan = BLEDevice::getScan();
+    pBLEScan = BLEDevice::getScan();
 
     pBLEScan->setAdvertisedDeviceCallbacks(new Lpf2HubAdvertisedDeviceCallbacks(this));
 
@@ -1180,6 +1180,15 @@ bool Lpf2Hub::isConnecting()
 bool Lpf2Hub::isConnected()
 {
     return _isConnected;
+}
+
+/**
+ * @brief Determine the scanning status
+ * @return Returns the scanning status
+*/
+bool Lpf2Hub::isScanning()
+{
+    return pBLEScan->isScanning();
 }
 
 /**
