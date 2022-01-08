@@ -16,8 +16,9 @@ PowerFunctions	KEYWORD1
 #######################################
 init	KEYWORD2
 connectHub	KEYWORD2
-isConnected	KEYWORD2
+isConnected KEYWORD2
 isConnecting	KEYWORD2
+isScanning	KEYWORD2
 getHubAddress	KEYWORD2
 setHubName	KEYWORD2
 getHubName	KEYWORD2
