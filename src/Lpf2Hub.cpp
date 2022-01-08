@@ -824,14 +824,6 @@ void Lpf2Hub::init()
 }
 
 /**
- * @brief Determine the scanning status
- * @return Returns the scanning status
- */
-bool Lpf2Hub::isScanning() {
-    return pBLEScan->isScanning();
-}
-
-/**
  * @brief Init function set the UUIDs and scan for the Hub
  * @param [in] deviceAddress to which the arduino should connect represented by a hex string of the format: 00:00:00:00:00:00
  */
@@ -1191,6 +1183,14 @@ bool Lpf2Hub::isConnected()
 }
 
 /**
+ * @brief Determine the scanning status
+ * @return Scanning status
+ */
+bool Lpf2Hub::isScanning() {
+    return pBLEScan->isScanning();
+}
+
+/**
  * @brief Retrieve the hub type
  * @return hub type 
  */
@@ -1375,6 +1375,16 @@ void Lpf2Hub::playTone(byte number)
     WriteValue(setToneMode, 8);
     byte playTone[6] = {0x81, 0x01, 0x11, 0x51, 0x02, number};
     WriteValue(playTone, 6);
+}
+
+/**
+ * @brief Set volume of Mario Hub 
+ * @param [in] volume value in % 0..100
+ */
+void Lpf2Hub::setMarioVolume(byte volume)
+{
+    byte setVolume[4] = {0x01, 0x12, 0x01, volume};
+    WriteValue(setVolume, 4);
 }
 
 #endif // ESP32

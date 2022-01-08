@@ -90,6 +90,7 @@ public:
 
   void playSound(byte sound);
   void playTone(byte number);
+  void setMarioVolume(byte volume);
 
   // parse methods to read in the message content of the charachteristic value
   void parseDeviceInfo(uint8_t *pData);
