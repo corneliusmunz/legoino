@@ -1,7 +1,7 @@
 /*
  * Lpf2Hub.cpp - Arduino base class for controlling Powered UP and Boost controllers
  * 
- * (c) Copyright 2020 - Cornelius Munz
+ * (c) Copyright 2022 - Cornelius Munz
  * Released under MIT License
  * 
 */
@@ -1215,38 +1215,65 @@ std::string Lpf2Hub::getHubName()
  */
 void Lpf2Hub::setBasicMotorSpeed(byte port, int speed = 0)
 {
-    byte setMotorCommand[8] = {0x81, port, 0x11, 0x51, 0x00, LegoinoCommon::MapSpeed(speed)}; //train, batmobil
-    WriteValue(setMotorCommand, 6);
+    setMotorPower(port, speed);
 }
 
 /**
  * @brief Stop the motor on a defined port.
  * @param [in] port Port of the Hub on which the motor will be stopped (A, B)
+ * @param [in] brakingStyle (Brake, Float)
  */
-void Lpf2Hub::stopBasicMotor(byte port)
+void Lpf2Hub::stopBasicMotor(byte port, BrakingStyle brakingStyle)
 {
-    setBasicMotorSpeed(port, 0);
+    stopMotor(port, brakingStyle);
+}
+
+/**
+ * @brief Stop the motor on a defined port.
+ * @param [in] port Port of the Hub on which the motor will be stopped (A, B, ...)
+ * @param [in] brakingStyle (Brake, Float)
+ */
+void Lpf2Hub::stopMotor(byte port, BrakingStyle brakingStyle)
+{
+    setMotorPower(port, (int)brakingStyle);
+}
+
+/**
+ * @brief Set the motor power on a defined port.
+ * @param [in] port Port of the Hub on which the power of the motor will set (A, B)
+ * @param [in] (Power of the Motor -100..0..100 negative values will reverse the rotation
+ */
+void Lpf2Hub::setMotorPower(byte port, int power = 0)
+{
+    byte setMotorCommand[8] = {0x81, port, 0x00, 0x01, LegoinoCommon::MapPower(power)}; //train, batmobil, and all others
+    WriteValue(setMotorCommand, 5);
 }
 
 /**
  * @brief Set the motor speed on a defined port. 
  * @param [in] port Port of the Hub on which the speed of the motor will set (A, B, AB)
  * @param [in] speed Speed of the Motor -100..0..100 negative values will reverse the rotation
+ * @param [in] brakingStyle (Brake, Float)
  */
 void Lpf2Hub::setTachoMotorSpeed(byte port, int speed, byte maxPower, BrakingStyle brakingStyle)
 {
-    //Use acc and dec profile (0x03 last two bits set)
-    byte setMotorCommand[8] = {0x81, port, 0x11, 0x01, LegoinoCommon::MapSpeed(speed), maxPower, (byte)brakingStyle, 0x03};
-    WriteValue(setMotorCommand, 8);
+    if (speed == 0) {
+        stopMotor(port, brakingStyle);
+    } else {
+        //Use acc and dec profile (0x03 last two bits set)
+        byte setMotorCommand[8] = {0x81, port, 0x00, 0x07, LegoinoCommon::MapSpeed(speed), maxPower, 0x03};
+        WriteValue(setMotorCommand, 7);
+    }
 }
 
 /**
  * @brief Stop the motor on a defined port.
  * @param [in] port Port of the Hub on which the motor will be stopped (A, B, AB, C, D)
+ * @param [in] brakingStyle (Brake, Float)
  */
-void Lpf2Hub::stopTachoMotor(byte port)
+void Lpf2Hub::stopTachoMotor(byte port, BrakingStyle brakingStyle)
 {
-    setTachoMotorSpeed(port, 0);
+    stopMotor(port, brakingStyle);
 }
 
 /**
@@ -1285,7 +1312,7 @@ void Lpf2Hub::setTachoMotorSpeedForTime(byte port, int speed, int16_t time = 0, 
 {
     //Use acc and dec profile (0x03 last two bits set)
     byte *timeBytes = LegoinoCommon::Int16ToByteArray(time);
-    byte setMotorCommand[10] = {0x81, port, 0x11, 0x09, timeBytes[0], timeBytes[1], LegoinoCommon::MapSpeed(speed), maxPower, (byte)brakingStyle, 0x03};
+    byte setMotorCommand[10] = {0x81, port, 0x00, 0x09, timeBytes[0], timeBytes[1], LegoinoCommon::MapSpeed(speed), maxPower, (byte)brakingStyle, 0x03};
     WriteValue(setMotorCommand, 10);
 }
 
@@ -1301,7 +1328,7 @@ void Lpf2Hub::setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees
 {
     byte *degreeBytes = LegoinoCommon::Int32ToByteArray(degrees);
     //Use acc and dec profile (0x03 last two bits set)
-    byte setMotorCommand[12] = {0x81, port, 0x11, 0x0B, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], LegoinoCommon::MapSpeed(speed), maxPower, (byte)brakingStyle, 0x03};
+    byte setMotorCommand[12] = {0x81, port, 0x00, 0x0B, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], LegoinoCommon::MapSpeed(speed), maxPower, (byte)brakingStyle, 0x03};
     WriteValue(setMotorCommand, 12);
 }
 
@@ -1317,7 +1344,7 @@ void Lpf2Hub::setAbsoluteMotorPosition(byte port, int speed, int32_t position, b
 {
     byte *positionBytes = LegoinoCommon::Int32ToByteArray(position);
     //Use acc and dec profile (0x03 last two bits set)
-    byte setMotorCommand[12] = {0x81, port, 0x11, 0x0D, positionBytes[0], positionBytes[1], positionBytes[2], positionBytes[3], LegoinoCommon::MapSpeed(speed), maxPower, (byte)brakingStyle, 0x03};
+    byte setMotorCommand[12] = {0x81, port, 0x00, 0x0D, positionBytes[0], positionBytes[1], positionBytes[2], positionBytes[3], LegoinoCommon::MapSpeed(speed), maxPower, (byte)brakingStyle, 0x03};
     WriteValue(setMotorCommand, 12);
 }
 
@@ -1331,7 +1358,7 @@ void Lpf2Hub::setAbsoluteMotorEncoderPosition(byte port, int32_t position)
     byte *positionBytes = LegoinoCommon::Int32ToByteArray(position);
     //WriteModeData (0x51)
     //PresetEncoder mode (0x02)
-    byte setMotorCommand[9] = {0x81, port, 0x11, 0x51, 0x02, positionBytes[0], positionBytes[1], positionBytes[2], positionBytes[3]};
+    byte setMotorCommand[9] = {0x81, port, 0x00, 0x51, 0x02, positionBytes[0], positionBytes[1], positionBytes[2], positionBytes[3]};
     WriteValue(setMotorCommand, 9);
 }
 
@@ -1348,7 +1375,7 @@ void Lpf2Hub::setTachoMotorSpeedsForDegrees(int speedLeft, int speedRight, int32
     byte *degreeBytes = LegoinoCommon::Int32ToByteArray(degrees);
     byte port = (byte)MoveHubPort::AB;
     //Use acc and dec profile (0x03 last two bits set)
-    byte setMotorCommand[13] = {0x81, port, 0x11, 0x0C, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], LegoinoCommon::MapSpeed(speedLeft), LegoinoCommon::MapSpeed(speedRight), maxPower, (byte)brakingStyle, 0x03}; //boost with time
+    byte setMotorCommand[13] = {0x81, port, 0x00, 0x0C, degreeBytes[0], degreeBytes[1], degreeBytes[2], degreeBytes[3], LegoinoCommon::MapSpeed(speedLeft), LegoinoCommon::MapSpeed(speedRight), maxPower, (byte)brakingStyle, 0x03}; //boost with time
     WriteValue(setMotorCommand, 13);
 }
 
