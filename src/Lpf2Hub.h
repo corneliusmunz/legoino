@@ -1,7 +1,7 @@
 /*
  * Lpf2Hub.h - Arduino base class for controlling Powered UP and Boost controllers
  * 
- * (c) Copyright 2020 - Cornelius Munz
+ * (c) Copyright 2022 - Cornelius Munz
  * Released under MIT License
  * 
 */
@@ -74,12 +74,14 @@ public:
   void setLedRGBColor(char red, char green, char blue);
   void setLedHSVColor(int hue, double saturation, double value);
 
-  void stopBasicMotor(byte port);
+  void stopBasicMotor(byte port, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
   void setBasicMotorSpeed(byte port, int speed);
+  void setMotorPower(byte port, int power);
+  void stopMotor(byte port, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
 
   void setAccelerationProfile(byte port, int16_t time);
   void setDecelerationProfile(byte port, int16_t time);
-  void stopTachoMotor(byte port);
+  void stopTachoMotor(byte port, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
   void setTachoMotorSpeed(byte port, int speed, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
   void setTachoMotorSpeedForTime(byte port, int speed, int16_t time, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);
   void setTachoMotorSpeedForDegrees(byte port, int speed, int32_t degrees, byte maxPower = 100, BrakingStyle brakingStyle = BrakingStyle::BRAKE);

@@ -1,7 +1,7 @@
 /*
  * LegoinoCommon.h - Arduino Library for converting values with different types
  *
- * (c) Copyright 2020 - Cornelius Munz
+ * (c) Copyright 2022 - Cornelius Munz
  * Released under MIT License
  *
 */
@@ -18,6 +18,7 @@ class LegoinoCommon
 {
 public:
   static byte MapSpeed(int speed);
+  static byte MapPower(int power);
   static byte *Int16ToByteArray(int16_t x);
   static byte *Int32ToByteArray(int32_t x);
   static unsigned char ReadUInt8(uint8_t *data, int offset);

@@ -1,7 +1,7 @@
 /*
  * LegoinoCommon.cpp - Arduino Library for converting values with different types
  *
- * (c) Copyright 2020 - Cornelius Munz
+ * (c) Copyright 2022 - Cornelius Munz
  * Released under MIT License
  *
 */
@@ -17,19 +17,28 @@
 byte LegoinoCommon::MapSpeed(int speed)
 {
     byte rawSpeed;
-    if (speed == 0)
+    if (speed == 0 || speed == 127)
     {
-        rawSpeed = 127; // stop motor
+        rawSpeed = speed; // stop motor with HOLD or FLOAT
     }
     else if (speed > 0)
     {
-        rawSpeed = map(speed, 0, 100, 0, 126);
+        rawSpeed = map(speed, 1, 100, 1, 126);
     }
     else
     {
-        rawSpeed = map(-speed, 0, 100, 255, 128);
+        rawSpeed = map(-speed, 1, 100, 255, 128);
     }
     return rawSpeed;
+}
+
+/**
+ * @brief Map power from -100..100 to the 8bit internal value
+ * @param [in] power -100..100
+ */
+byte LegoinoCommon::MapPower(int power)
+{
+    return MapSpeed(power);
 }
 
 /**
