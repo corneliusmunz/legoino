@@ -10,12 +10,16 @@
 
 #include "Lpf2Hub.h"
 
+boolean Lpf2Hub::_isInitializing = false;
+
+
 /** 
  * Callback if a scan has ended with the results of found devices 
  * only needed to enforce the non blocking scan start
  */
-void scanEndedCallback(NimBLEScanResults results)
+void Lpf2Hub::scanEndedCallback(NimBLEScanResults results)
 {
+    _isInitializing = false;
     log_d("Number of devices: %d", results.getCount());
     for (int i = 0; i < results.getCount(); i++)
     {
@@ -799,13 +803,22 @@ void Lpf2Hub::notifyCallback(
 /**
  * @brief Constructor
  */
-Lpf2Hub::Lpf2Hub(){};
+Lpf2Hub::Lpf2Hub() {};
 
 /**
  * @brief Init function set the UUIDs and scan for the Hub
  */
 void Lpf2Hub::init()
 {
+    if (_isInitializing)
+    {
+        return;
+    }
+    else
+    {
+        _isInitializing = true;
+    }
+
     _isConnected = false;
     _isConnecting = false;
     _bleUuid = BLEUUID(LPF2_UUID);

@@ -123,6 +123,7 @@ public:
   std::string parseHubAdvertisingName(uint8_t *pData);
 
   // BLE specific stuff
+  static void scanEndedCallback(NimBLEScanResults results);
   void notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify);
   BLEUUID _bleUuid;
   BLEUUID _charachteristicUuid;
@@ -134,6 +135,7 @@ public:
   std::string _hubName;
   boolean _isConnecting;
   boolean _isConnected;
+  static boolean _isInitializing;
 
 private:
   // Notification callbacks
