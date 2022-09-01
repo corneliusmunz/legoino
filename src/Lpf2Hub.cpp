@@ -806,6 +806,11 @@ Lpf2Hub::Lpf2Hub(){};
  */
 void Lpf2Hub::init()
 {
+    if (isScanning())
+    {
+        return;
+    }
+
     _isConnected = false;
     _isConnecting = false;
     _bleUuid = BLEUUID(LPF2_UUID);
