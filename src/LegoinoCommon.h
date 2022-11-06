@@ -13,6 +13,7 @@
 
 #include "Arduino.h"
 #include "Lpf2HubConst.h"
+#include <string>
 
 class LegoinoCommon
 {
