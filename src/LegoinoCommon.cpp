@@ -110,4 +110,19 @@ int32_t LegoinoCommon::ReadInt32LE(uint8_t *data, int offset = 0)
     return value;
 }
 
+std::string LegoinoCommon::HexString(std::string str)
+{
+  char result[str.size() * 3 + 1];
+  size_t result_length = 0;
+  for (std::string::size_type i = 0; i < str.size(); i++)
+  {
+    result_length += sprintf(&result[result_length], "%02X ", str[i]);
+  }
+
+  // Remove last space
+  result[result_length - 1] = 0x00;
+
+  return result;
+}
+
 #endif // ESP32

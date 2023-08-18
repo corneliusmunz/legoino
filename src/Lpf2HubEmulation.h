@@ -19,6 +19,7 @@
 #include "Arduino.h"
 #include <NimBLEDevice.h>
 #include "Lpf2HubConst.h"
+#include "LegoinoCommon.h"
 
 typedef void (*WritePortCallback)(byte port, byte value);
 

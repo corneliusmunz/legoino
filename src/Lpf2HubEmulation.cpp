@@ -67,7 +67,7 @@ public:
 
     if (msgReceived.length() > 0)
     {
-      log_d("message received (%d): %s", msgReceived.length(), msgReceived.c_str());
+      log_d("message received (%d): %s", msgReceived.length(), LegoinoCommon::HexString(msgReceived).c_str());
       log_d("message type: %d", msgReceived[(byte)MessageHeader::MESSAGE_TYPE]);
 
       // handle port mode information requests and respond dependent on the device type
@@ -117,6 +117,7 @@ public:
         {
           std::string payload;
           payload.push_back((char)HubPropertyReference::ADVERTISING_NAME);
+          payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
           payload.append(_lpf2HubEmulation->getHubName());
           _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
         }
@@ -125,7 +126,7 @@ public:
           std::string payload;
           payload.push_back((char)HubPropertyReference::HW_VERSION);
           payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
-          payload.append(std::string{0x00, 0x00, 0x00, 0x01}); 0.0.0.1
+          payload.append(std::string{0x00, 0x00, 0x00, 0x01}); // 0.0.0.1
           _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
           // byte feedback[] = {0x09, 0x00, 0x01, 0x04, 0x06, 0x00, 0x00, 0x00, 0x01};
           // _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
@@ -247,6 +248,7 @@ public:
       if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (char)MessageType::PORT_OUTPUT_COMMAND)
       {
         byte port = msgReceived[(byte)PortOutputMessage::PORT_ID];
+        byte startCompleteInfo = msgReceived[(byte)PortOutputMessage::STARTUP_AND_COMPLETION];
         byte subCommand = msgReceived[(byte)PortOutputMessage::SUB_COMMAND];
         // Reply to the App "Command excecuted"
         // https://lego.github.io/lego-ble-wireless-protocol-docs/index.html#port-output-command-feedback-format
@@ -264,6 +266,13 @@ public:
           if (_lpf2HubEmulation->writePortCallback != nullptr)
           {
             _lpf2HubEmulation->writePortCallback(msgReceived[(byte)PortOutputMessage::PORT_ID], msgReceived[0x07]); // WRITE_DIRECT_VALUE
+          }
+        }
+        else if (subCommand == 0x07) // StartSpeed (Speed, MaxPower, UseProfile)
+        {
+          if (_lpf2HubEmulation->writePortCallback != nullptr)
+          {
+            _lpf2HubEmulation->writePortCallback(msgReceived[(byte)PortOutputMessage::PORT_ID], msgReceived[0x06  ]); // WRITE_DIRECT_VALUE
           }
         }
       }
@@ -366,7 +375,7 @@ byte Lpf2HubEmulation::getDeviceTypeForPort(byte portNumber)
 
 void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, bool notify)
 {
-  std::string message = "";
+  std::string message;
   message.push_back((char)(payload.length() + 3)); // length of message
   message.push_back(0x00);                         // hub id (not used)
   message.push_back((char)messageType);            // message type
@@ -377,7 +386,20 @@ void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, 
   {
     pCharacteristic->notify();
   }
-  log_d("write message (%d): %s", message.length(), message);
+
+  // log_d("write message (%d): %s", message.length(), message);
+
+  // char msgstr[message.size()];
+  // memcpy(msgstr, message.data(), message.size());
+  // char buffer[message.size() * 3 + 1];
+  // size_t b = 0;
+  // for (size_t m = 0; m < message.size(); m++)
+  // {
+  //   b += sprintf(&buffer[b], "%02X ", msgstr[m]);
+  // }
+  // buffer[b] = 0x00;
+
+  log_d("write message (%d): %s", message.length(), LegoinoCommon::HexString(message).c_str());
 }
 
 void Lpf2HubEmulation::setHubButton(bool pressed)
