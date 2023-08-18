@@ -263,16 +263,21 @@ public:
 
         if (subCommand == 0x51) // OUT_PORT_CMD_WRITE_DIRECT
         {
+          byte commandMode = msgReceived[0x06];
+          byte power = msgReceived[0x07];
           if (_lpf2HubEmulation->writePortCallback != nullptr)
           {
-            _lpf2HubEmulation->writePortCallback(msgReceived[(byte)PortOutputMessage::PORT_ID], msgReceived[0x07]); // WRITE_DIRECT_VALUE
+            _lpf2HubEmulation->writePortCallback(msgReceived[(byte)PortOutputMessage::PORT_ID], power); // WRITE_DIRECT_VALUE
           }
         }
         else if (subCommand == 0x07) // StartSpeed (Speed, MaxPower, UseProfile)
         {
+          byte speed = msgReceived[0x06];
+          byte maxSpeed = msgReceived[0x07];
+          byte useProfile = msgReceived[0x08];
           if (_lpf2HubEmulation->writePortCallback != nullptr)
           {
-            _lpf2HubEmulation->writePortCallback(msgReceived[(byte)PortOutputMessage::PORT_ID], msgReceived[0x06  ]); // WRITE_DIRECT_VALUE
+            _lpf2HubEmulation->writePortCallback(msgReceived[(byte)PortOutputMessage::PORT_ID], speed); // WRITE_DIRECT_VALUE
           }
         }
       }
