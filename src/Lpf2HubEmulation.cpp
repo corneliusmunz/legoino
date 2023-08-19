@@ -37,6 +37,7 @@ public:
   {
     log_d("Device disconnected");
     _lpf2HubEmulation->isConnected = false;
+    _lpf2HubEmulation->isSubscripted = false;
     _lpf2HubEmulation->isPortInitialized = false;
   }
 
@@ -51,7 +52,6 @@ public:
 
 class Lpf2HubCharacteristicCallbacks : public NimBLECharacteristicCallbacks
 {
-
   Lpf2HubEmulation *_lpf2HubEmulation;
 
 public:
@@ -60,9 +60,21 @@ public:
     _lpf2HubEmulation = lpf2HubEmulation;
   }
 
+  void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc* desc, uint16_t subValue)
+  {
+    log_d("Client subscription status: %s (%d)", 
+          subValue == 0 ? "Un-Subscribed" : 
+          subValue == 1 ? "Notifications" : 
+          subValue == 2 ? "Indications" : 
+          subValue == 3 ? "Notifications and Indications" :
+          "unknown subscription status",
+          subValue);
+
+    _lpf2HubEmulation->isSubscripted = subValue != 0;
+  }  
+
   void onWrite(NimBLECharacteristic *pCharacteristic)
   {
-
     std::string msgReceived = pCharacteristic->getValue();
 
     if (msgReceived.length() > 0)
@@ -255,9 +267,6 @@ public:
         std::string payload;
         payload.push_back(0x31);
         _lpf2HubEmulation->writeValue(MessageType::HUB_ACTIONS, payload);
-        // byte msgDisconnectionReply[] = {0x04, 0x00, 0x02, 0x31};
-        // _lpf2HubEmulation->pCharacteristic->setValue(msgDisconnectionReply, sizeof(msgDisconnectionReply));
-        // _lpf2HubEmulation->pCharacteristic->notify();
         delay(100);
         log_d("restart ESP");
         delay(1000);
