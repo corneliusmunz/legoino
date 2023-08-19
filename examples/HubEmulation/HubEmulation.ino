@@ -63,18 +63,18 @@ void setup()
 void loop()
 {
 
-  // if an app is connected, attach some devices on the ports to signalize 
+  // if an app is connected and subscripted, attach some devices on the ports to signalize 
   // the app that values could be received/written to that ports
-  if (myEmulatedHub.isConnected && !myEmulatedHub.isPortInitialized)
+  if (myEmulatedHub.isConnected && myEmulatedHub.isSubscripted && !myEmulatedHub.isPortInitialized)
   {
-    delay(1000);
+    delay(100);
     myEmulatedHub.isPortInitialized = true;
     myEmulatedHub.attachDevice((byte)PoweredUpHubPort::A, DeviceType::TRAIN_MOTOR);
-    delay(1000);
+    delay(500);
     myEmulatedHub.attachDevice((byte)PoweredUpHubPort::LED, DeviceType::HUB_LED);
-    delay(1000);
+    delay(500);
     myEmulatedHub.attachDevice((byte)PoweredUpHubPort::B, DeviceType::TRAIN_MOTOR);
-    delay(1000);
+    delay(500);
   }
 
 } // End of loop
