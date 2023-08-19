@@ -576,6 +576,22 @@ std::string Lpf2HubEmulation::getPortInformationPayload(DeviceType deviceType, b
       break;
     }
   }
+  else if (deviceType == DeviceType::LIGHT)
+  {
+    switch (informationType)
+    {
+    case 0x01:
+      // Information Type == MODE INFO (001)
+      // Response: Input (seen from Hub), 1 port mode, 0 input modes, 1 output mode
+      payload.append(std::string{0x01, 0x01, 0x00, 0x00, 0x01, 0x00});
+      break;
+    case 0x02:
+      // Information Type == POSSIBLE MODE COMBINATIONS (002)
+      break;
+    default:
+      break;
+    }
+  }
 
   return payload;
 }
