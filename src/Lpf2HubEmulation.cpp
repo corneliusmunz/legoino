@@ -135,7 +135,7 @@ public:
         else if (msgReceived[(byte)HubPropertyMessage::PROPERTY] == (byte)HubPropertyReference::FW_VERSION)
         {
           std::string payload;
-          payload.push_back((char)HubPropertyReference::HW_VERSION);
+          payload.push_back((char)HubPropertyReference::FW_VERSION);
           payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
           payload.append(std::string{0x00, 0x00, 0x02, 0x11});
           _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
@@ -226,7 +226,7 @@ public:
           std::string payload;
           payload.push_back((char)HubPropertyReference::BATTERY_VOLTAGE);
           payload.push_back((char)HubPropertyOperation::UPDATE_UPSTREAM);
-          payload.push_back(0x47);
+          payload.push_back(0x47); // 71%
           _lpf2HubEmulation->writeValue(MessageType::HUB_PROPERTIES, payload);
           // byte feedback[] = {0x06, 0x00, 0x01, 0x06, 0x06, 0x47};
           // _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
@@ -250,16 +250,20 @@ public:
         byte port = msgReceived[(byte)PortOutputMessage::PORT_ID];
         byte startCompleteInfo = msgReceived[(byte)PortOutputMessage::STARTUP_AND_COMPLETION];
         byte subCommand = msgReceived[(byte)PortOutputMessage::SUB_COMMAND];
-        // Reply to the App "Command excecuted"
+
+        // Reply to the App "Command excecuted" if the App requests a feedback.
         // https://lego.github.io/lego-ble-wireless-protocol-docs/index.html#port-output-command-feedback-format
-        std::string payload;
-        payload.push_back((char)port);
-        payload.push_back(0x0A); // 0x0A Command complete+buffer empty+idle
-        _lpf2HubEmulation->writeValue(MessageType::PORT_OUTPUT_COMMAND_FEEDBACK, payload);
-        // byte msgPortCommandFeedbackReply[] = {0x05, 0x00, 0x82, 0x00, 0x0A};                                           // 0x0A Command complete+buffer empty+idle
-        // msgPortCommandFeedbackReply[(byte)PortOutputMessage::PORT_ID] = msgReceived[(byte)PortOutputMessage::PORT_ID]; // set the port_id
-        // _lpf2HubEmulation->pCharacteristic->setValue(msgPortCommandFeedbackReply, sizeof(msgPortCommandFeedbackReply));
-        // _lpf2HubEmulation->pCharacteristic->notify();
+        if ((startCompleteInfo & 0x01) != 0) // Command feedback (status) requested
+        {
+          std::string payload;
+          payload.push_back((char)port);
+          payload.push_back(0x0A); // 0x0A Command complete+buffer empty+idle
+          _lpf2HubEmulation->writeValue(MessageType::PORT_OUTPUT_COMMAND_FEEDBACK, payload);
+          // byte msgPortCommandFeedbackReply[] = {0x05, 0x00, 0x82, 0x00, 0x0A};                                           // 0x0A Command complete+buffer empty+idle
+          // msgPortCommandFeedbackReply[(byte)PortOutputMessage::PORT_ID] = msgReceived[(byte)PortOutputMessage::PORT_ID]; // set the port_id
+          // _lpf2HubEmulation->pCharacteristic->setValue(msgPortCommandFeedbackReply, sizeof(msgPortCommandFeedbackReply));
+          // _lpf2HubEmulation->pCharacteristic->notify();
+        }
 
         if (subCommand == 0x51) // OUT_PORT_CMD_WRITE_DIRECT
         {
@@ -380,7 +384,7 @@ byte Lpf2HubEmulation::getDeviceTypeForPort(byte portNumber)
 
 void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, bool notify)
 {
-  std::string message;
+  std::string message = "";
   message.push_back((char)(payload.length() + 3)); // length of message
   message.push_back(0x00);                         // hub id (not used)
   message.push_back((char)messageType);            // message type
@@ -391,18 +395,6 @@ void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, 
   {
     pCharacteristic->notify();
   }
-
-  // log_d("write message (%d): %s", message.length(), message);
-
-  // char msgstr[message.size()];
-  // memcpy(msgstr, message.data(), message.size());
-  // char buffer[message.size() * 3 + 1];
-  // size_t b = 0;
-  // for (size_t m = 0; m < message.size(); m++)
-  // {
-  //   b += sprintf(&buffer[b], "%02X ", msgstr[m]);
-  // }
-  // buffer[b] = 0x00;
 
   log_d("write message (%d): %s", message.length(), LegoinoCommon::HexString(message).c_str());
 }
