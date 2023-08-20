@@ -616,8 +616,8 @@ std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType de
         // packet length. ONLY ASCII chars: 0x30.. 0x39, 0x41..0x5A, 0x5F and 0x61..0x7A are
         // allowed.
         // Format: Uint8[0..10]
-        // Response: LPF2_TRAIN
-        payload.append(std::string{0x4C, 0x50, 0x46, 0x32, 0x5F, 0x54, 0x52, 0x41, 0x49, 0x4E, 0x00});
+        // Response: LPF2-TRAIN
+        payload.append(std::string{0x4C, 0x50, 0x46, 0x32, 0x2D, 0x54, 0x52, 0x41, 0x49, 0x4E, 0x00, 0x00});
         break;
       case 0x01:
         // Information Type == RAW (001)
@@ -707,8 +707,7 @@ std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType de
       }
     }
   }
-
-  if (deviceType == DeviceType::HUB_LED)
+  else if (deviceType == DeviceType::HUB_LED)
   {
     if (mode == 0x00)
     {
@@ -716,8 +715,8 @@ std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType de
       {
       case 0x00:
         // Information Type == NAME (000)
-        // Response: COL_O
-        payload.append(std::string{0x43, 0x4F, 0x4C, 0x5F, 0x4F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+        // Response: COL O
+        payload.append(std::string{0x43, 0x4F, 0x4C, 0x20, 0x4F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
         break;
       case 0x01:
         // Information Type == RAW (001)
@@ -759,8 +758,8 @@ std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType de
       {
       case 0x00:
         // Information Type == NAME (000)
-        // Response: RGB_0
-        payload.append(std::string{0x52, 0x47, 0x42, 0x5F, 0x4F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+        // Response: RGB O
+        payload.append(std::string{0x52, 0x47, 0x42, 0x20, 0x4F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
         break;
       case 0x01:
         // Information Type == RAW (001)
@@ -791,6 +790,95 @@ std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType de
         // Information Type == VALUE FORMAT (128)
         // Response: 3 datasets, 8 bit, 3 figures, 0 decimals
         payload.append(std::string{0x03, 0x00, 0x03, 0x00});
+        break;
+      default:
+        break;
+      }
+    }
+  }
+  else if (deviceType == DeviceType::LIGHT)
+  {
+    if (mode == 0x00)
+    {
+      switch (modeInformationType)
+      {
+      case 0x00:
+        // Information Type == NAME (000)
+        // Response: LPF2-LIGHT
+        payload.append(std::string{0x4C, 0x50, 0x46, 0x32, 0x2D, 0x4C, 0x49, 0x47, 0x48, 0x54, 0x00, 0x00});
+        break;
+      case 0x01:
+        // Information Type == RAW (001)
+        // Response: -10 - 10
+        payload.append(std::string{0x00, 0x00, 0x20, 0xC1, 0x00, 0x00, 0x20, 0x41});
+        break;
+      case 0x02:
+        // Information Type == PCT (002)
+        // Response: -100 - 100
+        payload.append(std::string{0x00, 0x00, 0xC8, 0xC2, 0x00, 0x00, 0xC8, 0x42});
+        break;
+      case 0x03:
+        // Information Type == SI (003)
+        // Response: -10 - 10
+        payload.append(std::string{0x00, 0x00, 0x20, 0xC1, 0x00, 0x00, 0x20, 0x41});
+        break;
+      case 0x04:
+        // Information Type == SYMBOL (004)
+        // Response: \0\0\0\0\0
+        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00});
+        break;
+      case 0x05:
+        // Information Type == MAPPING (005)
+        // Response: 00000000 00001000
+        payload.append(std::string{0x00, 0x08});
+        break;
+      case 0x80:
+        // Information Type == VALUE FORMAT (128)
+        // Response: 1 dataset, 8 bit, 1 figure, 0 decimals
+        payload.append(std::string{0x01, 0x00, 0x01, 0x00});
+        break;
+      default:
+        break;
+      }
+    }
+    else if (mode == 0x01)
+    {
+      switch (modeInformationType)
+      {
+      case 0x00:
+        // Information Type == NAME (000)
+        // Response: RGB_0
+        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+        break;
+      case 0x01:
+        // Information Type == RAW (001)
+        // Response: 0 - 1023
+        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x7F, 0x44});
+        break;
+      case 0x02:
+        // Information Type == PCT (002)
+        // Response: 0 - 100
+        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC8, 0x42});
+        break;
+      case 0x03:
+        // Information Type == SI (003)
+        // Response: 0 - 1
+        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F});
+        break;
+      case 0x04:
+        // Information Type == SYMBOL (004)
+        // Response: \0\0\0\0\0
+        payload.append(std::string{0x00, 0x00, 0x00, 0x00, 0x00});
+        break;
+      case 0x05:
+        // Information Type == MAPPING (005)
+        // Response: 00000000 00000000
+        payload.append(std::string{0x00, 0x00});
+        break;
+      case 0x80:
+        // Information Type == VALUE FORMAT (128)
+        // Response: 1 datasets, 8 bit, 4 figures, 0 decimals
+        payload.append(std::string{0x01, 0x00, 0x04, 0x00});
         break;
       default:
         break;
