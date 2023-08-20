@@ -361,4 +361,14 @@ enum struct MarioHubPort
   VOLTAGE = 0x06
 };
 
+// https://lego.github.io/lego-ble-wireless-protocol-docs/index.html#port-output-command-feedback-format
+enum struct PortFeedbackMessage
+{
+  BUFFER_EMPTY_AND_COMMAND_IN_PROGRESS = 0x01,
+  BUFFER_EMPTY_AND_COMMAND_COMPLETED = 0x02,
+  COMMANDS_DISCARDED = 0x04,
+  IDLE = 0x08,
+  BUSY_FULL = 0x10,
+};
+
 #endif

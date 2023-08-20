@@ -19,6 +19,7 @@
 #include "Arduino.h"
 #include <NimBLEDevice.h>
 #include "Lpf2HubConst.h"
+#include "LegoinoCommon.h"
 
 typedef void (*WritePortCallback)(byte port, byte value);
 
@@ -80,6 +81,7 @@ public:
   std::string getPortInformationPayload(DeviceType deviceType, byte port, byte informationType);
 
   bool isConnected = false;
+  bool isSubscripted = false;
   bool isPortInitialized = false;
   BLECharacteristic *pCharacteristic;
   WritePortCallback writePortCallback = nullptr;
